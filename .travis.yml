@@ -1,0 +1,31 @@
+language: c
+sudo: false
+
+os:
+  - linux
+
+env:
+  global:
+    - DEVKITPRO=$HOME/devkitPro
+    - DEVKITPPC=${DEVKITPRO}/devkitPPC
+
+cache:
+  directories:
+    - ${DEVKITPRO}
+
+before_install:
+  - mkdir -p "${DEVKITPRO}"
+  - wget http://download.sourceforge.net/devkitpro/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
+  - wget https://github.com/Maschell/dynamic_libs/archive/lib.tar.gz -O dynamic_libs.tar.gz
+  - wget https://github.com/Maschell/libutils/archive/master.tar.gz -O libutils.tar.gz
+
+install:
+  - tar -xjf devkitPPC-linux.tar.bz2 -C ${DEVKITPRO}/
+  - tar -xzvf dynamic_libs.tar.gz
+  - tar -xzvf libutils.tar.gz
+  - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
+  - (cd dynamic_libs-lib && make -j8 && make install)
+  - (cd libutils-master && make -j8 && make install)
+
+script:
+- (cd loader && make)
