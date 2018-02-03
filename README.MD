@@ -116,6 +116,11 @@ Platform: Wii U
 Notes: TODO
 https://github.com/Maschell/function-patcher-example
 
+## COSSubstrate
+Platform: Wii U
+Notes: TODO
+https://github.com/QuarkTheAwesome/COSSubstrate
+
 ## brainslug-wii
 Platform: Wii
 Notes: TODO
@@ -125,3 +130,4 @@ https://github.com/Chadderz121/brainslug-wii
 Platform: IOS
 Notes: TODO
 https://github.com/comex/substitute
+
