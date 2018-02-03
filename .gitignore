@@ -1,0 +1,3 @@
+loader/build/*
+loader/WiiUPluginLoader.cbp
+loader/*.elf

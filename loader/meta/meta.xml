@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+  <name>Wii U Plugin Loader</name>
+  <coder>Maschell</coder>
+  <url>https://github.com/Maschell/WiiUPluginSystem</url>
+  <version>pre-alpha</version>
+  <release_date>201802103162900</release_date>
+  <short_description>Plugin loader for the Wii U</short_description>
+  <long_description>
+  </long_description>
+  <category>tool</category>
+
+</app>
