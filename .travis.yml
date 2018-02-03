@@ -13,6 +13,11 @@ cache:
   directories:
     - ${DEVKITPRO}
 
+addons:
+  apt:
+    packages:
+    - p7zip-full
+
 before_install:
   - mkdir -p "${DEVKITPRO}"
   - wget http://download.sourceforge.net/devkitpro/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
