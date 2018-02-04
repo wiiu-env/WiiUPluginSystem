@@ -31,10 +31,12 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 TARGET		:=	wiiupluginloader
 BUILD		:=	build
 BUILD_DBG	:=	$(TARGET)_dbg
-SOURCES		:=	src
+SOURCES   :=  src \
+              src/libelf
 DATA		:=	
 
-INCLUDES	:=  src
+INCLUDES  :=  src \
+              src/libelf
 
 #---------------------------------------------------------------------------------
 # options for code generation
