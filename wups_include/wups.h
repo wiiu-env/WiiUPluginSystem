@@ -64,7 +64,7 @@ typedef struct wups_loader_entry_t {
     const wups_loader_entry_t wups_load_ ## original_func = { \
         .type = WUPS_LOADER_ENTRY_FUNCTION, \
         .data = { \
-            .function = { \
+            ._function = { \
                 .name = #original_func, \
                 .library = rpl_type, \
                 .target = &(replace_func) \
@@ -77,7 +77,7 @@ typedef struct wups_loader_entry_t {
     const wups_loader_entry_t wups_load_ ## original_func = { \
         .type = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY, \
         .data = { \
-            .function = { \
+            ._function = { \
                 .name = #original_func, \
                 .library = rpl_type, \
                 .target = &(replace_func) \
@@ -90,7 +90,7 @@ typedef struct wups_loader_entry_t {
     const wups_loader_entry_t wups_export_ ## symbol = { \
         .type = WUPS_LOADER_ENTRY_EXPORT, \
         .data = { \
-            .export = { \
+            ._export = { \
                 .name = #symbol, \
                 .target = &(symbol) \
             } \
