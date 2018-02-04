@@ -21,6 +21,10 @@
 #include "utils.h"
 #include "module_parser.h"
 #include "link_utils.h"
+#include "elf_utils.h"
+
+static void printModuleInfos();
+static void printInfos();
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
@@ -68,11 +72,50 @@ void loadAndProcessElf(const char * elfPath){
 
     DEBUG_FUNCTION_LINE("Now try to use brainslug code\n");
     if(Module_CheckFile(elfPath)){
-        module_information_t * moduleInformation = Module_LoadModuleInformation(elfPath);
-        if(moduleInformation != NULL){
-            uint8_t * space = (uint8_t *)0x880000;
-            Module_LinkModule(moduleInformation,&space);
-            printModuleInformation(moduleInformation);
+        Module_Load(elfPath);
+        DEBUG_FUNCTION_LINE("Found %d modules!\n",module_list_count);
+        //printInfos();
+        unsigned char * space = (unsigned char*)0x00910000;
+        Module_ListLink(&space);
+
+        if(module_relocations_count == 0){
+            DEBUG_FUNCTION_LINE("We need no relocations, we can call the functions!!\n");
+            DEBUG_FUNCTION_LINE("Calling %d functions!\n",module_entries_count);
+            for (unsigned int i = 0; i < module_entries_count; i++) {
+                DEBUG_FUNCTION_LINE("--- Function %d ---\n",i);
+                if( module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION ||
+                    module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
+                    DEBUG_FUNCTION_LINE("Let's call the function: %s \n",module_entries[i].data._function.name);
+                    int ret = ( (int (*)(void))((unsigned int*)module_entries[i].data._function.target) )();
+                    DEBUG_FUNCTION_LINE("result:  %d \n",ret);
+                }
+            }
         }
     }
+
+}
+
+static void printInfos(){
+        for (unsigned int i = 0; i < module_list_count; i++) {
+            DEBUG_FUNCTION_LINE("--- Module %d ---\n",i);
+            DEBUG_FUNCTION_LINE("name: %s\n",module_list[i]->name);
+            DEBUG_FUNCTION_LINE("path: %s\n",module_list[i]->path);
+            DEBUG_FUNCTION_LINE("author: %s\n",module_list[i]->author);
+        }
+        DEBUG_FUNCTION_LINE("--- Module list end ---\n");
+        for (unsigned int i = 0; i < module_entries_count; i++) {
+            DEBUG_FUNCTION_LINE("--- Entry %d ---\n",i);
+            if( module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION ||
+                module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
+                DEBUG_FUNCTION_LINE("library:  %d \n",module_entries[i].data._function.library);
+                DEBUG_FUNCTION_LINE("function: %s \n",module_entries[i].data._function.name);
+                DEBUG_FUNCTION_LINE("pointer:  %08X \n",module_entries[i].data._function.target);
+            }
+        }
+        DEBUG_FUNCTION_LINE("--- Entry list end ---\n");
+        for (unsigned int i = 0; i < module_relocations_count; i++) {
+            DEBUG_FUNCTION_LINE("--- Relocation %d ---\n",i);
+            DEBUG_FUNCTION_LINE("name: %s\n",module_relocations[i].name);
+        }
+        DEBUG_FUNCTION_LINE("--- Relocation list end ---\n");
 }

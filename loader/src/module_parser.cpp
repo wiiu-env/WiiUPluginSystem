@@ -37,72 +37,18 @@
 #include <unistd.h>
 #include "utils.h"
 
-static module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf);
-static module_information_t* Module_ModuleInformationRead(const char *path, Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
+bool module_has_error;
+bool module_has_info;
 
-void printModuleInformation(module_information_t* module_information){
-    if(module_information == NULL){
-        DEBUG_FUNCTION_LINE("module_information is null\n");
-    }
+#define MODULE_LIST_CAPACITY_DEFAULT 16
 
-    module_metadata_t *  metadata = module_information->metadata;
-    std::vector<module_unresolved_relocation_t *> relocations = module_information->rel;
-    DEBUG_FUNCTION_LINE("relocations size: %d\n",relocations.size());
-    for (std::vector<module_unresolved_relocation_t *>::iterator it = relocations.begin() ; it != relocations.end(); ++it){
-        module_unresolved_relocation_t * relo = *it;
-        DEBUG_FUNCTION_LINE("----\n",relo);
-        DEBUG_FUNCTION_LINE("name %s\n",relo->name);
-        DEBUG_FUNCTION_LINE("offset %d\n",relo->offset);
-        DEBUG_FUNCTION_LINE("type %d\n",relo->type);
-        DEBUG_FUNCTION_LINE("address %08X\n",relo->address);
-        DEBUG_FUNCTION_LINE("append %d\n",relo->addend);
-    }
+size_t module_list_size = 0;
+module_metadata_t **module_list = NULL;
+size_t module_list_count = 0;
+static size_t module_list_capacity = 0;
 
-    DEBUG_FUNCTION_LINE("entries size: %d\n",relocations.size());
-    std::vector<wups_loader_entry_t *> entries = module_information->entries;
-    for (std::vector<wups_loader_entry_t *>::iterator it = entries.begin() ; it != entries.end(); ++it){
-        //Added entry.
-        wups_loader_entry_t * curEntry = *it;
-        DEBUG_FUNCTION_LINE("Found entry @ %08X\n",curEntry);
-        dumpHex(curEntry,sizeof(wups_loader_entry_t));
-
-        DEBUG_FUNCTION_LINE("type %d\n",curEntry->type);
-        if( curEntry->type == WUPS_LOADER_ENTRY_FUNCTION ||
-            curEntry->type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
-
-            DEBUG_FUNCTION_LINE("library %d \n",curEntry->data._function.library);
-            DEBUG_FUNCTION_LINE("function %s \n",curEntry->data._function.name);
-            DEBUG_FUNCTION_LINE("target pointer %08X \n",curEntry->data._function.target);
-            dumpHex(curEntry->data._function.target,0x100);
-        }
-    }
-
-    if(metadata != NULL){
-        if(metadata->author != NULL){
-            DEBUG_FUNCTION_LINE("Author: %s.\n", metadata->author);
-        }else{
-            DEBUG_FUNCTION_LINE("Author: is null\n");
-        }
-        if(metadata->license != NULL){
-            DEBUG_FUNCTION_LINE("License: %s.\n", metadata->license);
-        }else{
-            DEBUG_FUNCTION_LINE("License: is null\n");
-        }
-        if(metadata->name != NULL){
-            DEBUG_FUNCTION_LINE("Name: %s.\n", metadata->name);
-        }else{
-            DEBUG_FUNCTION_LINE("Name: is null\n");
-        }
-        if(metadata->path != NULL){
-            DEBUG_FUNCTION_LINE("Path: %s.\n", metadata->path);
-        }else{
-            DEBUG_FUNCTION_LINE("Path: is null\n");
-        }
-        DEBUG_FUNCTION_LINE("entries_count: %d \n",metadata->entries_count);
-    }else{
-         DEBUG_FUNCTION_LINE("metadata is null\n");
-    }
-}
+static void Module_LoadElf(const char *path, Elf *elf);
+static module_metadata_t *Module_MetadataRead(const char *path, size_t index, Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
 
 bool Module_CheckFile(const char *path) {
     const char *extension;
@@ -126,10 +72,7 @@ bool Module_CheckFile(const char *path) {
     return false;
 }
 
-module_information_t* Module_LoadModuleInformation(const char *path) {
-    DEBUG_FUNCTION_LINE("Loading path: %s\n", path);
-
-    module_information_t* result = NULL;
+void Module_Load(const char *path) {
     int fd = -1;
     Elf *elf = NULL;
 
@@ -150,34 +93,34 @@ module_information_t* Module_LoadModuleInformation(const char *path) {
     switch (elf_kind(elf)) {
         case ELF_K_AR:
             /* TODO */
-            DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Archives not yet supported.\n", path);
-            //module_has_info = 1;
+            DEBUG_FUNCTION_LINE(
+                "Warning: Ignoring '%s' - Archives not yet supported.\n", path);
+            module_has_info = true;
             goto exit_error;
         case ELF_K_ELF:
-            DEBUG_FUNCTION_LINE("Module_LoadElf(path, elf);\n");
-            result = Module_LoadMetaDataFromElf(path, elf);
+            Module_LoadElf(path, elf);
             break;
         default:
-            DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF file.\n", path);
+            DEBUG_FUNCTION_LINE(
+                "Warning: Ignoring '%s' - Invalid ELF file.\n", path);
             goto exit_error;
     }
 
 exit_error:
     if (elf != NULL)
-        //elf_end(elf);
+        elf_end(elf);
     if (fd != -1)
         close(fd);
-    return result;
 }
 
-module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf) {
+static void Module_LoadElf(const char *path, Elf *elf) {
     Elf_Scn *scn;
     Elf32_Ehdr *ehdr;
     char *ident;
     size_t shstrndx, sz, symtab_count, i, symtab_strndx;
     Elf32_Sym *symtab = NULL;
     module_metadata_t *metadata = NULL;
-    module_information_t* result = NULL;
+    module_metadata_t **list_ptr;
 
     assert(elf != NULL);
     assert(elf_kind(elf) == ELF_K_ELF);
@@ -186,27 +129,27 @@ module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf) {
 
     if (ident == NULL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF header.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (sz < 7) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF header.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ident[4] != ELFCLASS32) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not 32 bit ELF.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ident[5] != ELFDATA2MSB) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not Big Endian.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ident[6] != EV_CURRENT) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Unknown ELF version.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
@@ -214,50 +157,43 @@ module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf) {
 
     if (ehdr == NULL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF header\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ehdr->e_type != ET_REL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not relocatable ELF.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ehdr->e_machine != EM_PPC) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Architecture not EM_PPC.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (ehdr->e_version != EV_CURRENT) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Unknown ELF version.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
-
-    DEBUG_FUNCTION_LINE("Loading Elf symtab\n");
     if (!Module_LoadElfSymtab(elf, &symtab, &symtab_count, &symtab_strndx)) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't parse symtab.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
     assert(symtab != NULL);
 
-    result = Module_ModuleInformationRead(path, elf, symtab, symtab_count, symtab_strndx);
+    DEBUG_FUNCTION_LINE("Reading metadata from path %s.\n", path);
 
-    if (result == NULL){
-        DEBUG_FUNCTION_LINE("Module_ModuleInformationRead was null\n");
-        goto exit_error;
-    }
-
-    metadata = result->metadata;
+    metadata = Module_MetadataRead(path, module_list_count, elf, symtab, symtab_count, symtab_strndx);
 
     if (metadata == NULL) /* error reporting done inside method */
         goto exit_error;
 
     if (elf_getshdrstrndx(elf, &shstrndx) != 0) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't find shdrstndx.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
@@ -283,56 +219,67 @@ module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf) {
             if (strcmp(name, ".wups.meta") == 0) {
                 continue;
             } else if (strcmp(name, ".wups.load") == 0) {
-                metadata->size += shdr->sh_size / sizeof(wups_loader_entry_t) * 12;
+                metadata->size +=
+                    shdr->sh_size / sizeof(wups_loader_entry_t) * 12;
             } else {
                 metadata->size += shdr->sh_size;
                 /* add alignment padding to size */
-                if (shdr->sh_addralign > 3){
+                if (shdr->sh_addralign > 3)
                     /* roundup to multiple of sh_addralign  */
-                    metadata->size += (-metadata->size & (shdr->sh_addralign - 1));
-                }else{
+                    metadata->size +=
+                        (-metadata->size & (shdr->sh_addralign - 1));
+                else
                     /* roundup to multiple of 4 */
                     metadata->size += (-metadata->size & 3);
-                }
             }
         }
     }
 
     /* roundup to multiple of 4 */
     metadata->size += (-metadata->size & 3);
-    return result;
+
+    list_ptr = (module_metadata_t **)Module_ListAllocate(
+        &module_list, sizeof(module_metadata_t *), 1, &module_list_capacity,
+        &module_list_count, MODULE_LIST_CAPACITY_DEFAULT);
+    if (list_ptr == NULL) {
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - ENOMEM.\n", path);
+        module_has_info = true;
+        goto exit_error;
+    }
+
+    assert(module_list != NULL);
+    assert(module_list_count <= module_list_capacity);
+
+    *list_ptr = metadata;
+    module_list_size += metadata->size;
+    /* prevent the data being freed */
+    metadata = NULL;
 
 exit_error:
     if (metadata != NULL)
         free(metadata);
     if (symtab != NULL)
         free(symtab);
-    return result;
 }
 
-static module_information_t *Module_ModuleInformationRead(const char *path, Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
+static module_metadata_t *Module_MetadataRead(const char *path, size_t index, Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
     char *metadata = NULL, *metadata_cur, *metadata_end, *tmp;
-    const char *name, *author, *version, *license, *wups;
+    const char *game, *name, *author, *version, *license, *wups;
     module_metadata_t *ret = NULL;
-    module_information_t *result = NULL;
     Elf_Scn *scn;
     size_t shstrndx, entries_count;
 
-    result = (module_information_t *) malloc(sizeof(module_information_t));
-    if (result == NULL){
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - couldn't allocate memory for meta information struct.\n", path);
-        return NULL;
-    }
-
     if (elf_getshdrstrndx(elf, &shstrndx) != 0) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't find shstrndx\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
     entries_count = 0;
 
-    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
+    for (scn = elf_nextscn(elf, NULL);
+         scn != NULL;
+         scn = elf_nextscn(elf, scn)) {
 
         Elf32_Shdr *shdr;
         const char *name;
@@ -346,14 +293,12 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
             continue;
 
         if (strcmp(name, ".wups.meta") == 0) {
-            DEBUG_FUNCTION_LINE("In section \"%s\" \n",name);
-
             if (shdr->sh_size == 0)
                 continue;
 
             if (metadata != NULL)
                 continue;
-            metadata = (char *) malloc(shdr->sh_size);
+            metadata = (char*) malloc(shdr->sh_size);
             if (metadata == NULL)
                 continue;
 
@@ -361,17 +306,20 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Couldn't load .wups.meta.\n",
                     path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
 
-            Module_ElfLoadSymbols(elf_ndxscn(scn), metadata, symtab, symtab_count);
+            Module_ElfLoadSymbols(
+                elf_ndxscn(scn), metadata, symtab, symtab_count);
 
-            if (!Module_ElfLink(result, elf, elf_ndxscn(scn), metadata, symtab, symtab_count, symtab_strndx, 0)) {
+            if (!Module_ElfLink(
+                    index, elf, elf_ndxscn(scn), metadata,
+                    symtab, symtab_count, symtab_strndx, false)) {
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - .wups.meta contains invalid "
                     "relocations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
 
@@ -384,10 +332,11 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
 
     if (metadata == NULL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not a WUPS module file.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
+    game = NULL;
     name = NULL;
     author = NULL;
     version = NULL;
@@ -409,12 +358,21 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
         if (eq == NULL)
             continue;
 
-        if (strncmp(metadata_cur, "name", eq - metadata_cur) == 0) {
+        if (strncmp(metadata_cur, "game", eq - metadata_cur) == 0) {
+            if (game != NULL) {
+                DEBUG_FUNCTION_LINE(
+                    "Warning: Ignoring '%s' - Multiple WUPS_MODULE_GAME "
+                    "declarations.\n", path);
+                module_has_info = true;
+                goto exit_error;
+            }
+            game = eq + 1;
+        } else if (strncmp(metadata_cur, "name", eq - metadata_cur) == 0) {
             if (name != NULL) {
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Multiple WUPS_MODULE_NAME "
                     "declarations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
             name = eq + 1;
@@ -423,7 +381,7 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Multiple WUPS_MODULE_AUTHOR "
                     "declarations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
             author = eq + 1;
@@ -432,7 +390,7 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Multiple WUPS_MODULE_VERSION "
                     "declarations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
             version = eq + 1;
@@ -441,7 +399,7 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Multiple WUPS_MODULE_LICENSE "
                     "declarations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
             license = eq + 1;
@@ -450,53 +408,56 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
                 DEBUG_FUNCTION_LINE(
                     "Warning: Ignoring '%s' - Multiple WUPS_MODULE_NAME "
                     "declarations.\n", path);
-                //module_has_info = 1;
+                module_has_info = true;
                 goto exit_error;
             }
             wups = eq + 1;
         }
     }
 
+    if (game == NULL)
+        game = "";
     if (wups == NULL || strcmp(wups, "0.1") != 0) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Unrecognised BSlug version.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (name == NULL) {
         DEBUG_FUNCTION_LINE(
             "Warning: Ignoring '%s' - Missing WUPS_MODULE_NAME declaration.\n",
             path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (author == NULL) {
         DEBUG_FUNCTION_LINE(
             "Warning: Ignoring '%s' - Missing WUPS_MODULE_AUTHOR "
             "declaration.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (version == NULL) {
         DEBUG_FUNCTION_LINE(
             "Warning: Ignoring '%s' - Missing WUPS_MODULE_VERSION "
             "declaration.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
     if (license == NULL) {
         DEBUG_FUNCTION_LINE(
             "Warning: Ignoring '%s' - Missing WUPS_MODULE_LICENSE "
             "declaration.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
-    ret = (module_metadata_t *) malloc(sizeof(module_metadata_t) + strlen(path) +
-        strlen(name) + strlen(author) +
+    ret = (module_metadata_t *)malloc(
+        sizeof(module_metadata_t) + strlen(path) +
+        strlen(game) + strlen(name) + strlen(author) +
         strlen(version) + strlen(license) + 6);
     if (ret == NULL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't parse BSlug metadata.\n", path);
-        //module_has_info = 1;
+        module_has_info = true;
         goto exit_error;
     }
 
@@ -518,10 +479,9 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
     ret->size = 0;
     ret->entries_count = entries_count;
 
-    result->metadata = ret;
 exit_error:
     if (metadata != NULL)
         free(metadata);
 
-    return result;
+    return ret;
 }

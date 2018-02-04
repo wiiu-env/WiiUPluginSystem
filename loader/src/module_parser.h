@@ -17,7 +17,6 @@ extern "C" {
 
 typedef struct {
     const char *path;
-    const char *game;
     const char *name;
     const char *author;
     const char *version;
@@ -27,6 +26,7 @@ typedef struct {
 } module_metadata_t;
 
 typedef struct {
+    size_t module;
     const char *name;
     void *address;
     size_t offset;
@@ -34,14 +34,15 @@ typedef struct {
     int addend;
 } module_unresolved_relocation_t;
 
-typedef struct {
-    std::vector<module_unresolved_relocation_t *> rel;
-    std::vector<wups_loader_entry_t *> entries;
-    module_metadata_t * metadata;
-} module_information_t;
+extern bool module_has_error;
+/* whether or not to delay loading for debug messages. */
+extern bool module_has_info;
+
+extern size_t module_list_size;
+extern module_metadata_t **module_list;
+extern size_t module_list_count;
 
 bool Module_CheckFile(const char *path);
-void printModuleInformation(module_information_t* module_information);
-module_information_t* Module_LoadModuleInformation(const char *path);
+void Module_Load(const char *path);
 
 #endif

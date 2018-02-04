@@ -36,19 +36,31 @@
 #include <assert.h>
 #include <utils/logger.h>
 #include <unistd.h>
+#include <dynamic_libs/os_functions.h>
 
-bool Module_LinkModule(module_information_t * module_information, uint8_t **space) {
-     if(module_information == NULL){
-        DEBUG_FUNCTION_LINE("module_information is null\n");
+#define MODULE_ENTRIES_CAPACITY_DEFAULT 128
+
+wups_loader_entry_t *module_entries = NULL;
+size_t module_entries_count = 0;
+size_t module_entries_capacity = 0;
+
+bool Module_ListLink(uint8_t **space) {
+    size_t i;
+    bool result = false;
+
+    for (i = 0; i < module_list_count; i++) {
+        if (!Module_LinkModule(i, module_list[i]->path, space))
+            goto exit_error;
     }
-    module_metadata_t *  metadata = module_information->metadata;
-    const char * path = NULL;
-    if(metadata != NULL && metadata->path != NULL){
-        path = metadata->path;
-    }else{
-        DEBUG_FUNCTION_LINE("metadata is null\n");
-        return false;
-    }
+
+    result = true;
+exit_error:
+    if (!result) DEBUG_FUNCTION_LINE("Module_ListLink: exit_error\n");
+    return result;
+}
+
+bool Module_LinkModule(size_t index, const char *path, uint8_t **space) {
+    DEBUG_FUNCTION_LINE("Running Module_LinkModule for %s\n",path);
 
     int fd = -1;
     Elf *elf = NULL;
@@ -72,7 +84,8 @@ bool Module_LinkModule(module_information_t * module_information, uint8_t **spac
             /* TODO */
             goto exit_error;
         case ELF_K_ELF:
-            if (!Module_LinkModuleElf(module_information, elf, space))
+            DEBUG_FUNCTION_LINE("Calling now Module_LinkModuleElf\n");
+            if (!Module_LinkModuleElf(index, elf, space))
                 goto exit_error;
             break;
         default:
@@ -89,7 +102,7 @@ exit_error:
     return result;
 }
 
-bool Module_LinkModuleElf(module_information_t * module_information, Elf *elf, uint8_t **space) {
+bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space) {
     Elf_Scn *scn;
     size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count;
     Elf32_Sym *symtab = NULL;
@@ -137,7 +150,10 @@ bool Module_LinkModuleElf(module_information_t * module_information, Elf *elf, u
                     goto exit_error;
 
                 entries_count = shdr->sh_size / sizeof(wups_loader_entry_t);
-                entries = (wups_loader_entry_t*) malloc(sizeof(wups_loader_entry_t)*entries_count);
+                entries = (wups_loader_entry_t*) Module_ListAllocate(
+                    &module_entries, sizeof(wups_loader_entry_t),
+                    entries_count, &module_entries_capacity,
+                    &module_entries_count, MODULE_ENTRIES_CAPACITY_DEFAULT);
 
                 if (entries == NULL)
                     goto exit_error;
@@ -145,14 +161,10 @@ bool Module_LinkModuleElf(module_information_t * module_information, Elf *elf, u
                 destinations[elf_ndxscn(scn)] = (uint8_t *)entries;
                 if (!Module_ElfLoadSection(elf, scn, shdr, entries))
                     goto exit_error;
-                Module_ElfLoadSymbols(elf_ndxscn(scn), entries, symtab, symtab_count);
-                for(int i = 0;i<entries_count;i++){
-                    wups_loader_entry_t * curEntry = &entries[i];
-                    module_information->entries.push_back(curEntry);
-                }
-
+                Module_ElfLoadSymbols(
+                    elf_ndxscn(scn), entries, symtab, symtab_count);
             } else {
-                DEBUG_FUNCTION_LINE("Copy the function to %08X\n",*space);
+                DEBUG_FUNCTION_LINE("Copy function to %08X\n",*space);
                 *space -= shdr->sh_size;
                 if (shdr->sh_addralign > 3)
                     *space = (uint8_t *)((int)*space &
@@ -165,7 +177,8 @@ bool Module_LinkModuleElf(module_information_t * module_information, Elf *elf, u
                 assert(*space != NULL);
                 if (!Module_ElfLoadSection(elf, scn, shdr, *space))
                     goto exit_error;
-                Module_ElfLoadSymbols(elf_ndxscn(scn), *space, symtab, symtab_count);
+                Module_ElfLoadSymbols(
+                    elf_ndxscn(scn), *space, symtab, symtab_count);
             }
         }
     }
@@ -187,7 +200,8 @@ bool Module_LinkModuleElf(module_information_t * module_information, Elf *elf, u
             (shdr->sh_flags & SHF_ALLOC) &&
             destinations[elf_ndxscn(scn)] != NULL) {
 
-            if (!Module_ElfLink(module_information, elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)],
+            if (!Module_ElfLink(
+                    index, elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)],
                     symtab, symtab_count, symtab_strndx, true))
                 goto exit_error;
         }
@@ -202,3 +216,83 @@ exit_error:
         free(symtab);
     return result;
 }
+
+bool Module_ListLinkFinal(uint8_t **space) {
+    size_t relocation_index, entry_index, module_index;
+    bool result = false, has_error = false;
+
+    relocation_index = 0;
+    entry_index = 0;
+
+    /* Process the replacements the link each module in turn.
+     * It must be done in this order, otherwise two replacements to the same
+     * function will cause an infinite loop. */
+    for (module_index = 0; module_index < module_list_count; module_index++) {
+        size_t limit;
+
+        limit = entry_index + module_list[module_index]->entries_count;
+
+        /*for (; entry_index < limit; entry_index++) {
+            wups_loader_entry_t *entry;
+
+            assert(entry_index < module_entries_count);
+
+            entry = module_entries + entry_index;
+
+            switch (entry->type) {
+            case WUPS_LOADER_ENTRY_EXPORT: {
+                break;
+            } case WUPS_LOADER_ENTRY_FUNCTION:
+            case WUPS_LOADER_ENTRY_FUNCTION_MANDATORY: {
+                if (!Module_ListLinkFinalReplaceFunction(space, entry))
+                    goto exit_error;
+                break;
+            } default:
+                goto exit_error;
+            }
+        }*/
+
+        for (;
+             relocation_index < module_relocations_count;
+             relocation_index++) {
+            module_unresolved_relocation_t *reloc;
+            void *symbol;
+
+            reloc = module_relocations + relocation_index;
+
+            if (reloc->module != module_index)
+                break;
+
+            assert(reloc->name != NULL);
+            //symbol = Search_SymbolLookup(reloc->name);
+
+            if (symbol == NULL) {
+                DEBUG_FUNCTION_LINE(
+                    "Missing symbol '%s' needed by '%s'\n", reloc->name,
+                    module_list[module_index]->name);
+                has_error = true;
+                continue;
+            }
+
+            if (!Module_ElfLinkOne(
+                    reloc->type, reloc->offset, reloc->addend,
+                    reloc->address, (uint32_t)symbol))
+                goto exit_error;
+        }
+    }
+
+    assert(entry_index == module_entries_count);
+    assert(relocation_index == module_relocations_count);
+
+    if (has_error)
+        goto exit_error;
+
+    result = true;
+exit_error:
+    if (!result) DEBUG_FUNCTION_LINE("Module_ListLinkFinal: exit_error\n");
+    module_relocations_count = 0;
+    module_relocations_capacity = 0;
+    free(module_relocations);
+    return result;
+}
+

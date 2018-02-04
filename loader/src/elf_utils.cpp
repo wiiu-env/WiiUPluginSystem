@@ -34,8 +34,16 @@
 #include <assert.h>
 #include <utils/logger.h>
 #include <unistd.h>
+#include "utils.h"
 
-int Module_ElfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr, void *destination) {
+#define MODULE_RELOCATIONS_CAPCITY_DEFAULT 128
+
+module_unresolved_relocation_t *module_relocations = NULL;
+size_t module_relocations_count = 0;
+size_t module_relocations_capacity = 0;
+
+bool Module_ElfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr,void *destination) {
+
     assert(destination != NULL);
 
     switch (shdr->sh_type) {
@@ -51,18 +59,18 @@ int Module_ElfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr, 
                 memcpy((char *)destination + n, data->d_buf, data->d_size);
                 n += data->d_size;
             }
-            return 1;
+            return true;
         } case SHT_NOBITS: {
             memset(destination, 0, shdr->sh_size);
-            return 1;
+            return true;
         } default:
-            return 0;
+            return false;
     }
 }
 
-int Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,size_t *symtab_strndx) {
+bool Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count, size_t *symtab_strndx) {
     Elf_Scn *scn;
-    int result = 0;
+    bool result = false;
 
     for (scn = elf_nextscn(elf, NULL);
          scn != NULL;
@@ -75,12 +83,10 @@ int Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,size
             continue;
 
         if (shdr->sh_type == SHT_SYMTAB) {
-            size_t shstrndx;
-
             size_t sym;
 
             assert (*symtab == NULL);
-            *symtab = (Elf32_Sym *) malloc(shdr->sh_size);
+            *symtab = (Elf32_Sym *)malloc(shdr->sh_size);
             if (*symtab == NULL)
                 continue;
 
@@ -90,8 +96,9 @@ int Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,size
             if (!Module_ElfLoadSection(elf, scn, shdr, *symtab))
                 goto exit_error;
 
-            for (sym = 0; sym < *symtab_count; sym++)
+            for (sym = 0; sym < *symtab_count; sym++){
                 (*symtab)[sym].st_other = 0;
+            }
 
             break;
         }
@@ -100,13 +107,12 @@ int Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,size
     if (*symtab == NULL)
         goto exit_error;
 
-    result = 1;
+    result = true;
 exit_error:
     return result;
 }
 
 void Module_ElfLoadSymbols(size_t shndx, const void *destination, Elf32_Sym *symtab, size_t symtab_count) {
-
     size_t i;
 
     /* use the st_other field (no defined meaning) to indicate whether or not a
@@ -121,18 +127,17 @@ void Module_ElfLoadSymbols(size_t shndx, const void *destination, Elf32_Sym *sym
     }
 }
 
-bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t shndx, void *destination,Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx,int allow_globals) {
+bool Module_ElfLink(size_t index, Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals) {
     Elf_Scn *scn;
 
-    for (scn = elf_nextscn(elf, NULL);
-         scn != NULL;
-         scn = elf_nextscn(elf, scn)) {
+    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
 
         Elf32_Shdr *shdr;
 
         shdr = elf32_getshdr(scn);
         if (shdr == NULL)
             continue;
+
         switch (shdr->sh_type) {
             case SHT_REL: {
                 const Elf32_Rel *rel;
@@ -168,33 +173,38 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                                 module_unresolved_relocation_t *reloc;
                                 char *name;
 
-                                reloc = (module_unresolved_relocation_t*) malloc(sizeof(module_unresolved_relocation_t));
-                                if (reloc == NULL){
-                                    DEBUG_FUNCTION_LINE("WARNING: failed to allocate space for relocate struct.\n");
+                                reloc = (module_unresolved_relocation_t *) Module_ListAllocate(
+                                    &module_relocations,
+                                    sizeof(module_unresolved_relocation_t), 1,
+                                    &module_relocations_capacity,
+                                    &module_relocations_count,
+                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
+                                if (reloc == NULL)
                                     return false;
-                                }
 
-                                name = elf_strptr(elf, symtab_strndx, symtab[symbol].st_name);
+                                name = elf_strptr(
+                                    elf, symtab_strndx, symtab[symbol].st_name);
 
                                 if (name == NULL) {
-                                    DEBUG_FUNCTION_LINE("WARNING: name == NULL.\n");
+                                    module_relocations_count--;
                                     return false;
                                 }
 
                                 reloc->name = strdup(name);
                                 if (reloc->name == NULL) {
-                                    DEBUG_FUNCTION_LINE("WARNING: strdup failed.\n");
+                                    module_relocations_count--;
                                     return false;
                                 }
 
+                                DEBUG_FUNCTION_LINE("Adding relocation!\n");
+
+                                reloc->module = index;
                                 reloc->address = destination;
                                 reloc->offset = rel[i].r_offset;
                                 reloc->type = ELF32_R_TYPE(rel[i].r_info);
                                 reloc->addend =
                                     *(int *)((char *)destination +
                                         rel[i].r_offset);
-
-                                module_information->rel.push_back(reloc);
 
                                 continue;
                             } else
@@ -227,7 +237,7 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                 if (data == NULL)
                     continue;
 
-                rela = (Elf32_Rela*) data->d_buf;
+                rela = (const Elf32_Rela *) data->d_buf;
 
                 for (i = 0; i < shdr->sh_size / sizeof(Elf32_Rela); i++) {
                     uint32_t symbol_addr;
@@ -249,40 +259,44 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                                 module_unresolved_relocation_t *reloc;
                                 char *name;
 
-                                reloc = (module_unresolved_relocation_t*) malloc(sizeof(module_unresolved_relocation_t));
-                                if (reloc == NULL){
-                                    DEBUG_FUNCTION_LINE("WARNING: failed to allocate space for relocate struct.\n");
+                                reloc = (module_unresolved_relocation_t *) Module_ListAllocate(
+                                    &module_relocations,
+                                    sizeof(module_unresolved_relocation_t), 1,
+                                    &module_relocations_capacity,
+                                    &module_relocations_count,
+                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
+                                if (reloc == NULL)
                                     return false;
-                                }
 
-
-                                name = elf_strptr(elf, symtab_strndx, symtab[symbol].st_name);
+                                name = elf_strptr(
+                                    elf, symtab_strndx, symtab[symbol].st_name);
 
                                 if (name == NULL) {
-                                    DEBUG_FUNCTION_LINE("WARNING: name == NULL.\n");
+                                    module_relocations_count--;
                                     return false;
                                 }
 
                                 reloc->name = strdup(name);
                                 if (reloc->name == NULL) {
-                                    DEBUG_FUNCTION_LINE("WARNING: strdup failed.\n");
+                                    module_relocations_count--;
                                     return false;
                                 }
 
+                                DEBUG_FUNCTION_LINE("Adding relocation!\n");
+
+                                reloc->module = index;
                                 reloc->address = destination;
                                 reloc->offset = rela[i].r_offset;
                                 reloc->type = ELF32_R_TYPE(rela[i].r_info);
                                 reloc->addend = rela[i].r_addend;
 
-                                module_information->rel.push_back(reloc);
-
                                 continue;
                             } else
                                 return false;
                         } default: {
+
                             if (symtab[symbol].st_other != 1)
                                 return false;
-
                             symbol_addr = symtab[symbol].st_value;
                             break;
                         }
@@ -298,13 +312,13 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
         }
     }
 
-    return 1;
+    return true;
 }
 
-int Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, uint32_t symbol_addr) {
+bool Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, uint32_t symbol_addr) {
     int value;
     char *target = (char *)destination + offset;
-    int result = 0;
+    bool result = false;
 
     switch (type) {
         case R_PPC_ADDR32:
@@ -403,8 +417,9 @@ int Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, u
             goto exit_error;
     }
 
-    result = 1;
+    result = true;
 exit_error:
     if (!result) DEBUG_FUNCTION_LINE("Module_ElfLinkOne: exit_error\n");
     return result;
 }
+
