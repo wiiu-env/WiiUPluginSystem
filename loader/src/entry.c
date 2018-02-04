@@ -6,5 +6,5 @@ int __entry_menu(int argc, char **argv)
     //! *******************************************************************
     //! *                 Jump to our application                    *
     //! *******************************************************************
-    return Menu_Main();
+    return Menu_Main(argc,argv);
 }
