@@ -14,6 +14,7 @@
 #include <system/exception_handler.h>
 #include "common/common.h"
 
+#include "version.h"
 #include "main.h"
 #include "utils.h"
 
@@ -24,6 +25,8 @@ extern "C" int Menu_Main(int argc, char **argv){
     InitFSFunctionPointers();
 
     log_init();
+
+    DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
     setup_os_exceptions();
 

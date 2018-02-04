@@ -1,1 +1,1 @@
-#define APP_VERSION "pre-alpha"
+#define APP_VERSION "alpha"
