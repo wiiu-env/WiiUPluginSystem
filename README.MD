@@ -121,6 +121,9 @@ make
 
 then you can build the example_plugin.
 
+# Logging
+For logging you need to start the UdpDebugReader. This has been created by @dimok789 and can be found in the tools folder.
+
 # Similar projects
 
 ## function-patcher-example
