@@ -1,10 +1,10 @@
 SECTIONS {
 	.wups.meta : {
-        bslug_meta = .;
+        wups_meta = .;
 		*(.wups.meta*)
 	}
 	.wups.load : {
-        bslug_load = .;
+        wups_load = .;
 		*(.wups.load*)
 	}
 }
