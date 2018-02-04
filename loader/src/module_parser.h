@@ -11,6 +11,7 @@ extern "C" {
 }
 #endif
 
+#include <wups.h>
 #include <stdbool.h>
 #include <vector>
 
@@ -35,6 +36,7 @@ typedef struct {
 
 typedef struct {
     std::vector<module_unresolved_relocation_t *> rel;
+    std::vector<wups_loader_entry_t *> entries;
     module_metadata_t * metadata;
 } module_information_t;
 

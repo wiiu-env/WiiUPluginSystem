@@ -36,7 +36,6 @@
 #include <unistd.h>
 
 int Module_ElfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr, void *destination) {
-    DEBUG_FUNCTION_LINE("\n");
     assert(destination != NULL);
 
     switch (shdr->sh_type) {
@@ -77,17 +76,6 @@ int Module_LoadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,size
 
         if (shdr->sh_type == SHT_SYMTAB) {
             size_t shstrndx;
-            if (elf_getshdrstrndx(elf, &shstrndx) == 0) {
-                char* name = elf_strptr(elf, shstrndx, shdr->sh_name);
-                if (name != NULL){
-                    DEBUG_FUNCTION_LINE("SHT_SYMTAB name: %s\n",name);
-                }else{
-                    DEBUG_FUNCTION_LINE("Name null\n");
-                }
-            }else{
-                DEBUG_FUNCTION_LINE("Couldn't find shstrndx\n");
-            }
-
 
             size_t sym;
 
@@ -134,7 +122,6 @@ void Module_ElfLoadSymbols(size_t shndx, const void *destination, Elf32_Sym *sym
 }
 
 bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t shndx, void *destination,Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx,int allow_globals) {
-    DEBUG_FUNCTION_LINE("In Module_ElfLink\n");
     Elf_Scn *scn;
 
     for (scn = elf_nextscn(elf, NULL);
@@ -146,7 +133,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
         shdr = elf32_getshdr(scn);
         if (shdr == NULL)
             continue;
-        DEBUG_FUNCTION_LINE("shdr->sh_type: %d\n",shdr->sh_type);
         switch (shdr->sh_type) {
             case SHT_REL: {
                 const Elf32_Rel *rel;
@@ -178,7 +164,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                         } case SHN_COMMON: {
                             return false;
                         } case SHN_UNDEF: {
-                            DEBUG_FUNCTION_LINE("SHN_UNDEF\n");
                             if (allow_globals) {
                                 module_unresolved_relocation_t *reloc;
                                 char *name;
@@ -208,9 +193,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                                 reloc->addend =
                                     *(int *)((char *)destination +
                                         rel[i].r_offset);
-
-
-                                DEBUG_FUNCTION_LINE("Relocate push_back!.\n");
 
                                 module_information->rel.push_back(reloc);
 
@@ -263,7 +245,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                         } case SHN_COMMON: {
                             return false;
                         } case SHN_UNDEF: {
-                            DEBUG_FUNCTION_LINE("SHN_UNDEF2\n");
                             if (allow_globals) {
                                 module_unresolved_relocation_t *reloc;
                                 char *name;
@@ -293,8 +274,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
                                 reloc->type = ELF32_R_TYPE(rela[i].r_info);
                                 reloc->addend = rela[i].r_addend;
 
-                                DEBUG_FUNCTION_LINE("Relocate push_back!.\n");
-
                                 module_information->rel.push_back(reloc);
 
                                 continue;
@@ -323,7 +302,6 @@ bool Module_ElfLink(module_information_t * module_information, Elf *elf, size_t 
 }
 
 int Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, uint32_t symbol_addr) {
-    DEBUG_FUNCTION_LINE("Module_ElfLinkOne\n");
     int value;
     char *target = (char *)destination + offset;
     int result = 0;

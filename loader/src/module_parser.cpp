@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <utils/logger.h>
 #include <unistd.h>
+#include "utils.h"
 
 static module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf);
 static module_information_t* Module_ModuleInformationRead(const char *path, Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
@@ -49,9 +50,32 @@ void printModuleInformation(module_information_t* module_information){
     DEBUG_FUNCTION_LINE("relocations size: %d\n",relocations.size());
     for (std::vector<module_unresolved_relocation_t *>::iterator it = relocations.begin() ; it != relocations.end(); ++it){
         module_unresolved_relocation_t * relo = *it;
-        DEBUG_FUNCTION_LINE("RELOCATION INFO %08X\n",relo);
+        DEBUG_FUNCTION_LINE("----\n",relo);
+        DEBUG_FUNCTION_LINE("name %s\n",relo->name);
+        DEBUG_FUNCTION_LINE("offset %d\n",relo->offset);
+        DEBUG_FUNCTION_LINE("type %d\n",relo->type);
+        DEBUG_FUNCTION_LINE("address %08X\n",relo->address);
+        DEBUG_FUNCTION_LINE("append %d\n",relo->addend);
     }
 
+    DEBUG_FUNCTION_LINE("entries size: %d\n",relocations.size());
+    std::vector<wups_loader_entry_t *> entries = module_information->entries;
+    for (std::vector<wups_loader_entry_t *>::iterator it = entries.begin() ; it != entries.end(); ++it){
+        //Added entry.
+        wups_loader_entry_t * curEntry = *it;
+        DEBUG_FUNCTION_LINE("Found entry @ %08X\n",curEntry);
+        dumpHex(curEntry,sizeof(wups_loader_entry_t));
+
+        DEBUG_FUNCTION_LINE("type %d\n",curEntry->type);
+        if( curEntry->type == WUPS_LOADER_ENTRY_FUNCTION ||
+            curEntry->type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
+
+            DEBUG_FUNCTION_LINE("library %d \n",curEntry->data._function.library);
+            DEBUG_FUNCTION_LINE("function %s \n",curEntry->data._function.name);
+            DEBUG_FUNCTION_LINE("target pointer %08X \n",curEntry->data._function.target);
+            dumpHex(curEntry->data._function.target,0x100);
+        }
+    }
 
     if(metadata != NULL){
         if(metadata->author != NULL){
@@ -69,8 +93,11 @@ void printModuleInformation(module_information_t* module_information){
         }else{
             DEBUG_FUNCTION_LINE("Name: is null\n");
         }
-        DEBUG_FUNCTION_LINE("Path: %s \n",metadata->path);
-        DEBUG_FUNCTION_LINE("Size: %d \n",metadata->size);
+        if(metadata->path != NULL){
+            DEBUG_FUNCTION_LINE("Path: %s.\n", metadata->path);
+        }else{
+            DEBUG_FUNCTION_LINE("Path: is null\n");
+        }
         DEBUG_FUNCTION_LINE("entries_count: %d \n",metadata->entries_count);
     }else{
          DEBUG_FUNCTION_LINE("metadata is null\n");

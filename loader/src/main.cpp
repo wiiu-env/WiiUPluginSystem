@@ -20,6 +20,7 @@
 #include "main.h"
 #include "utils.h"
 #include "module_parser.h"
+#include "link_utils.h"
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
@@ -69,6 +70,8 @@ void loadAndProcessElf(const char * elfPath){
     if(Module_CheckFile(elfPath)){
         module_information_t * moduleInformation = Module_LoadModuleInformation(elfPath);
         if(moduleInformation != NULL){
+            uint8_t * space = (uint8_t *)0x880000;
+            Module_LinkModule(moduleInformation,&space);
             printModuleInformation(moduleInformation);
         }
     }
