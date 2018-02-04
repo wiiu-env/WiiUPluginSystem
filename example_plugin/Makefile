@@ -88,7 +88,7 @@ LD1FLAGS += --relocatable -s \
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-CFLAGS   += -O0 -Wall -x c -std=gnu11 \
+CFLAGS   += -O0 -Wall -x c -std=gnu99 \
 			-nostdinc -ffreestanding \
             -DGEKKO_U -D__wiiu__ \
             -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common \

@@ -13,13 +13,13 @@ static int value = 15;
 
 static int my_func(void)
 {
-   int res = func();
+   int res = 17;
    return 4 * value * res;
 }
 
 static int my_func2(void)
 {
-   int res = func();
+   int res = 15;
    return 4 * value * res;
 }
 
