@@ -14,9 +14,12 @@
 #include <system/exception_handler.h>
 #include "common/common.h"
 
+#include <wups.h>
+#include <libelf.h>
 #include "version.h"
 #include "main.h"
 #include "utils.h"
+#include "module_parser.h"
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
@@ -62,4 +65,11 @@ void loadAndProcessElf(const char * elfPath){
         dumpHex(elfData,dump_size);
     }
 
+    DEBUG_FUNCTION_LINE("Now try to use brainslug code\n");
+    if(Module_CheckFile(elfPath)){
+        module_information_t * moduleInformation = Module_LoadModuleInformation(elfPath);
+        if(moduleInformation != NULL){
+            printModuleInformation(moduleInformation);
+        }
+    }
 }
