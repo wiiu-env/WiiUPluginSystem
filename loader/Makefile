@@ -22,21 +22,24 @@ export CXX	:=	$(PREFIX)g++
 export AR	:=	$(PREFIX)ar
 export OBJCOPY	:=	$(PREFIX)objcopy
 
+print-%  : ; @echo $* = $($*)
+
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	wiiupluginloader
-BUILD		:=	build
-BUILD_DBG	:=	$(TARGET)_dbg
-SOURCES   :=  src \
-              src/libelf
+TARGET    :=  wiiupluginloader
+BUILD     :=  build
+BUILD_DBG	:=  $(TARGET)_dbg
+SOURCES   :=  src/libelf \
+              src/
+              
 DATA		:=	
 
-INCLUDES  :=  src \
-              src/libelf
+INCLUDES  :=  src/libelf \
+              src/
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -60,7 +63,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lm -lgcc -lutils -ldynamiclibs 
+LIBS	:= -lm -lgcc -lutils -ldynamiclibs
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -68,6 +71,7 @@ LIBS	:= -lm -lgcc -lutils -ldynamiclibs
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(CURDIR)	\
 			$(DEVKITPPC)/lib  \
+			$(DEVKITPRO)/wups  \
 			$(DEVKITPPC)/lib/gcc/powerpc-eabi/4.8.2
 
 
