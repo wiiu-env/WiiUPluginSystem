@@ -35,7 +35,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     int res = 0;
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
-        loadAndProcessElf("sd:/example_plugin.mod");
+        loadAndProcessElf("sd:/wiiu/plugins/example_plugin.mod");
     }
 
     DEBUG_FUNCTION_LINE("Application is ending now.\n");

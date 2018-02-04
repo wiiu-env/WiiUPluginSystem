@@ -39,13 +39,15 @@ script:
 
 before_deploy:
 - mkdir -p "wiiu/apps/wiiupluginloader"
+- mkdir -p "wiiu/plugins"
 - commit="$(git rev-parse --short=7 HEAD)"
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
 - (cd loader && make)
+- cp example_plugin/bin/example_plugin.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
-- zip -r wiiupluginloader_$versiontag.zip wiiu example_plugin/bin/example_plugin.mod
+- zip -r WiiUPluginLoader_$versiontag.zip wiiu
 - git config --global user.email "builds@travis-ci.com"
 - git config --global user.name "Travis CI"
 - export GIT_TAG=WiiUPluginLoader-$versiontag
