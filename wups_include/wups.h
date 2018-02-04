@@ -50,11 +50,11 @@ typedef struct wups_loader_entry_t {
             const char *name;
             const wups_loader_library_type_t library;
             const void *target;
-        } function;
+        } _function;
         struct {
             const char *name;
             const void *target;
-        } export;
+        } _export;
     } data;
 } wups_loader_entry_t;
 
