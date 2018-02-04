@@ -315,6 +315,24 @@ extern const char *__progname;
 
 #endif
 
+#if defined(__wiiu__)
+
+#include <sys/param.h>
+
+#define	ELFTC_BYTE_ORDER			BYTE_ORDER
+#define	ELFTC_BYTE_ORDER_LITTLE_ENDIAN		LITTLE_ENDIAN
+#define	ELFTC_BYTE_ORDER_BIG_ENDIAN		BIG_ENDIAN
+
+#define roundup(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
+#define	roundup2	roundup
+
+#define	ELFTC_HAVE_MMAP				0
+#define	ELFTC_HAVE_STRMODE			0/
+#define ELFTC_NEED_BYTEORDER_EXTENSIONS		1
+
+#endif
+
+
 #if defined(__DragonFly__)
 
 #include <osreldate.h>
