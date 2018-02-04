@@ -40,8 +40,8 @@ script:
 before_deploy:
 - mkdir -p "wiiu/apps/wiiupluginloader"
 - commit="$(git rev-parse --short=7 HEAD)"
-- (cd loader && chmod +x gitrev.sh)
-- (cd loader && versiontag="$(./gitrev.sh)")
+- chmod +x gitrev.sh
+- versiontag="$(./gitrev.sh)"
 - (cd loader && make)
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
@@ -60,7 +60,7 @@ deploy:
   prerelease: true
   api_key:
     secure: "BdoeihqS+jQGq98cPyF22iCKx68stGSWa3t5ZotLcp8z9EYBODjGLOITbDxm1WsuVbC17dq4ESLogVhLSs1I3Kjfb+oESRTAh6X5tsRpxVWkvpiqk9pkMOQPLq1t1QDAKagm6BtEJ2lkMWD9a0G+Z8d7Fc6BE3TqqTf+DxVsX04ArxA9znLgOtJZxgIbSFhCPGU2PXueiWLcOzLL6u2Bp6FmPcGYOkM3K8BD45+9CjYqv+/SIv7ckJW8KI1CaNOIyrvLGv8VyQ18dAB9DRScB6kIAyInAStwQbvGbU6E+fKSJcdoqGuZIxMgBObo4KIN98pVckMsacXXuEk7BYc9lsdQkB9WhJWfJbmDoXF7Ur4pno/3rGSVD8RC96sCO7mrjKnlbACu4ybvVJvxSq6F4DRG6vpamh03AiiMHaQZG4kOC1CuOA26UG+k0kE9ErlkKa1IcfF/l0G+6UN2Ahx8UNXSu3WJR7IVj6jwVDWKnJnPwKcYjHq7Gn3UnIt+h/j1qN2KuYPZujnuaB/RCHNt0VmHylpmOeQPU4aWHq/KZHj3eSpecSXV9G7Xb9BjbK+cNft+vnmJBqQTyKJG1cWwty38bjJnAwsS249KdBWBowzZmeZoLPvdZaPrLBEfb2+p/ty2aMqKFj66ev/aQBSMkiOnIaVjFzl7UtCutm0FEAo="
-  file: WiiUPluginLoader$versiontag.zip
+  file: WiiUPluginLoader_$versiontag.zip
   on:
     repo: Maschell/WiiUPluginSystem
     tags: false

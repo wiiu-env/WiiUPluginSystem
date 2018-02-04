@@ -1,12 +1,12 @@
 #! /bin/bash
 #
 rev_new=$(git rev-parse --short=7 HEAD)
-version=$(cat ./src/version.h 2>/dev/null | cut -d '"' -f2)
+version=$(cat ./loader/src/version.h 2>/dev/null | cut -d '"' -f2)
 
 
 rev_date=`date -u +%Y%m%d%H%M%S`
 
-    cat <<EOF > ./meta/meta.xml
+    cat <<EOF > ./loader/meta/meta.xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <app version="1">
   <name>Wii U Plugin Loader</name>
@@ -21,7 +21,7 @@ rev_date=`date -u +%Y%m%d%H%M%S`
 </app>
 EOF
 
-    cat <<EOF > ./src/version.h
+    cat <<EOF > ./loader/src/version.h
 #define APP_VERSION "$version-nightly-$rev_new"
 EOF
 
