@@ -1,4 +1,4 @@
-# Plugin system for the Wii U. (WIP)
+# Plugin system for the Wii U. (WIP) [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
 I decided to make this entirely public, so everbody can contribute.
 
@@ -107,7 +107,19 @@ This is just an short overview. Look at the issued for detailed information.
   - Running on which FW
   - arguments?
   - ???
-	
+
+# How to build
+
+For building you need: 
+- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
+- [libutils](https://github.com/Maschell/libutils) for common functions.
+
+Also install this plugin system with.
+```
+make
+```
+
+then you can build the example_plugin.
 
 # Similar projects
 

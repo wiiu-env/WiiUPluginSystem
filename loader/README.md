@@ -1,4 +1,4 @@
-﻿# Wii U Plugin Loader (HBL version)  [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
+﻿# Wii U Plugin Loader [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
 ## Building
 
