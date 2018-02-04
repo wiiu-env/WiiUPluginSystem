@@ -25,7 +25,6 @@ typedef struct {
     size_t entries_count;
 } module_metadata_t;
 
-
 typedef struct {
     const char *name;
     void *address;
@@ -42,7 +41,5 @@ typedef struct {
 bool Module_CheckFile(const char *path);
 void printModuleInformation(module_information_t* module_information);
 module_information_t* Module_LoadModuleInformation(const char *path);
-
-
 
 #endif

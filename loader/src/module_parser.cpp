@@ -75,10 +75,7 @@ void printModuleInformation(module_information_t* module_information){
     }else{
          DEBUG_FUNCTION_LINE("metadata is null\n");
     }
-
-
 }
-
 
 bool Module_CheckFile(const char *path) {
     const char *extension;
@@ -263,13 +260,13 @@ module_information_t* Module_LoadMetaDataFromElf(const char *path, Elf *elf) {
             } else {
                 metadata->size += shdr->sh_size;
                 /* add alignment padding to size */
-                if (shdr->sh_addralign > 3)
+                if (shdr->sh_addralign > 3){
                     /* roundup to multiple of sh_addralign  */
-                    metadata->size +=
-                        (-metadata->size & (shdr->sh_addralign - 1));
-                else
+                    metadata->size += (-metadata->size & (shdr->sh_addralign - 1));
+                }else{
                     /* roundup to multiple of 4 */
                     metadata->size += (-metadata->size & 3);
+                }
             }
         }
     }
@@ -308,9 +305,7 @@ static module_information_t *Module_ModuleInformationRead(const char *path, Elf 
 
     entries_count = 0;
 
-    for (scn = elf_nextscn(elf, NULL);
-         scn != NULL;
-         scn = elf_nextscn(elf, scn)) {
+    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
 
         Elf32_Shdr *shdr;
         const char *name;
