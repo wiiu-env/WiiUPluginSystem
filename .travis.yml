@@ -33,4 +33,6 @@ install:
   - (cd libutils-master && make -j8 && make install)
 
 script:
+- make
 - (cd loader && make)
+- (cd example_plugin && make)

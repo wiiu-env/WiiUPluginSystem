@@ -21,7 +21,7 @@ install :  wups.ld  wups_elf.ld
 	$Qcp -r wups.ld $(WUPSDIR)
 	$Qcp -r wups_elf.ld $(WUPSDIR)
   
-  # Rule to install wups.
+# Rule to install wups.
 PHONY += uninstall
 uninstall :
 	$(addprefix $Qrm -rf ,$(wildcard $(WUPSDIR)))
