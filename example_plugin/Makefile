@@ -28,7 +28,7 @@ LIB_INC_DIRS := $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include \
                 
 include makefile.mk
 
-LIB_DIRS += $(DEVKITPPC)/lib\gcc\powerpc-eabi\6.3.0
+LIB_DIRS += $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)
 LIBS += gcc 
 ###############################################################################
 # Parameters
