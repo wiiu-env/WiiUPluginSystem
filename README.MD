@@ -131,3 +131,6 @@ Platform: IOS
 Notes: TODO
 https://github.com/comex/substitute
 
+# Credits
+Some files are based on brainslug by Chadderz:
+https://github.com/Chadderz121/brainslug-wii

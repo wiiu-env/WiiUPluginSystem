@@ -1,3 +1,6 @@
 loader/build/*
 loader/WiiUPluginLoader.cbp
 loader/*.elf
+example_plugin/bin/*
+example_plugin/build/*
+example_plugin_pic/*
