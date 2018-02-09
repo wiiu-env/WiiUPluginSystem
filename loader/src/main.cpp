@@ -74,12 +74,17 @@ void loadAndProcessElf(const char * elfPath){
     if(Module_CheckFile(elfPath)){
         Module_Load(elfPath);
         DEBUG_FUNCTION_LINE("Found %d modules!\n",module_list_count);
-        //printInfos();
+        printInfos();
         unsigned char * space = (unsigned char*)0x00910000;
         Module_ListLink(&space);
 
+        printInfos();
+
+        DCFlushRange ((void*)0x00850000,0x00910000-0x00850000);
+        DCInvalidateRange((void*)0x00850000,0x00910000-0x00850000);
+
         if(module_relocations_count == 0){
-            DEBUG_FUNCTION_LINE("We need no relocations, we can call the functions!!\n");
+            DEBUG_FUNCTION_LINE("We need no more relocations, we can call the functions!!\n");
             DEBUG_FUNCTION_LINE("Calling %d functions!\n",module_entries_count);
             for (unsigned int i = 0; i < module_entries_count; i++) {
                 DEBUG_FUNCTION_LINE("--- Function %d ---\n",i);
@@ -87,9 +92,11 @@ void loadAndProcessElf(const char * elfPath){
                     module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
                     DEBUG_FUNCTION_LINE("Let's call the function: %s \n",module_entries[i].data._function.name);
                     int ret = ( (int (*)(void))((unsigned int*)module_entries[i].data._function.target) )();
-                    DEBUG_FUNCTION_LINE("result:  %d \n",ret);
+                    DEBUG_FUNCTION_LINE("result:  %08X \n",ret);
                 }
             }
+        }else{
+            DEBUG_FUNCTION_LINE("There are still symbols that need to be resolved. Can't call the functions\n");
         }
     }
 

@@ -2,9 +2,10 @@
 # Source files
 
 # The source files to compile.
-SRC      := main.c
+SRC      := src/main.c 
+            
 # Include directories
-INC_DIRS :=
+INC_DIRS := src
 # Library directories
 LIB_DIRS :=
 # The names of libraries to use.

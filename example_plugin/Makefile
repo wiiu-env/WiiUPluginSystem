@@ -16,20 +16,24 @@ ifeq ($(strip $(DEVKITPPC)),)
   $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
 
-WUPSDIR := $(DEVKITPRO)/wups
-GCC_VER := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
+WUPSDIR  := $(DEVKITPRO)/wups
+GCC_VER  := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
+PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
 
 PATH := $(DEVKITPPC)/bin:$(PATH)
 LIB_INC_DIRS := $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include \
                 $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include-fixed \
-                $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include-fixed \
                 $(DEVKITPPC)/powerpc-eabi/include \
+                $(PORTLIBS)/include \
+                $(PORTLIBS)/include/libutils \
                 $(WUPSDIR)/include
                 
 include makefile.mk
 
-LIB_DIRS += $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)
-LIBS += gcc 
+LIB_DIRS += $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER) \
+            $(DEVKITPPC)/powerpc-eabi/ \
+            $(PORTLIBS)/lib
+LIBS += c dynamiclibs utils
 ###############################################################################
 # Parameters
 
@@ -63,11 +67,11 @@ OBJDUMP := $(PREFIX)objdump
 # --gc-sections: remove unneeded symbols
 # -T: use the linker script specified (to force certain wups sections together)
 # -Map: generate a map file
-LDFLAGS  += --relocatable -s  -u wups_load -u wups_meta \
+LDFLAGS  += --relocatable -s --gc-sections  -u wups_load -u wups_meta \
             -T $(WUPSDIR)/wups.ld \
-            $(patsubst %,-Map %,$(strip $(MAP)))
-LD1FLAGS += --relocatable -s \
-            -T $(WUPSDIR)/wups_elf.ld
+            $(patsubst %,-Map %,$(strip $(MAP))) -wrap malloc -wrap free -wrap memalign -wrap calloc -wrap realloc -wrap malloc_usable_size -wrap _malloc_r -wrap _free_r -wrap _realloc_r -wrap _calloc_r -wrap _memalign_r -wrap _malloc_usable_size_r
+LD1FLAGS += --relocatable -s  \
+            -T $(WUPSDIR)/wups_elf.ld -wrap malloc -wrap free -wrap memalign -wrap calloc -wrap realloc -wrap malloc_usable_size -wrap _malloc_r -wrap _free_r -wrap _realloc_r -wrap _calloc_r -wrap _memalign_r -wrap _malloc_usable_size_r
 
 # -O2: optimise lots
 # -Wall: generate lots of warnings
@@ -88,12 +92,12 @@ LD1FLAGS += --relocatable -s \
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-CFLAGS   += -O0 -Wall -x c -std=gnu99 \
-			-nostdinc -ffreestanding \
-            -DGEKKO_U -D__wiiu__ \
-            -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common \
-            -msdata=none -memb -ffunction-sections -fdata-sections
+CFLAGS   += -shared -fPIC -O0 -Wall -x c -std=c11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
+CFLAGS += -D__LOGGING__
+
+			
+      
 ifdef DEBUG
 else
   CFLAGS += -DNDEBUG

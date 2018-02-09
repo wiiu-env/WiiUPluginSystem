@@ -14,6 +14,12 @@ SECTIONS {
 	.rodata : {
 		*(.rodata*)
 	}
+	.got2 : {
+		*(.got2*)
+	}
+	.sbss : {
+		*(.sbss*)
+	}
 	.bss : {
 		*(.bss*)
 	}
