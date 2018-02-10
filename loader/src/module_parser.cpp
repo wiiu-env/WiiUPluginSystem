@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <utils/logger.h>
 #include <unistd.h>
+#include "common/retain_vars.h"
 #include "utils.h"
 
 bool module_has_error;
@@ -93,8 +94,7 @@ void Module_Load(const char *path) {
     switch (elf_kind(elf)) {
         case ELF_K_AR:
             /* TODO */
-            DEBUG_FUNCTION_LINE(
-                "Warning: Ignoring '%s' - Archives not yet supported.\n", path);
+            DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Archives not yet supported.\n", path);
             module_has_info = true;
             goto exit_error;
         case ELF_K_ELF:
@@ -238,6 +238,8 @@ static void Module_LoadElf(const char *path, Elf *elf) {
     /* roundup to multiple of 4 */
     metadata->size += (-metadata->size & 3);
 
+    strncpy(gbl_replacement_data.module_data[module_list_count].module_name,metadata->name,MAXIMUM_MODULE_NAME_LENGTH-1);
+
     list_ptr = (module_metadata_t **)Module_ListAllocate(
         &module_list, sizeof(module_metadata_t *), 1, &module_list_capacity,
         &module_list_count, MODULE_LIST_CAPACITY_DEFAULT);
@@ -254,6 +256,9 @@ static void Module_LoadElf(const char *path, Elf *elf) {
     module_list_size += metadata->size;
     /* prevent the data being freed */
     metadata = NULL;
+
+    gbl_replacement_data.number_used_modules++;
+
 
 exit_error:
     if (metadata != NULL)
@@ -303,9 +308,7 @@ static module_metadata_t *Module_MetadataRead(const char *path, size_t index, El
                 continue;
 
             if (!Module_ElfLoadSection(elf, scn, shdr, metadata)) {
-                DEBUG_FUNCTION_LINE(
-                    "Warning: Ignoring '%s' - Couldn't load .wups.meta.\n",
-                    path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't load .wups.meta.\n", path);
                 module_has_info = true;
                 goto exit_error;
             }
@@ -316,9 +319,7 @@ static module_metadata_t *Module_MetadataRead(const char *path, size_t index, El
             if (!Module_ElfLink(
                     index, elf, elf_ndxscn(scn), metadata,
                     symtab, symtab_count, symtab_strndx, false)) {
-                DEBUG_FUNCTION_LINE(
-                    "Warning: Ignoring '%s' - .wups.meta contains invalid "
-                    "relocations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - .wups.meta contains invalid relocations.\n", path);
                 module_has_info = true;
                 goto exit_error;
             }
@@ -456,7 +457,7 @@ static module_metadata_t *Module_MetadataRead(const char *path, size_t index, El
         strlen(game) + strlen(name) + strlen(author) +
         strlen(version) + strlen(license) + 6);
     if (ret == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't parse BSlug metadata.\n", path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't parse WUPS metadata.\n", path);
         module_has_info = true;
         goto exit_error;
     }

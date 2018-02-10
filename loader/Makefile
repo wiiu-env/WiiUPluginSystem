@@ -34,6 +34,8 @@ TARGET    :=  wiiupluginloader
 BUILD     :=  build
 BUILD_DBG	:=  $(TARGET)_dbg
 SOURCES   :=  src/libelf \
+SOURCES   :=  src/patcher \
+              src/common \
               src/
               
 DATA		:=	

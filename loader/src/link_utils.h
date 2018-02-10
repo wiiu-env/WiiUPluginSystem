@@ -17,7 +17,7 @@ extern "C" {
 bool Module_ListLink(uint8_t **space);
 bool Module_LinkModule(size_t index, const char *path, uint8_t **space);
 bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space);
-bool Module_ListLinkFinal(uint8_t **space);
+bool Module_ListLinkFinal();
 
 extern wups_loader_entry_t *module_entries;
 extern size_t module_entries_count;

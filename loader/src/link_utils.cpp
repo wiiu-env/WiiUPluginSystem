@@ -26,6 +26,7 @@
 #include "link_utils.h"
 #include "elf_utils.h"
 #include "utils.h"
+#include <utils/utils.h>
 #include <wups.h>
 #include <libelf.h>
 #include <malloc.h>
@@ -35,6 +36,7 @@
 #include <string.h>
 #include <assert.h>
 #include <utils/logger.h>
+#include <common/retain_vars.h>
 #include <unistd.h>
 #include <dynamic_libs/os_functions.h>
 
@@ -161,11 +163,17 @@ bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space) {
                 destinations[elf_ndxscn(scn)] = (uint8_t *)entries;
                 if (!Module_ElfLoadSection(elf, scn, shdr, entries))
                     goto exit_error;
-                Module_ElfLoadSymbols(
-                    elf_ndxscn(scn), entries, symtab, symtab_count);
+                Module_ElfLoadSymbols(elf_ndxscn(scn), entries, symtab, symtab_count);
+
+                int entries_offset = module_entries_count - entries_count;
+
+                for(int i = 0;i< entries_count;i++){
+                    gbl_replacement_data.module_data[index].functions[i].entry_index = entries_offset +i;
+                    gbl_replacement_data.module_data[index].number_used_functions++;
+                }
             } else {
-                DEBUG_FUNCTION_LINE("Copy function to %08X\n",*space);
                 *space -= shdr->sh_size;
+
                 if (shdr->sh_addralign > 3)
                     *space = (uint8_t *)((int)*space &
                         ~(shdr->sh_addralign - 1));
@@ -175,6 +183,12 @@ bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space) {
                 destinations[elf_ndxscn(scn)] = *space;
 
                 assert(*space != NULL);
+                if((u32) *space < getApplicationEndAddr()){
+                    DEBUG_FUNCTION_LINE("Not enough space to load function %s into memory at %08X.\n",name,*space);
+                    goto exit_error;
+                }
+
+                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,*space);
                 if (!Module_ElfLoadSection(elf, scn, shdr, *space))
                     goto exit_error;
                 Module_ElfLoadSymbols(
@@ -217,72 +231,69 @@ exit_error:
     return result;
 }
 
-bool Module_ListLinkFinal(uint8_t **space) {
-    size_t relocation_index, entry_index, module_index;
-    bool result = false, has_error = false;
+/**
+Relocation the real_XXX calls into the "replace_data" area of the replacement_data_function_t struct.
+This function also fill the other data needed of the replacement_data_function_t struct.
+**/
+bool Module_ListLinkFinal() {
+    int has_error = 0;
+    bool result;
 
-    relocation_index = 0;
-    entry_index = 0;
+    int relocations = 0;
+    DEBUG_FUNCTION_LINE("Found modules: %d\n",gbl_replacement_data.number_used_modules);
+    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
+        replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
+        DEBUG_FUNCTION_LINE("Module name: %s\n",module_data->module_name);
+        DEBUG_FUNCTION_LINE("number of used function: %d\n",module_data->number_used_functions);
+        for(int j=0;j<module_data->number_used_functions;j++){
+            replacement_data_function_t * function_data = &module_data->functions[j];
+            if(function_data->entry_index > module_entries_count-1){
+                DEBUG_FUNCTION_LINE("Error. entry_index was too high: %d. maximum is %d\n",function_data->entry_index,module_entries_count-1);
+                goto exit_error;
+            }
+            wups_loader_entry_t * entry  = &module_entries[function_data->entry_index];
+            strncpy(function_data->function_name,entry->data._function.name,MAXIMUM_FUNCTION_NAME_LENGTH-1);
+            function_data->library = entry->data._function.library;
+            function_data->replaceAddr = (u32) entry->data._function.target;
+            function_data->replaceCall = (u32) entry->data._function.call_addr;
 
-    /* Process the replacements the link each module in turn.
-     * It must be done in this order, otherwise two replacements to the same
-     * function will cause an infinite loop. */
-    for (module_index = 0; module_index < module_list_count; module_index++) {
-        size_t limit;
+            /*
+            We don't need this...
 
-        limit = entry_index + module_list[module_index]->entries_count;
+            DEBUG_FUNCTION_LINE("Searching for relocations %d\n",module_relocations_count);
 
-        /*for (; entry_index < limit; entry_index++) {
-            wups_loader_entry_t *entry;
+            module_unresolved_relocation_t *reloc = NULL;
+            for (int relocation_index = 0;relocation_index < module_relocations_count;relocation_index++) {
+                DEBUG_FUNCTION_LINE("Try relocation %d\n",relocation_index);
+                if (module_relocations[relocation_index].module == module_index){
+                    if(strcmp(entry->data._function.real_function_name,module_relocations[relocation_index].name) == 0){
+                        DEBUG_FUNCTION_LINE("Found the entry we want to replace %s\n",entry->data._function.real_function_name);
+                        reloc = &module_relocations[relocation_index];
+                        break;
+                    }
+                }
+            }
 
-            assert(entry_index < module_entries_count);
-
-            entry = module_entries + entry_index;
-
-            switch (entry->type) {
-            case WUPS_LOADER_ENTRY_EXPORT: {
-                break;
-            } case WUPS_LOADER_ENTRY_FUNCTION:
-            case WUPS_LOADER_ENTRY_FUNCTION_MANDATORY: {
-                if (!Module_ListLinkFinalReplaceFunction(space, entry))
+            if(reloc != NULL){
+                u32 call_addr = (u32) &function_data->replace_data[0];
+                //DEBUG_FUNCTION_LINE("Found reloc. We need to find the symbol for: %s in lib %d\n",entry->data._function.name,entry->data._function.library);
+                //u32 call_addr = (u32) new_GetAddressOfFunction("OSFatal",WUPS_LOADER_LIBRARY_COREINIT);
+                DEBUG_FUNCTION_LINE("Relocating\n");
+                if (!Module_ElfLinkOne(reloc->type, reloc->offset, reloc->addend, reloc->address, (uint32_t)call_addr)){
                     goto exit_error;
-                break;
-            } default:
-                goto exit_error;
-            }
-        }*/
+                }else{
+                    relocations++;
+                    DEBUG_FUNCTION_LINE("Success! relocated to %08X\n",call_addr);
+                }
+            }else{
 
-        for (;
-             relocation_index < module_relocations_count;
-             relocation_index++) {
-            module_unresolved_relocation_t *reloc;
-            void *symbol;
-
-            reloc = module_relocations + relocation_index;
-
-            if (reloc->module != module_index)
-                break;
-
-            assert(reloc->name != NULL);
-            //symbol = Search_SymbolLookup(reloc->name);
-
-            if (symbol == NULL) {
-                DEBUG_FUNCTION_LINE(
-                    "Missing symbol '%s' needed by '%s'\n", reloc->name,
-                    module_list[module_index]->name);
-                has_error = true;
-                continue;
-            }
-
-            if (!Module_ElfLinkOne(
-                    reloc->type, reloc->offset, reloc->addend,
-                    reloc->address, (uint32_t)symbol))
-                goto exit_error;
+            }*/
         }
     }
+    module_relocations_count -= relocations;
 
-    assert(entry_index == module_entries_count);
-    assert(relocation_index == module_relocations_count);
+    //assert(entry_index == module_entries_count);
+    //assert(relocation_index == module_relocations_count);
 
     if (has_error)
         goto exit_error;
@@ -290,9 +301,11 @@ bool Module_ListLinkFinal(uint8_t **space) {
     result = true;
 exit_error:
     if (!result) DEBUG_FUNCTION_LINE("Module_ListLinkFinal: exit_error\n");
-    module_relocations_count = 0;
-    module_relocations_capacity = 0;
-    free(module_relocations);
+    //module_relocations_count = 0;
+    //module_relocations_capacity = 0;
+    if(module_relocations_count == 0){
+        free(module_relocations);
+    }
     return result;
 }
 

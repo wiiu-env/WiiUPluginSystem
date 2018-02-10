@@ -11,7 +11,7 @@ extern "C" {
 
 //! C wrapper for our C++ functions
 int Menu_Main(int argc, char **argv);
-void loadAndProcessElf(const char * elfPath);
+void loadElf(const char * elfPath);
 
 #ifdef __cplusplus
 }
