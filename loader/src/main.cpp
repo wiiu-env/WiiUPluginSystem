@@ -194,6 +194,7 @@ void loadSamplePlugin(){
             }
         }*/
 
+        unmount_sd_fat("sd");
     }
 }
 
