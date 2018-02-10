@@ -5,12 +5,16 @@ SECTIONS {
 	.wups.load : {
 		*(.wups.load*)
 	}
+  .wups.hooks : {
+		*(.wups.hooks*)
+	}
 	.text : {
 		*(.text*)
 	}
 	.sdata : {
 		*(.sdata*)
-	}.data : {
+	}
+  .data : {
 		*(.data*)
 	}
 	.rodata : {

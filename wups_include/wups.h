@@ -34,16 +34,10 @@ extern "C" {
 #endif
 
 #define WUPS_SECTION(x) __attribute__((__section__ (".wups." x)))
-
+        
 #define DECL_FUNCTION(res, name, ...) \
         res (* real_ ## name)(__VA_ARGS__) __attribute__((section(".data"))); \
         res my_ ## name(__VA_ARGS__)
-
-typedef enum wups_loader_entry_type_t {
-    WUPS_LOADER_ENTRY_FUNCTION,
-    WUPS_LOADER_ENTRY_FUNCTION_MANDATORY,
-    WUPS_LOADER_ENTRY_EXPORT
-} wups_loader_entry_type_t;
 
 typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_AVM,
@@ -114,6 +108,36 @@ typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_ZLIB125,
 } wups_loader_library_type_t;
 
+
+
+typedef enum wups_loader_hook_type_t {
+    WUPS_LOADER_HOOK_INIT_FUNCTION
+} wups_loader_hook_type_t;
+
+typedef struct wups_loader_hook_t {
+    wups_loader_hook_type_t type;
+    const void *target;                         /*Address of our own, new function (my_XXX)*/
+} wups_loader_hook_t;
+
+#define WUPS_HOOK_INIT(original_func) \
+    extern const wups_loader_hook_t wups_hooks_init_ ## original_func \
+        WUPS_SECTION("hooks"); \
+    const wups_loader_hook_t wups_hooks_init_ ## original_func = { \
+        .type = WUPS_LOADER_HOOK_INIT_FUNCTION, \
+        .target = (const void*)&(original_func) \
+    }
+    
+#define INITIALIZE() \
+    void init();\
+    WUPS_HOOK_INIT(init); \
+    void init()
+
+typedef enum wups_loader_entry_type_t {
+    WUPS_LOADER_ENTRY_FUNCTION,
+    WUPS_LOADER_ENTRY_FUNCTION_MANDATORY,
+    WUPS_LOADER_ENTRY_EXPORT
+} wups_loader_entry_type_t;
+
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
     union {
@@ -126,8 +150,6 @@ typedef struct wups_loader_entry_t {
         } _function;
     } data;
 } wups_loader_entry_t;
-
-
 
 #define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_EX(real_ ## x, lib, my_ ## x,  function_name);
 

@@ -7,4 +7,8 @@ SECTIONS {
         wups_load = .;
 		*(.wups.load*)
 	}
+	.wups.hooks : {
+        wups_hooks = .;
+		*(.wups.hooks*)
+	}
 }
