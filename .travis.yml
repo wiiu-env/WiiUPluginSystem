@@ -36,6 +36,7 @@ script:
 - make
 - (cd loader && make)
 - (cd example_plugin && make)
+- (cd plugins/padcon && make)
 
 before_deploy:
 - mkdir -p "wiiu/apps/wiiupluginloader"
@@ -45,6 +46,7 @@ before_deploy:
 - versiontag="$(./gitrev.sh)"
 - (cd loader && make)
 - cp example_plugin/bin/example_plugin.mod wiiu/plugins
+- cp plugins/padcon/bin/padcon.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
 - zip -r WiiUPluginLoader_$versiontag.zip wiiu
