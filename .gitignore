@@ -4,5 +4,8 @@ loader/*.elf
 example_plugin/bin/*
 example_plugin/build/*
 example_plugin_pic/*
+plugins/*/bin/*
+plugins/*/build/*
 loader/WiiUPluginLoader.cscope_file_list
 loader/WiiUPluginLoader.layout
+
