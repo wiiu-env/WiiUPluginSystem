@@ -5,24 +5,23 @@
 #include "dynamic_libs/socket_functions.h"
 #include "utils/logger.h"
 
-
 WUPS_MODULE_NAME("test module");
 WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("BSD");
 
-DECL_FUNCTION(void,OSFatal,char * msg){
+INITIALIZE(){
    InitOSFunctionPointers();
    InitSocketFunctionPointers();
    
    log_init();
 
-   //log_printf is not working.
-   log_print(msg);
-   log_print("\n^--- Someone called OSFatal with this string. Lets modify it. Bye bye =(\n");
-   real_OSFatal("Does the replacement work?");
-   return;
+   log_print("Init of example_plugin!\n");
+} 
+DECL_FUNCTION(int,FSInit,void){
+   log_print("FSInit called\n");
+   return real_FSInit();
 }
 
 
-WUPS_MUST_REPLACE(OSFatal,WUPS_LOADER_LIBRARY_COREINIT, OSFatal);
+WUPS_MUST_REPLACE(FSInit,WUPS_LOADER_LIBRARY_COREINIT, FSInit);

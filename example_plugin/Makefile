@@ -67,7 +67,7 @@ OBJDUMP := $(PREFIX)objdump
 # --gc-sections: remove unneeded symbols
 # -T: use the linker script specified (to force certain wups sections together)
 # -Map: generate a map file
-LDFLAGS  += --relocatable -s --gc-sections  -u wups_load -u wups_meta \
+LDFLAGS  += --relocatable -s --gc-sections  -u wups_load -u wups_meta -u wups_hooks \
             -T $(WUPSDIR)/wups.ld \
             $(patsubst %,-Map %,$(strip $(MAP))) -wrap malloc -wrap free -wrap memalign -wrap calloc -wrap realloc -wrap malloc_usable_size -wrap _malloc_r -wrap _free_r -wrap _realloc_r -wrap _calloc_r -wrap _memalign_r -wrap _malloc_usable_size_r
 LD1FLAGS += --relocatable -s  \
