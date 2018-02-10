@@ -7,7 +7,9 @@
 
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/socket_functions.h>
+#include <dynamic_libs/sys_functions.h>
 #include <dynamic_libs/fs_functions.h>
+#include <dynamic_libs/vpad_functions.h>
 #include <utils/logger.h>
 #include <fs/FSUtils.h>
 #include <fs/sd_fat_devoptab.h>
@@ -27,13 +29,23 @@
 #include "patcher/function_patcher.h"
 
 static void printModuleInfos();
+static void loadSamplePlugin();
 static void printInfos();
 static void printReplacementInfos();
+static void ApplyPatches();
+void CallHook(wups_loader_hook_type_t hook_type);
+static void RestorePatches();
+s32 isInMiiMakerHBL();
+
+
+u8 isFirstBoot __attribute__((section(".data"))) = 1;
+
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
+    InitSysFunctionPointers();
     InitFSFunctionPointers();
 
     log_init();
@@ -42,20 +54,104 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     setup_os_exceptions();
 
-    DEBUG_FUNCTION_LINE("End address of loader %08X\n",getApplicationEndAddr());
+    if(isFirstBoot){
+        memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
+        loadSamplePlugin();
+    }
 
-    memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
 
+    CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
+
+    DEBUG_FUNCTION_LINE("Apply patches.\n");
+    ApplyPatches();
+
+
+    //Reset everything when were going back to the Mii Maker
+    if(!isFirstBoot && isInMiiMakerHBL()){
+        DEBUG_FUNCTION_LINE("Returing to the Homebrew Launcher!\n");
+        isFirstBoot = 0;
+        RestorePatches();
+        return EXIT_SUCCESS;
+    }
+
+    if(!isInMiiMakerHBL()){ //Starting the application
+
+        return EXIT_RELAUNCH_ON_LOAD;
+    }
+
+    if(isFirstBoot){ // First boot back to SysMenu
+        DEBUG_FUNCTION_LINE("Loading the System Menu\n");
+        isFirstBoot = 0;
+        SYSLaunchMenu();
+        return EXIT_RELAUNCH_ON_LOAD;
+    }
+
+    DEBUG_FUNCTION_LINE("Application is ending now.\n");
+
+    RestorePatches();
+
+    return EXIT_SUCCESS;
+}
+
+void ApplyPatches(){
+    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
+        new_PatchInvidualMethodHooks(&gbl_replacement_data.module_data[module_index]);
+    }
+}
+
+void CallHook(wups_loader_hook_type_t hook_type){
+    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
+        replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
+        DEBUG_FUNCTION_LINE("Checking hook functions for %s.\n",module_data->module_name);
+        DEBUG_FUNCTION_LINE("Found hooks: %d\n",module_data->number_used_hooks);
+        for(int j=0;j<module_data->number_used_hooks;j++){
+            replacement_data_hook_t * hook_data = &module_data->hooks[j];
+            if(hook_data->type == hook_type){
+                DEBUG_FUNCTION_LINE("Calling hook of type %d\n",hook_data->type);
+                void * func_ptr = hook_data->func_pointer;
+                //TODO: Switch cases depending on arguments etc.
+                if(func_ptr != NULL){
+                    DEBUG_FUNCTION_LINE("Calling it! %08X\n",func_ptr);
+                    ( (void (*)(void))((unsigned int*)func_ptr) )();
+                }else{
+                    DEBUG_FUNCTION_LINE("Was not defined\n");
+                }
+            }
+
+        }
+    }
+}
+
+void RestorePatches(){
+    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
+        new_RestoreInvidualInstructions(&gbl_replacement_data.module_data[module_index]);
+    }
+}
+
+s32 isInMiiMakerHBL(){
+    if (OSGetTitleID != 0 && (
+            OSGetTitleID() == 0x000500101004A200 || // mii maker eur
+            OSGetTitleID() == 0x000500101004A100 || // mii maker usa
+            OSGetTitleID() == 0x000500101004A000 ||// mii maker jpn
+            OSGetTitleID() == 0x0005000013374842))
+        {
+            return 1;
+    }
+    return 0;
+}
+
+void loadSamplePlugin(){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
 
     int res = 0;
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
         loadElf("sd:/wiiu/plugins/example_plugin.mod");
+        loadElf("sd:/wiiu/plugins/padcon.mod");
 
         if(module_list_count == 0){
             DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
-            return EXIT_SUCCESS;
+            return;
         }
 
         DEBUG_FUNCTION_LINE("Found %d modules!\n",module_list_count);
@@ -81,12 +177,6 @@ extern "C" int Menu_Main(int argc, char **argv){
 
         printReplacementInfos();
 
-        for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
-            new_PatchInvidualMethodHooks(&gbl_replacement_data.module_data[module_index]);
-        }
-
-        // The example plugin should override the message.
-        OSFatal("We should never see this message.");
         /*
         test code for calling the loaded functions.
 
@@ -105,10 +195,6 @@ extern "C" int Menu_Main(int argc, char **argv){
         }*/
 
     }
-
-    DEBUG_FUNCTION_LINE("Application is ending now.\n");
-
-    return EXIT_SUCCESS;
 }
 
 void loadElf(const char * elfPath){

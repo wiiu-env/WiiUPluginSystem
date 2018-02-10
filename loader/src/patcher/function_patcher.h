@@ -55,6 +55,14 @@ struct replacement_data_function_t{
 
 };
 
+struct replacement_data_hook_t{
+    void * func_pointer = NULL;                                     /* [will be filled] */
+    wups_loader_hook_type_t type;                                   /* [will be filled] */
+    u32 hook_index;                                                 /* [needs to be filled] name of the function we want to replace */
+
+};
+
+#define MAXIMUM_HOOKS_PER_MODULE                        4
 #define MAXIMUM_FUNCTION_PER_MODULE                     100
 
 struct replacement_data_module_t{
@@ -62,6 +70,9 @@ struct replacement_data_module_t{
     int                         priority;                                       // Priority of this module
     int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_MODULE
     replacement_data_function_t functions[MAXIMUM_FUNCTION_PER_MODULE];         // Replacement information for each function.
+
+    int                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_MODULE
+    replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_MODULE];                 // Replacement information for each function.
 };
 
 #define MAXIMUM_MODULES                                 32

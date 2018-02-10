@@ -220,7 +220,10 @@ static void Module_LoadElf(const char *path, Elf *elf) {
                 continue;
             } else if (strcmp(name, ".wups.load") == 0) {
                 metadata->size +=
-                    shdr->sh_size / sizeof(wups_loader_entry_t) * 12;
+                    shdr->sh_size / sizeof(wups_loader_entry_t) * 6*4;
+            } else if (strcmp(name, ".wups.hooks") == 0) {
+                metadata->size +=
+                    shdr->sh_size / sizeof(wups_loader_hook_t) * 2*4;
             } else {
                 metadata->size += shdr->sh_size;
                 /* add alignment padding to size */

@@ -40,7 +40,15 @@
 #include <unistd.h>
 #include <dynamic_libs/os_functions.h>
 
+//TODO: Adjust this.
 #define MODULE_ENTRIES_CAPACITY_DEFAULT 128
+
+//TODO: Adjust this.
+#define MODULE_HOOKS_CAPACITY_DEFAULT 128
+
+wups_loader_hook_t *module_hooks = NULL;
+size_t module_hooks_count = 0;
+size_t module_hooks_capacity = 0;
 
 wups_loader_entry_t *module_entries = NULL;
 size_t module_entries_count = 0;
@@ -106,10 +114,11 @@ exit_error:
 
 bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space) {
     Elf_Scn *scn;
-    size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count;
+    size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count, hooks_count;
     Elf32_Sym *symtab = NULL;
     uint8_t **destinations = NULL;
     wups_loader_entry_t *entries = NULL;
+    wups_loader_hook_t *hooks = NULL;
     bool result = false;
 
     if (!Module_LoadElfSymtab(elf, &symtab, &symtab_count, &symtab_strndx))
@@ -170,6 +179,30 @@ bool Module_LinkModuleElf(size_t index, Elf *elf, uint8_t **space) {
                 for(int i = 0;i< entries_count;i++){
                     gbl_replacement_data.module_data[index].functions[i].entry_index = entries_offset +i;
                     gbl_replacement_data.module_data[index].number_used_functions++;
+                }
+            }else if (strcmp(name, ".wups.hooks") == 0) {
+                if (hooks != NULL)
+                    goto exit_error;
+
+                hooks_count = shdr->sh_size / sizeof(wups_loader_hook_t);
+                hooks = (wups_loader_hook_t*) Module_ListAllocate(
+                    &module_hooks, sizeof(wups_loader_hook_t),
+                    hooks_count, &module_hooks_capacity,
+                    &module_hooks_count, MODULE_HOOKS_CAPACITY_DEFAULT);
+
+                if (hooks == NULL)
+                    goto exit_error;
+
+                destinations[elf_ndxscn(scn)] = (uint8_t *)hooks;
+                if (!Module_ElfLoadSection(elf, scn, shdr, hooks))
+                    goto exit_error;
+                Module_ElfLoadSymbols(elf_ndxscn(scn), hooks, symtab, symtab_count);
+
+                int hook_offset = module_hooks_count - hooks_count;
+
+                for(int i = 0;i< hooks_count;i++){
+                    gbl_replacement_data.module_data[index].hooks[i].hook_index = hook_offset +i;
+                    gbl_replacement_data.module_data[index].number_used_hooks++;
                 }
             } else {
                 *space -= shdr->sh_size;
@@ -244,6 +277,20 @@ bool Module_ListLinkFinal() {
     for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
         replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
         DEBUG_FUNCTION_LINE("Module name: %s\n",module_data->module_name);
+        for(int j=0;j<module_data->number_used_hooks;j++){
+            replacement_data_hook_t * hook_data = &module_data->hooks[j];
+            if(hook_data->hook_index > module_entries_count-1){
+                DEBUG_FUNCTION_LINE("Error. hook_index was too high: %d. maximum is %d\n",hook_data->hook_index,module_entries_count-1);
+                goto exit_error;
+            }
+            wups_loader_hook_t * hook  = &module_hooks[hook_data->hook_index];
+            DEBUG_FUNCTION_LINE("Set hook %d of module \"%s\" of type %08X\n",hook_data->hook_index,module_data->module_name,hook->type);
+            hook_data->func_pointer = (void*) hook->target;
+            hook_data->type         = hook->type;
+
+        }
+
+
         DEBUG_FUNCTION_LINE("number of used function: %d\n",module_data->number_used_functions);
         for(int j=0;j<module_data->number_used_functions;j++){
             replacement_data_function_t * function_data = &module_data->functions[j];
