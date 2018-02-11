@@ -154,6 +154,7 @@ bool loadSamplePlugin(){
         loadElf("sd:/wiiu/plugins/example_plugin.mod");
         loadElf("sd:/wiiu/plugins/sdcafiine.mod");
         loadElf("sd:/wiiu/plugins/padcon.mod");
+        loadElf("sd:/wiiu/plugins/swapdrc.mod");
         if(module_list_count == 0){
             DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
             return false;
