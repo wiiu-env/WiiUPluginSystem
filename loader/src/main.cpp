@@ -57,6 +57,12 @@ extern "C" int Menu_Main(int argc, char **argv){
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
         loadSamplePlugin();
+
+    }
+
+    if(module_relocations_count != 0){
+        DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting\n");
+        return EXIT_SUCCESS;
     }
 
 
@@ -171,6 +177,7 @@ void loadSamplePlugin(){
 
         if(module_relocations_count != 0){
             DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting\n");
+            return;
         }
 
         DEBUG_FUNCTION_LINE("Printing some information before replacing the functions\n");
