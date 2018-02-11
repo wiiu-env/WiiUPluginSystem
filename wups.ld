@@ -5,7 +5,7 @@ SECTIONS {
 	.wups.load : {
 		*(.wups.load*)
 	}
-  .wups.hooks : {
+    .wups.hooks : {
 		*(.wups.hooks*)
 	}
 	.text : {
@@ -14,7 +14,7 @@ SECTIONS {
 	.sdata : {
 		*(.sdata*)
 	}
-  .data : {
+	.data : {
 		*(.data*)
 	}
 	.rodata : {

@@ -18,11 +18,11 @@ export GCC_VER  := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
 
 PREFIX	:=	powerpc-eabi-
 
-export AS	:=	$(PREFIX)as
-export CC	:=	$(PREFIX)gcc
-export CXX	:=	$(PREFIX)g++
-export REAL_LD	:=	$(PREFIX)ld
-export AR	:=	$(PREFIX)ar
+export AS		:=	$(PREFIX)as
+export CC		:=	$(PREFIX)gcc
+export CXX		:=	$(PREFIX)g++
+export LD		:=	$(PREFIX)ld
+export AR		:=	$(PREFIX)ar
 export OBJCOPY	:=	$(PREFIX)objcopy
 
 #---------------------------------------------------------------------------------
@@ -31,26 +31,45 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	$(BIN)/$(notdir $(CURDIR)).mod
-BUILD		  :=	build
-BUILD_DBG	:=	$(TARGET)_dbg
+TARGET		:=	$(notdir $(CURDIR)).mod
+BUILD		:= 	build
 SOURCES		:=	src 
 
-DATA		  :=	
+DATA		:=	
 
 INCLUDES	:=  src
 
-# The name of the assembler listing file to generate.
-LIST   ?= $(TARGET:.mod=.list)
-# The name of the map file to generate.
 MAP ?= $(TARGET:.mod=.map)
-
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	  += -shared -fPIC -Os -Wall -x c -std=c11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
-CXXFLAGS  += -shared -fPIC -Os -Wall -x c -std=gnu++11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+
+# -fPIC: create position independed code
+# -Os: optimise size
+# -Wall: generate lots of warnings
+# -DGEKKO_U: define the symbol GEKKO (used in some headers)
+# -D__wiiu__: define the symbol __wii__ (used in some headers)
+# -mrvl: enable wii/gamecube compilation
+# -mcpu=750: enable processor specific compilation
+# -meabi: enable eabi specific compilation
+# -mhard-float: enable hardware floating point instructions
+# -fshort-wchar: use 16 bit whcar_t type in keeping with Wii executables
+# -fno-common: stop common variables which the loader can't understand
+# -msdata-none: do not use r2 or r13 as small data areas
+# -memb: enable embedded application specific compilation
+# -ffunction-sections: split up functions so linker can garbage collect
+# -fdata-sections: split up data so linker can garbage collect
+COMMON_CFLAGS	+= -fPIC -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+
+
+# -x c: compile as c code
+# -std=c11: use the c11 standard
+CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=c11
+
+# -x c: compile as c++ code
+# -std=gnu++11: use the c++11 standard
+CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11
 
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
@@ -60,12 +79,18 @@ endif
 ASFLAGS	:= -mregnames
 # --relocatable: make sure ld doesn't remove relocations wups will need
 # -s: strip local symbols to speed linking
+# -u: keep certain sections
+# -wrap: wrap function
 # --gc-sections: remove unneeded symbols
 # -T: use the linker script specified (to force certain wups sections together)
 # -Map: generate a map file
-LDFLAGS  +=   -u wups_load -u wups_meta -u wups_hooks -T $(WUPSDIR)/wups.ld \
-              -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,--relocatable,--gc-sections
-LD1FLAGS +=  --relocatable -s -T $(WUPSDIR)/wups_elf.ld
+
+LDFLAG_COMMON += -u wups_load -u wups_meta -u wups_hooks -T $(WUPSDIR)/wups.ld \
+				 -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,--gc-sections
+
+LDFLAGS_MOD  +=  	$(LDFLAG_COMMON),--relocatable
+LDFLAGS_ELF  +=  	--relocatable -s -T $(WUPSDIR)/wups_elf.ld
+
 #---------------------------------------------------------------------------------
 Q := @
 MAKEFLAGS += --no-print-directory
@@ -108,9 +133,9 @@ PNGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(CPPFILES)),)
-	export LD	:=	$(CC)
+	export LD_MOD	:=	$(CC)
 else
-	export LD	:=	$(CXX)
+	export LD_MOD	:=	$(CXX)
 endif
 
 export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
@@ -160,22 +185,18 @@ all : $(OUTPUT)
 # Special build rules
 
 # Rule to make the module file.
-$(OUTPUT) : output.elf | $(BIN)
-	$(LOG)
-	$(LD) $(THIS_DIR)/$(BUILD)/output.elf $(LDFLAGS) $(LIBS) $(LIBPATHS) -o $@ 
+$(OUTPUT) : output.elf
+	@echo "checking for missing symbols ..."
+	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LIBS) $(LIBPATHS) -o check_linking.elf	
+	@echo "linking ..." $@
+	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAGS_MOD) $(LIBS) $(LIBPATHS) -o $@ 
 
 # Rule to make the module file.
-output.elf : $(OFILES) | $(BIN) $(BUILD)
-	$(LOG)
-	$(REAL_LD) $(OFILES) $(LD1FLAGS)  $(LIBS) $(LIBPATHS) -o $@ 
+output.elf : $(OFILES)
+	@echo "linking ... output.elf"
 	
-# Rule to make intermediate directory
-$(BUILD) : 
-	$Qmkdir $@
-
-# Rule to make output directory
-$(BIN) : 
-	$Qmkdir $@
+	
+	@$(LD) $(OFILES) $(LDFLAGS_ELF)  $(LIBS) $(LIBPATHS) -o $@ 
   
 ###############################################################################
 # Standard build rules
@@ -194,12 +215,12 @@ $(BIN) :
 #---------------------------------------------------------------------------------
 %.o: %.c
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) $(INCLUDE)  -c $< -o $@ $(ERROR_FILTER)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) $(INCLUDE)  -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.o: %.S
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.png.o : %.png
