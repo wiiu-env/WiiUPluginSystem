@@ -28,7 +28,7 @@
 #include <kernel/kernel_defs.h>
 #include <kernel/syscalls.h>
 
-#define DEBUG_LOG_DYN                                   1
+#define DEBUG_LOG_DYN                                   0
 
 rpl_handling rpl_handles[] __attribute__((section(".data"))) = {
     {WUPS_LOADER_LIBRARY_AVM,       "avm.rpl"       ,0},

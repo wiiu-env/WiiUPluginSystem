@@ -67,23 +67,19 @@ extern "C" int Menu_Main(int argc, char **argv){
         return EXIT_SUCCESS;
     }
 
-
-    CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
-
-    DEBUG_FUNCTION_LINE("Apply patches.\n");
-    ApplyPatches();
-
-
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
         DEBUG_FUNCTION_LINE("Returing to the Homebrew Launcher!\n");
         isFirstBoot = 0;
         RestorePatches();
         return EXIT_SUCCESS;
+    } else {
+        DEBUG_FUNCTION_LINE("Apply patches.\n");
+        ApplyPatches();
     }
 
     if(!isInMiiMakerHBL()){ //Starting the application
-
+        CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
@@ -131,7 +127,8 @@ void CallHook(wups_loader_hook_type_t hook_type){
 }
 
 void RestorePatches(){
-    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
+    for(int module_index=gbl_replacement_data.number_used_modules-1;module_index>=0;module_index--){
+        DEBUG_FUNCTION_LINE("Restoring function for module: %d\n",module_index);
         new_RestoreInvidualInstructions(&gbl_replacement_data.module_data[module_index]);
     }
 }
