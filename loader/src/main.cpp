@@ -155,7 +155,7 @@ bool loadSamplePlugin(){
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
         loadElf("sd:/wiiu/plugins/example_plugin.mod");
-        //loadElf("sd:/wiiu/plugins/sdcafiine.mod");
+        loadElf("sd:/wiiu/plugins/sdcafiine.mod");
         loadElf("sd:/wiiu/plugins/padcon.mod");
         if(module_list_count == 0){
             DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
