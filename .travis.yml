@@ -45,8 +45,8 @@ before_deploy:
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
 - (cd loader && make)
-- cp example_plugin/bin/example_plugin.mod wiiu/plugins
-- cp plugins/padcon/bin/padcon.mod wiiu/plugins
+- cp example_plugin/example_plugin.mod wiiu/plugins
+- cp plugins/padcon/padcon.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
 - zip -r WiiUPluginLoader_$versiontag.zip wiiu
