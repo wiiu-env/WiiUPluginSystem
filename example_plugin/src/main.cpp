@@ -3,6 +3,7 @@
 #include <string.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/socket_functions.h"
+#include "dynamic_libs/fs_functions.h"
 #include "utils/logger.h"
 
 WUPS_MODULE_NAME("test module");
@@ -18,10 +19,12 @@ INITIALIZE(){
 
    log_print("Init of example_plugin!\n");
 } 
-DECL_FUNCTION(int,FSInit,void){
-   log_print("FSInit called\n");
-   return real_FSInit();
+
+DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error) {
+    int result = real_FSOpenFile(pClient, pCmd, path, mode, handle, error);
+    
+    log_printf("FSOpenFile called for folder %s! Result %d\n",path,result);
+    return result;
 }
 
-
-WUPS_MUST_REPLACE(FSInit,WUPS_LOADER_LIBRARY_COREINIT, FSInit);
+WUPS_MUST_REPLACE(FSOpenFile,WUPS_LOADER_LIBRARY_COREINIT, FSOpenFile);

@@ -9,3 +9,4 @@ plugins/*/build/*
 loader/WiiUPluginLoader.cscope_file_list
 loader/WiiUPluginLoader.layout
 
+*.mod

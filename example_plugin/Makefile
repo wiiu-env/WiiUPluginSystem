@@ -1,142 +1,173 @@
-###############################################################################
-# Makefile
-#  by Alex Chadwick
-#
-# A makefile script for generation of a brainslug module
-###############################################################################
-# Hopefully you shouldn't need to change anything in this file.
-# Alter makefile.mk to change common settings.
+DO_LOGGING := 1
 
-###############################################################################
-# devkitpro settings
-ifeq ($(strip $(DEVKITPRO)),)
-  $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro")
-endif
+#---------------------------------------------------------------------------------
+# Clear the implicit built in rules
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
 ifeq ($(strip $(DEVKITPPC)),)
-  $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
+$(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
+endif
+export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
+export PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
+export WUPSDIR  := $(DEVKITPRO)/wups
+export GCC_VER  := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
 
-WUPSDIR  := $(DEVKITPRO)/wups
-GCC_VER  := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
-PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
+PREFIX	:=	powerpc-eabi-
 
-PATH := $(DEVKITPPC)/bin:$(PATH)
-LIB_INC_DIRS := $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include \
-                $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)/include-fixed \
-                $(DEVKITPPC)/powerpc-eabi/include \
-                $(PORTLIBS)/include \
-                $(PORTLIBS)/include/libutils \
-                $(WUPSDIR)/include
-                
-include makefile.mk
+export AS	:=	$(PREFIX)as
+export CC	:=	$(PREFIX)gcc
+export CXX	:=	$(PREFIX)g++
+export REAL_LD	:=	$(PREFIX)ld
+export AR	:=	$(PREFIX)ar
+export OBJCOPY	:=	$(PREFIX)objcopy
 
-LIB_DIRS += $(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER) \
-            $(DEVKITPPC)/powerpc-eabi/ \
-            $(PORTLIBS)/lib
-LIBS += c dynamiclibs utils
-###############################################################################
-# Parameters
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# INCLUDES is a list of directories containing extra header files
+#---------------------------------------------------------------------------------
+TARGET		:=	$(BIN)/$(notdir $(CURDIR)).mod
+BUILD		  :=	build
+BUILD_DBG	:=	$(TARGET)_dbg
+SOURCES		:=	src 
 
-# A comma to make writing commands easier
-C := ,
-# Used to suppress command echo.
-Q      ?= @
-LOG    ?= @echo $@
-# The intermediate directory for compiled object files.
-BUILD  ?= build
+DATA		  :=	
+
+INCLUDES	:=  src
+
 # The name of the assembler listing file to generate.
 LIST   ?= $(TARGET:.mod=.list)
 # The name of the map file to generate.
-MAP    ?= $(TARGET:.mod=.map)
+MAP ?= $(TARGET:.mod=.map)
 
-INC_DIRS += $(LIB_INC_DIRS)
 
-###############################################################################
-# Compiler settings
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+CFLAGS	  += -shared -fPIC -Os -Wall -x c -std=c11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+CXXFLAGS  += -shared -fPIC -Os -Wall -x c -std=gnu++11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
-# The toolchain to use.
-PREFIX  ?= powerpc-eabi-
-# Tools to use
-AS      := $(PREFIX)as
-LD      := $(PREFIX)ld
-CC      := $(PREFIX)g++
-OBJDUMP := $(PREFIX)objdump
-
+ifeq ($(DO_LOGGING), 1)
+   CFLAGS += -D__LOGGING__
+   CXXFLAGS += -D__LOGGING__
+endif
+			
+ASFLAGS	:= -mregnames
 # --relocatable: make sure ld doesn't remove relocations wups will need
 # -s: strip local symbols to speed linking
 # --gc-sections: remove unneeded symbols
 # -T: use the linker script specified (to force certain wups sections together)
 # -Map: generate a map file
-LDFLAGS  += --relocatable -s --gc-sections  -u wups_load -u wups_meta -u wups_hooks \
-            -T $(WUPSDIR)/wups.ld \
-            $(patsubst %,-Map %,$(strip $(MAP))) -wrap malloc -wrap free -wrap memalign -wrap calloc -wrap realloc -wrap malloc_usable_size -wrap _malloc_r -wrap _free_r -wrap _realloc_r -wrap _calloc_r -wrap _memalign_r -wrap _malloc_usable_size_r
-LD1FLAGS += --relocatable -s  \
-            -T $(WUPSDIR)/wups_elf.ld -wrap malloc -wrap free -wrap memalign -wrap calloc -wrap realloc -wrap malloc_usable_size -wrap _malloc_r -wrap _free_r -wrap _realloc_r -wrap _calloc_r -wrap _memalign_r -wrap _malloc_usable_size_r
+LDFLAGS  +=   -u wups_load -u wups_meta -u wups_hooks -T $(WUPSDIR)/wups.ld \
+              -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,--relocatable,--gc-sections
+LD1FLAGS +=  --relocatable -s -T $(WUPSDIR)/wups_elf.ld
+#---------------------------------------------------------------------------------
+Q := @
+MAKEFLAGS += --no-print-directory
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
+LIBS	:= -lutils -ldynamiclibs
+#  
 
-# -O2: optimise lots
-# -Wall: generate lots of warnings
-# -x c: compile as C code
-# -std=gnu11: use the C11 standard with GNU extensions
-# -nostdinc: don't include standard headers (we don't have all the symbols)
-# -ffreestanding: we don't have libc; don't expect we do
-# -DGEKKO: define the symbol GEKKO (used in some libogc headers)
-# -DHW_RVL: define the symbol HW_RVL (used in some libogc headers)
-# -D__wii__: define the symbol __wii__ (used in some libogc headers)
-# -mrvl: enable wii/gamecube compilation
-# -mcpu=750: enable processor specific compilation
-# -meabi: enable eabi specific compilation
-# -mhard-float: enable hardware floating point instructions
-# -fshort-wchar: use 16 bit whcar_t type in keeping with Wii executables
-# -fno-common: stop common variables which the loader can't understand
-# -msdata-none: do not use r2 or r13 as small data areas
-# -memb: enable embedded application specific compilation
-# -ffunction-sections: split up functions so linker can garbage collect
-# -fdata-sections: split up data so linker can garbage collect
-CFLAGS   += -shared -fPIC -O0 -Wall -x c -std=c11 -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:=	$(DEVKITPPC)
 
-CFLAGS += -D__LOGGING__
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+#---------------------------------------------------------------------------------
+export PROJECTDIR := $(CURDIR)
+export OUTPUT	:=	$(CURDIR)/$(TARGETDIR)/$(TARGET)
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-			
-      
-ifdef DEBUG
+#---------------------------------------------------------------------------------
+# automatically build a list of object files for our project
+#---------------------------------------------------------------------------------
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+TTFFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.ttf)))
+PNGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+	export LD	:=	$(CC)
 else
-  CFLAGS += -DNDEBUG
+	export LD	:=	$(CXX)
 endif
 
-###############################################################################
-# Variable init
+export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
+					$(sFILES:.s=.o) $(SFILES:.S=.o) \
+					$(PNGFILES:.png=.png.o) $(addsuffix .o,$(BINFILES))
 
-# Phony targets
-PHONY    :=
+#---------------------------------------------------------------------------------
+# build a list of include paths
+#---------------------------------------------------------------------------------
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include \
+					-I$(PORTLIBS)/include/libutils -I$(WUPSDIR)/include
+
+#---------------------------------------------------------------------------------
+# build a list of library paths
+#---------------------------------------------------------------------------------
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
+                    -L$(PORTLIBS)/lib 
+
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
+.PHONY: $(BUILD) clean install
+
+#---------------------------------------------------------------------------------
+$(BUILD):
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	
+#---------------------------------------------------------------------------------
+clean:
+	@echo clean ...
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf	$(OUTPUT)
+
+#---------------------------------------------------------------------------------
+else
+
+DEPENDS	:=	$(OFILES:.o=.d)
+
+THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ###############################################################################
 # Rule to make everything.
 PHONY += all
 
-all : $(TARGET)
-
-###############################################################################
-# Derived rules
-
-LDFLAGS += $(patsubst %,-l %,$(LIBS)) $(patsubst %,-l %,$(LIBS)) \
-           $(patsubst %,-L %,$(LIB_DIRS)) $(patsubst %,-L %/lib,$(LIB_DIRS))
-CFLAGS  += $(patsubst %,-I %,$(INC_DIRS)) \
-           $(patsubst %,-I %/include,$(LIB_DIRS)) -iquote src
-
-OBJECTS := $(patsubst %.c,$(BUILD)/%.c.o,$(filter %.c,$(SRC)))
-
+all : $(OUTPUT)
 ###############################################################################
 # Special build rules
 
 # Rule to make the module file.
-$(TARGET) : $(BUILD)/output.elf | $(BIN)
+$(OUTPUT) : output.elf | $(BIN)
 	$(LOG)
-	$Q$(LD) $(BUILD)/output.elf $(LDFLAGS) -o $@ 
+	$(LD) $(THIS_DIR)/$(BUILD)/output.elf $(LDFLAGS) $(LIBS) $(LIBPATHS) -o $@ 
 
 # Rule to make the module file.
-$(BUILD)/output.elf : $(OBJECTS) | $(BIN) $(BUILD)
+output.elf : $(OFILES) | $(BIN) $(BUILD)
 	$(LOG)
-	$Q$(LD) $(OBJECTS) $(LD1FLAGS) -o $@ 
+	$(REAL_LD) $(OFILES) $(LD1FLAGS)  $(LIBS) $(LIBPATHS) -o $@ 
 	
 # Rule to make intermediate directory
 $(BUILD) : 
@@ -145,14 +176,65 @@ $(BUILD) :
 # Rule to make output directory
 $(BIN) : 
 	$Qmkdir $@
-
+  
 ###############################################################################
 # Standard build rules
+#---------------------------------------------------------------------------------
+%.a:
+#---------------------------------------------------------------------------------
+	@echo $(notdir $@)
+	@rm -f $@
+	@$(AR) -rc $@ $^
 
-$(BUILD)/%.c.o: %.c | $(BUILD)
-	$(LOG)
-	-$Qmkdir -p $(dir $@)
-	$Q$(CC) -c $(CFLAGS) $< -o $@
+#---------------------------------------------------------------------------------
+%.o: %.cpp
+	@echo $(notdir $<)
+	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) $(INCLUDE)  -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.c
+	@echo $(notdir $<)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) $(INCLUDE)  -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.S
+	@echo $(notdir $<)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.png.o : %.png
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.jpg.o : %.jpg
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.ttf.o : %.ttf
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.bin.o : %.bin
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.wav.o : %.wav
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.mp3.o : %.mp3
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
+
+#---------------------------------------------------------------------------------
+%.ogg.o : %.ogg
+	@echo $(notdir $<)
+	@bin2s -a 32 $< | $(AS) -o $(@)
 
 ###############################################################################
 # Assembly listing rules
@@ -179,3 +261,9 @@ clean :
 # Phony targets
 
 .PHONY : $(PHONY)
+  
+-include $(DEPENDS)
+
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
