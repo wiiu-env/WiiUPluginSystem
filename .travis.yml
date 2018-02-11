@@ -23,12 +23,22 @@ before_install:
   - wget http://download.sourceforge.net/devkitpro/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
   - wget https://github.com/Maschell/dynamic_libs/archive/lib.tar.gz -O dynamic_libs.tar.gz
   - wget https://github.com/Maschell/libutils/archive/master.tar.gz -O libutils.tar.gz
+  - wget https://github.com/aliaspider/libfat/archive/master.tar.gz -O libfat.tar.gz
+  - wget https://github.com/dimok789/libiosuhax/archive/master.tar.gz -O libiosuhax.tar.gz
+  - wget https://github.com/Maschell/libntfs-wiiu/archive/master.tar.gz -O libntfs.tar.gz
 
 install:
   - tar -xjf devkitPPC-linux.tar.bz2 -C ${DEVKITPRO}/
   - tar -xzvf dynamic_libs.tar.gz
   - tar -xzvf libutils.tar.gz
+  - tar -xzvf libfat.tar.gz
+  - tar -xzvf libiosuhax.tar.gz
+  - tar -xzvf libntfs.tar.gz
+  - tar -xzvf libiosuhax.tar.gz
   - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
+  - (cd libiosuhax-master && make -j8 && make install)
+  - (cd libfat-master && make wiiu-release && make wiiu-install)
+  - (cd libntfs-wiiu-master && make wiiu-install)
   - (cd dynamic_libs-lib && make -j8 && make install)
   - (cd libutils-master && make -j8 && make install)
 
@@ -37,6 +47,7 @@ script:
 - (cd loader && make)
 - (cd example_plugin && make)
 - (cd plugins/padcon && make)
+- (cd plugins/sdcafiine && make)
 
 before_deploy:
 - mkdir -p "wiiu/apps/wiiupluginloader"
@@ -47,6 +58,7 @@ before_deploy:
 - (cd loader && make)
 - cp example_plugin/example_plugin.mod wiiu/plugins
 - cp plugins/padcon/padcon.mod wiiu/plugins
+- cp plugins/sdcafiine/sdcafiine.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
 - zip -r WiiUPluginLoader_$versiontag.zip wiiu
