@@ -45,7 +45,6 @@ MAP ?= $(TARGET:.mod=.map)
 # options for code generation
 #---------------------------------------------------------------------------------
 
-# -fPIC: create position independed code
 # -Os: optimise size
 # -Wall: generate lots of warnings
 # -DGEKKO_U: define the symbol GEKKO (used in some headers)
@@ -60,7 +59,7 @@ MAP ?= $(TARGET:.mod=.map)
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	+= -fPIC -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
 
 # -x c: compile as c code
