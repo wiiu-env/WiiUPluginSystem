@@ -29,7 +29,7 @@
 #include "patcher/function_patcher.h"
 
 static void printModuleInfos();
-static void loadSamplePlugin();
+static bool loadSamplePlugin();
 static void printInfos();
 static void printReplacementInfos();
 static void ApplyPatches();
@@ -56,7 +56,9 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
-        loadSamplePlugin();
+        if(!loadSamplePlugin()){
+            return    EXIT_SUCCESS;
+        }
 
     }
 
@@ -146,18 +148,18 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
-void loadSamplePlugin(){
+bool loadSamplePlugin(){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
 
     int res = 0;
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
         loadElf("sd:/wiiu/plugins/example_plugin.mod");
+        //loadElf("sd:/wiiu/plugins/sdcafiine.mod");
         loadElf("sd:/wiiu/plugins/padcon.mod");
-
         if(module_list_count == 0){
             DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
-            return;
+            return false;
         }
 
         DEBUG_FUNCTION_LINE("Found %d modules!\n",module_list_count);
@@ -167,7 +169,9 @@ void loadSamplePlugin(){
         DEBUG_FUNCTION_LINE("Relocating them now\n");
         unsigned char * space = (unsigned char*)0x01000000;
 
-        Module_ListLink(&space);
+        if(!Module_ListLink(&space)){
+            return false;
+        }
         Module_ListLinkFinal();
 
         DEBUG_FUNCTION_LINE("Flush memory\n");
@@ -177,7 +181,7 @@ void loadSamplePlugin(){
 
         if(module_relocations_count != 0){
             DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting\n");
-            return;
+            return false;
         }
 
         DEBUG_FUNCTION_LINE("Printing some information before replacing the functions\n");
@@ -203,6 +207,7 @@ void loadSamplePlugin(){
 
         unmount_sd_fat("sd");
     }
+    return true;
 }
 
 void loadElf(const char * elfPath){
