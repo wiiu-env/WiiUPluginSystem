@@ -3,15 +3,16 @@
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/vpad_functions.h>
 #include <dynamic_libs/sys_functions.h>
+#include <dynamic_libs/fs_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
 #include <dynamic_libs/socket_functions.h>
 #include <fs/sd_fat_devoptab.h>
-#include <fswrapper/FileReplacerUtils.h>
-#include <fswrapper/fs_default_os_wrapper.h>
 #include <utils/logger.h>
 #include "utils/fs_utils.h"
 #include "common/retain_vars.h"
 #include <iosuhax.h>
+#include "common/retain_vars.h"
+#include "fs_wrapper/fs_retain_vars.h"
 #include "common/common.h"
 #include "main.h"
 

@@ -33,7 +33,10 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR)).mod
 BUILD		:= 	build
-SOURCES		:=	src 
+SOURCES		:=	src \
+              src/common \
+              src/fs_wrapper \
+              src/utils
 
 DATA		:=	
 
@@ -96,7 +99,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lutils -ldynamiclibs
+LIBS	:= -lutils -ldynamiclibs -liosuhax
 #  
 
 #---------------------------------------------------------------------------------

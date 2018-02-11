@@ -5,8 +5,8 @@
 #include <dynamic_libs/sys_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
 #include <dynamic_libs/socket_functions.h>
-#include <fswrapper/FileReplacerUtils.h>
-#include <fswrapper/fs_default_os_wrapper.h>
+#include "fs_wrapper/FileReplacerUtils.h"
+#include "fs_wrapper/fs_default_os_wrapper.h"
 #include <utils/logger.h>
 #include "utils/fs_utils.h"
 #include "common/retain_vars.h"
