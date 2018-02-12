@@ -8,22 +8,21 @@
 #include <dynamic_libs/socket_functions.h>
 #include <fs/sd_fat_devoptab.h>
 #include <utils/logger.h>
-#include "utils/fs_utils.h"
 #include "common/retain_vars.h"
 #include <iosuhax.h>
-#include "common/retain_vars.h"
-#include "fs_wrapper/fs_retain_vars.h"
+#include <fswrapper/fs_retain_vars.h>
+#include <fswrapper/FileReplacerUtils.h>
 #include "common/common.h"
 #include "main.h"
+#include "modpackSelector.h"
 
 #define DEBUG_LOG  1
 
-WUPS_MODULE_NAME("SDCaffiine");
+WUPS_MODULE_NAME("SDCaffiine lite");
 WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
-static bool setGroupAndOwnerID();
 void Init_SD_USB();
 
 INITIALIZE(){
@@ -41,38 +40,19 @@ INITIALIZE(){
     log_init();
 
     gSDInitDone = 0;
-    snprintf(gModFolder, FS_MAX_ENTNAME_SIZE, "sd:/sdcafiine/%016llX",OSGetTitleID());
 
-    DEBUG_FUNCTION_LINE("Folder: %s\n",gModFolder);
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
     Init_SD_USB();
 
-    setGroupAndOwnerID();
+    if(FileReplacerUtils::setGroupAndOwnerID()){
+        DEBUG_FUNCTION_LINE("SUCCESS\n");
+    }
 
-    g_dirhandles = vc_vector_create(0, sizeof(int), NULL);
-    g_filehandles = vc_vector_create(0, sizeof(int), NULL);
+    HandleMultiModPacks(OSGetTitleID());
 
     log_print("Init of sd_cafiine!\n");
 }
 
-
-static bool setGroupAndOwnerID(){
-    int mcpHandle = MCP_Open();
-    if(mcpHandle != 0)
-    {
-        unsigned char titleInfo[0x80];
-        memset(titleInfo, 0, sizeof(titleInfo));
-
-        MCP_GetOwnTitleInfo(mcpHandle, titleInfo);
-        MCP_Close(mcpHandle);
-        u32 * test = (u32*)titleInfo;
-        global_owner_id = test[1];
-        global_group_id = test[2];
-        DEBUG_FUNCTION_LINE("Set group_id to %08X and owner_id to %08X\n",global_group_id,global_owner_id);
-        return true;
-    }
-    return false;
-}
 
 void Init_SD_USB() {
     //int res = IOSUHAX_Open(NULL);
@@ -108,6 +88,7 @@ void Init_SD_USB() {
     }
     DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
 }
+
 
 void deInit_SD_USB(){
     DEBUG_FUNCTION_LINE("Called this function.\n");
@@ -152,3 +133,10 @@ void deInit_SD_USB(){
     }
     DEBUG_FUNCTION_LINE("Function end.\n");
 }
+
+void deInitApplication(){
+    //FileReplacerUtils::getInstance()->StopAsyncThread();
+    FileReplacerUtils::destroyInstance();
+    deInit_SD_USB();
+}
+

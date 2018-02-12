@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-void deInit_SD_USB();
+void deInitApplication();
 
 #ifdef __cplusplus
 }

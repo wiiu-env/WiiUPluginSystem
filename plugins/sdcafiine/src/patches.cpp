@@ -5,10 +5,10 @@
 #include <dynamic_libs/sys_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
 #include <dynamic_libs/socket_functions.h>
-#include "fs_wrapper/FileReplacerUtils.h"
-#include "fs_wrapper/fs_default_os_wrapper.h"
+#include <fswrapper/FileReplacerUtils.h>
+#include <fswrapper/fs_default_os_wrapper.h>
+#include <myfs/fs_utils.h>
 #include <utils/logger.h>
-#include "utils/fs_utils.h"
 #include "common/retain_vars.h"
 #include "common/common.h"
 #include "main.h"
@@ -18,7 +18,7 @@
 DECL_FUNCTION(void, __PPCExit, void){
     DEBUG_FUNCTION_LINE("__PPCExit\n");
 
-    deInit_SD_USB();
+    deInitApplication();
 
     real___PPCExit();
 }

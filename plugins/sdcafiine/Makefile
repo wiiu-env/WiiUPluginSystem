@@ -35,8 +35,8 @@ TARGET		:=	$(notdir $(CURDIR)).mod
 BUILD		:= 	build
 SOURCES		:=	src \
               src/common \
-              src/fs_wrapper \
-              src/utils
+              src/myutils \
+              src/myfs
 
 DATA		:=	
 
@@ -71,7 +71,7 @@ CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=c11
 
 # -x c: compile as c++ code
 # -std=gnu++11: use the c++11 standard
-CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11
+CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11  -D_GNU_SOURCE
 
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
@@ -99,7 +99,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lutils -ldynamiclibs -liosuhax
+LIBS	:= -liosuhax -lfswrapper -lutils -ldynamiclibs
 #  
 
 #---------------------------------------------------------------------------------
@@ -150,7 +150,8 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 					-I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include \
-					-I$(PORTLIBS)/include/libutils -I$(WUPSDIR)/include
+					-I$(PORTLIBS)/include/libutils -I$(PORTLIBS)/include/libfswrapper \
+          -I$(WUPSDIR)/include
 
 #---------------------------------------------------------------------------------
 # build a list of library paths

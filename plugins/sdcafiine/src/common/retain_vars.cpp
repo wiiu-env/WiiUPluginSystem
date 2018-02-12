@@ -9,6 +9,3 @@ char gModFolder[FS_MAX_ENTNAME_SIZE] __attribute__((section(".data")));
 
 void * ntfs_mounts __attribute__((section(".data"))) = NULL;
 int ntfs_mount_count __attribute__((section(".data"))) = 0;
-
-vc_vector* g_dirhandles = NULL;
-vc_vector* g_filehandles = NULL;
