@@ -29,7 +29,4 @@ SECTIONS {
 	.bss : {
 		*(.bss*)
 	}
-	/DISCARD/ : {
-		*(*)
-	}
 }
