@@ -59,11 +59,10 @@ extern "C" int Menu_Main(int argc, char **argv){
         if(!loadSamplePlugin()){
             return    EXIT_SUCCESS;
         }
-
     }
 
     if(module_relocations_count != 0){
-        DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting\n");
+        DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting!\n");
         return EXIT_SUCCESS;
     }
 
@@ -151,10 +150,13 @@ bool loadSamplePlugin(){
     int res = 0;
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
-        loadElf("sd:/wiiu/plugins/example_plugin.mod");
+
+        loadElf("sd:/wiiu/plugins/hid_to_vpad.mod");
         loadElf("sd:/wiiu/plugins/sdcafiine.mod");
+        //loadElf("sd:/wiiu/plugins/example_plugin.mod");
         loadElf("sd:/wiiu/plugins/padcon.mod");
         loadElf("sd:/wiiu/plugins/swapdrc.mod");
+
         if(module_list_count == 0){
             DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
             return false;
@@ -185,23 +187,6 @@ bool loadSamplePlugin(){
         DEBUG_FUNCTION_LINE("Printing some information before replacing the functions\n");
 
         printReplacementInfos();
-
-        /*
-        test code for calling the loaded functions.
-
-        DEBUG_FUNCTION_LINE("We need no more relocations, we can call the functions!!\n");
-        DEBUG_FUNCTION_LINE("Calling %d functions!\n",module_entries_count);
-        for (unsigned int i = 0; i < module_entries_count; i++) {
-            DEBUG_FUNCTION_LINE("--- Function %d ---\n",i);
-            if( module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION ||
-                module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
-                DEBUG_FUNCTION_LINE("Let's call the function: %08X \n",module_entries[i].data._function.name);
-                DEBUG_FUNCTION_LINE("Let's call the function: %s \n",module_entries[i].data._function.name);
-                dumpHex(module_entries[i].data._function.target,0x80);
-                //int ret = ( (int (*)(void))((unsigned int*)module_entries[i].data._function.target) )();
-                //DEBUG_FUNCTION_LINE("result:  %08X \n",ret);
-            }
-        }*/
 
         unmount_sd_fat("sd");
     }
@@ -244,9 +229,9 @@ static void printInfos(){
             DEBUG_FUNCTION_LINE("--- Entry %d ---\n",i);
             if( module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION ||
                 module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
-                DEBUG_FUNCTION_LINE("library:  %d \n",module_entries[i].data._function.library);
-                DEBUG_FUNCTION_LINE("function: %s \n",module_entries[i].data._function.name);
-                DEBUG_FUNCTION_LINE("pointer:  %08X \n",module_entries[i].data._function.target);
+                DEBUG_FUNCTION_LINE("library:  %d \n",module_entries[i]._function.library);
+                DEBUG_FUNCTION_LINE("function: %s \n",module_entries[i]._function.name);
+                DEBUG_FUNCTION_LINE("pointer:  %08X \n",module_entries[i]._function.target);
             }
         }
         DEBUG_FUNCTION_LINE("--- Entry list end ---\n");

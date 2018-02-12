@@ -284,7 +284,7 @@ bool Module_ListLinkFinal() {
                 goto exit_error;
             }
             wups_loader_hook_t * hook  = &module_hooks[hook_data->hook_index];
-            DEBUG_FUNCTION_LINE("Set hook %d of module \"%s\" of type %08X\n",hook_data->hook_index,module_data->module_name,hook->type);
+            DEBUG_FUNCTION_LINE("Set hook %d of module \"%s\" of type %08X to target %08X\n",hook_data->hook_index,module_data->module_name,hook->type,(void*) hook->target);
             hook_data->func_pointer = (void*) hook->target;
             hook_data->type         = hook->type;
 
@@ -299,10 +299,14 @@ bool Module_ListLinkFinal() {
                 goto exit_error;
             }
             wups_loader_entry_t * entry  = &module_entries[function_data->entry_index];
-            strncpy(function_data->function_name,entry->data._function.name,MAXIMUM_FUNCTION_NAME_LENGTH-1);
-            function_data->library = entry->data._function.library;
-            function_data->replaceAddr = (u32) entry->data._function.target;
-            function_data->replaceCall = (u32) entry->data._function.call_addr;
+            if(entry->_function.name != NULL){
+                strncpy(function_data->function_name,entry->_function.name,MAXIMUM_FUNCTION_NAME_LENGTH-1);
+            }else {
+                DEBUG_FUNCTION_LINE("WARNING NAME IS NULL\n");
+            }
+            function_data->library = entry->_function.library;
+            function_data->replaceAddr = (u32) entry->_function.target;
+            function_data->replaceCall = (u32) entry->_function.call_addr;
 
             /*
             We don't need this...
@@ -313,8 +317,8 @@ bool Module_ListLinkFinal() {
             for (int relocation_index = 0;relocation_index < module_relocations_count;relocation_index++) {
                 DEBUG_FUNCTION_LINE("Try relocation %d\n",relocation_index);
                 if (module_relocations[relocation_index].module == module_index){
-                    if(strcmp(entry->data._function.real_function_name,module_relocations[relocation_index].name) == 0){
-                        DEBUG_FUNCTION_LINE("Found the entry we want to replace %s\n",entry->data._function.real_function_name);
+                    if(strcmp(entry->_function.real_function_name,module_relocations[relocation_index].name) == 0){
+                        DEBUG_FUNCTION_LINE("Found the entry we want to replace %s\n",entry->_function.real_function_name);
                         reloc = &module_relocations[relocation_index];
                         break;
                     }
@@ -323,7 +327,7 @@ bool Module_ListLinkFinal() {
 
             if(reloc != NULL){
                 u32 call_addr = (u32) &function_data->replace_data[0];
-                //DEBUG_FUNCTION_LINE("Found reloc. We need to find the symbol for: %s in lib %d\n",entry->data._function.name,entry->data._function.library);
+                //DEBUG_FUNCTION_LINE("Found reloc. We need to find the symbol for: %s in lib %d\n",entry->_function.name,entry->_function.library);
                 //u32 call_addr = (u32) new_GetAddressOfFunction("OSFatal",WUPS_LOADER_LIBRARY_COREINIT);
                 DEBUG_FUNCTION_LINE("Relocating\n");
                 if (!Module_ElfLinkOne(reloc->type, reloc->offset, reloc->addend, reloc->address, (uint32_t)call_addr)){

@@ -140,15 +140,13 @@ typedef enum wups_loader_entry_type_t {
 
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
-    union {
-        struct {
-            const char *name;                           /* Name of the function that will be replaced */
-            const wups_loader_library_type_t library;   /**/            
-            const char *my_function_name;               /* Function name of your own, new function (my_XXX) */     
-            const void *call_addr;                      /* Function name of function, to call the real function.(real_XXX) */            
-            const void *target;                         /*Address of our own, new function (my_XXX)*/
-        } _function;
-    } data;
+	struct {
+		const char *name;                           /* Name of the function that will be replaced */
+		const wups_loader_library_type_t library;   /**/            
+		const char *my_function_name;               /* Function name of your own, new function (my_XXX) */     
+		const void *call_addr;                      /* Function name of function, to call the real function.(real_XXX) */            
+		const void *target;                         /*Address of our own, new function (my_XXX)*/
+	} _function;
 } wups_loader_entry_t;
 
 #define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_EX(real_ ## x, lib, my_ ## x,  function_name);
@@ -158,15 +156,13 @@ typedef struct wups_loader_entry_t {
         WUPS_SECTION("load"); \
     const wups_loader_entry_t wups_load_ ## replace_func = { \
         .type = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY, \
-        .data = { \
-            ._function = { \
+        ._function = { \
                 .name = #replace_function_name, \
                 .library = rpl_type, \
                 .my_function_name = #replace_func, \
                 .call_addr = (const void*)&(original_func), \
                 .target = (const void*)&(replace_func) \
             } \
-        } \
     }
 
 #define WUPS_META(id, value) \

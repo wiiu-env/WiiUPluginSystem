@@ -336,6 +336,7 @@ bool Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, 
             break;
         } case R_PPC_REL24:
         case R_PPC_PLTREL24:
+        case R_PPC_LOCAL24PC:
         case R_PPC_REL14:
         case R_PPC_REL14_BRTAKEN:
         case R_PPC_REL14_BRNTAKEN:
@@ -357,6 +358,7 @@ bool Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, 
             value = addend - (int)symbol_addr;
             break;
         } default:
+            DEBUG_FUNCTION_LINE("Module_ElfLinkOne01: %02X\n",type);
             goto exit_error;
     }
 
@@ -370,6 +372,7 @@ bool Module_ElfLinkOne(char type, size_t offset, int addend, void *destination, 
             break;
         } case R_PPC_ADDR24:
         case R_PPC_PLTREL24:
+        case R_PPC_LOCAL24PC:
         case R_PPC_REL24: {
             *(int *)target =
                 (*(int *)target & 0xfc000003) | (value & 0x03fffffc);
