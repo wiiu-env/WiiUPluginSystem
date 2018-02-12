@@ -26,6 +26,8 @@ before_install:
   - wget https://github.com/aliaspider/libfat/archive/master.tar.gz -O libfat.tar.gz
   - wget https://github.com/dimok789/libiosuhax/archive/master.tar.gz -O libiosuhax.tar.gz
   - wget https://github.com/Maschell/libntfs-wiiu/archive/master.tar.gz -O libntfs.tar.gz
+  - wget https://github.com/Maschell/controller_patcher/archive/master.tar.gz -O controller_patcher.tar.gz
+  - wget https://github.com/Maschell/fs_wrapper/archive/master.tar.gz -O fs_wrapper.tar.gz
 
 install:
   - tar -xjf devkitPPC-linux.tar.bz2 -C ${DEVKITPRO}/
@@ -35,12 +37,16 @@ install:
   - tar -xzvf libiosuhax.tar.gz
   - tar -xzvf libntfs.tar.gz
   - tar -xzvf libiosuhax.tar.gz
+  - tar -xzvf fs_wrapper.tar.gz
+  - tar -xzvf controller_patcher.tar.gz
   - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
   - (cd libiosuhax-master && make -j8 && make install)
   - (cd libfat-master && make wiiu-release && make wiiu-install)
   - (cd libntfs-wiiu-master && make wiiu-install)
   - (cd dynamic_libs-lib && make -j8 && make install)
   - (cd libutils-master && make -j8 && make install)
+  - (cd fs_wrapper-master && make -j8 && make install)
+  - (cd controller_patcher-master && make -j8 && make install)
 
 script:
 - make
@@ -49,6 +55,7 @@ script:
 - (cd plugins/padcon && make)
 - (cd plugins/sdcafiine && make)
 - (cd plugins/swapdrc && make)
+- (cd plugins/hid_to_vpad && make)
 
 before_deploy:
 - mkdir -p "wiiu/apps/wiiupluginloader"
@@ -61,6 +68,7 @@ before_deploy:
 - cp plugins/padcon/padcon.mod wiiu/plugins
 - cp plugins/swapdrc/swapdrc.mod wiiu/plugins
 - cp plugins/sdcafiine/sdcafiine.mod wiiu/plugins
+- cp plugins/hid_to_vpad/hid_to_vpad.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
 - zip -r WiiUPluginLoader_$versiontag.zip wiiu
