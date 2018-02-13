@@ -105,6 +105,7 @@ void CallHook(wups_loader_hook_type_t hook_type){
                 DEBUG_FUNCTION_LINE("Calling hook of type %d\n",hook_data->type);
                 void * func_ptr = hook_data->func_pointer;
                 //TODO: Switch cases depending on arguments etc.
+                // Adding arguments!
                 if(func_ptr != NULL){
                     DEBUG_FUNCTION_LINE("Calling it! %08X\n",func_ptr);
                     ( (void (*)(void))((unsigned int*)func_ptr) )();
@@ -135,6 +136,8 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
+#define PLUGIN_LOCATION_END_ADDRESS 0x01000000
+
 bool loadSamplePlugins(){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
 
@@ -144,13 +147,19 @@ bool loadSamplePlugins(){
 
         std::vector<ModuleData *> modules;
 
-        unsigned char * space = (unsigned char*)0x01000000;
+        // Set a pointer to the END of our plugin location.
+        // So our plugins will be stored from PLUGIN_LOCATION_END_ADDRESS backward. Maximum is getApplicationEndAddr() (behind this loader).
+        // Copied the "reserved" direction from brainslug, not sure why we're doing this.
+        unsigned char * space = (unsigned char*)PLUGIN_LOCATION_END_ADDRESS;
 
+
+        // TODO: Load all files from a certain directory, don't use hardcoded paths. (common.h)
         loadElf(&modules, "sd:/wiiu/plugins/hid_to_vpad.mod",&space);
         loadElf(&modules, "sd:/wiiu/plugins/sdcafiine.mod",&space);
         loadElf(&modules, "sd:/wiiu/plugins/padcon.mod",&space);
         loadElf(&modules, "sd:/wiiu/plugins/swipswapme.mod",&space);
 
+        // Copy the data into the global struct locating in the .data section.
         copyDataIntoGlobalStruct(&modules);
 
         // Free memory.
@@ -162,10 +171,12 @@ bool loadSamplePlugins(){
         }
 
         DEBUG_FUNCTION_LINE("Flush memory\n");
+        DCFlushRange ((void*)getApplicationEndAddr(),PLUGIN_LOCATION_END_ADDRESS-getApplicationEndAddr());
+        DCInvalidateRange((void*)getApplicationEndAddr(),PLUGIN_LOCATION_END_ADDRESS-getApplicationEndAddr());
 
-        DCFlushRange ((void*)getApplicationEndAddr(),0x01000000-getApplicationEndAddr());
-        DCInvalidateRange((void*)getApplicationEndAddr(),0x01000000-getApplicationEndAddr());
-
+        // TODO: keep it mounted for the plugins. But this would require sharing the read/write/open etc. functions from this loader.
+        // Idea: Giving the init hook the pointers. Hiding the __wrap function of the plugin behind the INITIALIZE macro.
+        // Needs to be tested if this is working. This would have the advantage of adopting all right/accesses from the loader (libfat, libntfs, iosuhax etc.)
         unmount_sd_fat("sd");
     }
     return true;
