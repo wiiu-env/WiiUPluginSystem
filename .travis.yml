@@ -54,7 +54,7 @@ script:
 - (cd example_plugin && make)
 - (cd plugins/padcon && make)
 - (cd plugins/sdcafiine && make)
-- (cd plugins/swapdrc && make)
+- (cd plugins/swipswapme && make)
 - (cd plugins/hid_to_vpad && make)
 
 before_deploy:
@@ -66,7 +66,7 @@ before_deploy:
 - (cd loader && make)
 - cp example_plugin/example_plugin.mod wiiu/plugins
 - cp plugins/padcon/padcon.mod wiiu/plugins
-- cp plugins/swapdrc/swapdrc.mod wiiu/plugins
+- cp plugins/swipswapme/swipswapme.mod wiiu/plugins
 - cp plugins/sdcafiine/sdcafiine.mod wiiu/plugins
 - cp plugins/hid_to_vpad/hid_to_vpad.mod wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader

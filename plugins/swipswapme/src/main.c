@@ -34,7 +34,7 @@
 #include <utils/logger.h>
 #include <common/c_retain_vars.h>
 
-WUPS_MODULE_NAME("SwapDRC");
+WUPS_MODULE_NAME("SwipSwapMe");
 WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
