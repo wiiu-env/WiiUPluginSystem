@@ -747,14 +747,14 @@ bool ModuleData::linkModuleElf(Elf *elf, uint8_t **space) {
     for(size_t j=0;j<hook_t_list.size();j++){
         wups_loader_hook_t * hook = hook_t_list[j];
 
-        DEBUG_FUNCTION_LINE("Set hook of module \"%s\" of type %08X to target %08X\n",getName().c_str(),hook->type,(void*) hook->target);
+        DEBUG_FUNCTION_LINE("Saving hook of module \"%s\". Type: %08X, target: %08X\n",getName().c_str(),hook->type,(void*) hook->target);
         HookData * hook_data = new HookData((void *) hook->target,hook->type);
         addHookData(hook_data);
     }
 
     for(size_t j=0;j<entry_t_list.size();j++){
         wups_loader_entry_t * entry = entry_t_list[j];
-        DEBUG_FUNCTION_LINE("Set hook %s of module \"%s\" of type %08X to target %08X\n",entry->_function.name,getName().c_str(),entry->_function.library,entry->_function.target);
+        DEBUG_FUNCTION_LINE("Saving entry \"%s\" of module \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",entry->_function.name,getName().c_str(),entry->_function.library,entry->_function.target, (void *) entry->_function.call_addr);
         EntryData * entry_data = new EntryData(entry->_function.name,entry->_function.library, (void *) entry->_function.target, (void *) entry->_function.call_addr);
         addEntryData(entry_data);
     }
