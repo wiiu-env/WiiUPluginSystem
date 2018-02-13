@@ -62,7 +62,7 @@ struct replacement_data_hook_t{
 
 };
 
-#define MAXIMUM_HOOKS_PER_MODULE                        4
+#define MAXIMUM_HOOKS_PER_MODULE                        10
 #define MAXIMUM_FUNCTION_PER_MODULE                     100
 
 struct replacement_data_module_t{

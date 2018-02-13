@@ -15,24 +15,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _ENTRY_DATA_H_
+#define _ENTRY_DATA_H_
 
-#include <dynamic_libs/os_functions.h>
-#include <dynamic_libs/os_types.h>
+#include <wups.h>
+#include <string>
 
-/* Main */
-#ifdef __cplusplus
-extern "C" {
-#endif
+class EntryData{
 
-#include <libelf.h>
+public:
+    EntryData(const char * name, wups_loader_library_type_t library, void * target, void * call_addr){
+        this->name = name;
+        this->library = library;
+        this->replaceAddr = target;
+        this->replaceCall = call_addr;
+    }
 
-//! C wrapper for our C++ functions
-int Menu_Main(int argc, char **argv);
+    ~EntryData(){
 
-#ifdef __cplusplus
-}
-#endif
+    }
+
+    std::string getName(){
+        return this->name;
+    }
+
+    wups_loader_library_type_t getLibrary(){
+        return this->library;
+    }
+
+    void * getReplaceAddress(){
+        return replaceAddr;
+    }
+
+    void * getReplaceCall(){
+        return replaceCall;
+    }
+
+private:
+    std::string name;
+    wups_loader_library_type_t library;
+    void * replaceAddr = NULL;
+    void * replaceCall = NULL;
+};
+
 
 #endif

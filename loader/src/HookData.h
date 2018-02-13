@@ -15,24 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _HOOK_DATA_H_
+#define _HOOK_DATA_H_
 
-#include <dynamic_libs/os_functions.h>
-#include <dynamic_libs/os_types.h>
+#include <wups.h>
+#include <string>
 
-/* Main */
-#ifdef __cplusplus
-extern "C" {
-#endif
+class HookData{
 
-#include <libelf.h>
+public:
+    HookData(void * function_pointer, wups_loader_hook_type_t type){
+        this->function_pointer = function_pointer;
+        this->type = type;
+    }
 
-//! C wrapper for our C++ functions
-int Menu_Main(int argc, char **argv);
+    ~HookData(){
 
-#ifdef __cplusplus
-}
-#endif
+    }
+
+    void * getFunctionPointer(){
+        return function_pointer;
+    }
+
+    wups_loader_hook_type_t getType(){
+        return this->type;
+    }
+private:
+     void * function_pointer;
+     wups_loader_hook_type_t type;
+};
+
 
 #endif

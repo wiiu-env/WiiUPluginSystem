@@ -38,32 +38,3 @@ void dumpHex(const void* data, size_t size) {
 		}
 	}
 }
-
-void *Module_ListAllocate(void *list, size_t entry_size, size_t num, size_t *capacity, size_t *count, size_t default_capacity) {
-    void *result;
-
-    while (*capacity < *count + num) {
-        if (*count == 0) {
-            *(void **)list = malloc(entry_size * default_capacity);
-
-            if (*(void **)list == NULL)
-                return NULL;
-
-            *capacity = default_capacity;
-        } else {
-            void *temp;
-
-            temp = realloc(*(void **)list, entry_size * *capacity * 2);
-            if (temp == NULL)
-                return NULL;
-
-            *(void **)list = temp;
-            *capacity = *capacity * 2;
-        }
-    }
-
-    result = *(char **)list + entry_size * *count;
-    (*count) += num;
-
-    return result;
-}

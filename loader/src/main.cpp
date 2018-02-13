@@ -17,29 +17,25 @@
 #include <system/exception_handler.h>
 #include "common/retain_vars.h"
 #include "common/common.h"
+#include "ModuleData.h"
 
 #include <wups.h>
-#include <libelf.h>
+
 #include "version.h"
 #include "main.h"
 #include "utils.h"
-#include "module_parser.h"
-#include "link_utils.h"
-#include "elf_utils.h"
 #include "patcher/function_patcher.h"
 
-static void printModuleInfos();
-static bool loadSamplePlugin();
-static void printInfos();
-static void printReplacementInfos();
+static bool loadSamplePlugins();
 static void ApplyPatches();
 void CallHook(wups_loader_hook_type_t hook_type);
 static void RestorePatches();
 s32 isInMiiMakerHBL();
 
+static void copyDataIntoGlobalStruct(std::vector<ModuleData *>* modules);
+static void loadElf(std::vector<ModuleData *>* modules, const char * elfPath, uint8_t ** space);
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
-
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
@@ -56,14 +52,9 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
-        if(!loadSamplePlugin()){
+        if(!loadSamplePlugins()){
             return    EXIT_SUCCESS;
         }
-    }
-
-    if(module_relocations_count != 0){
-        DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting!\n");
-        return EXIT_SUCCESS;
     }
 
     //Reset everything when were going back to the Mii Maker
@@ -78,6 +69,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     }
 
     if(!isInMiiMakerHBL()){ //Starting the application
+        DEBUG_FUNCTION_LINE("Calling init hook.\n");
         CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
         return EXIT_RELAUNCH_ON_LOAD;
     }
@@ -120,7 +112,6 @@ void CallHook(wups_loader_hook_type_t hook_type){
                     DEBUG_FUNCTION_LINE("Was not defined\n");
                 }
             }
-
         }
     }
 }
@@ -144,100 +135,111 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
-bool loadSamplePlugin(){
+bool loadSamplePlugins(){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
 
     int res = 0;
     if((res = mount_sd_fat("sd")) >= 0){
         DEBUG_FUNCTION_LINE("Mounting successful\n");
 
-        loadElf("sd:/wiiu/plugins/hid_to_vpad.mod");
-        loadElf("sd:/wiiu/plugins/sdcafiine.mod");
-        //loadElf("sd:/wiiu/plugins/example_plugin.mod");
-        loadElf("sd:/wiiu/plugins/padcon.mod");
-        loadElf("sd:/wiiu/plugins/swapdrc.mod");
+        std::vector<ModuleData *> modules;
 
-        if(module_list_count == 0){
-            DEBUG_FUNCTION_LINE("Found no valid modules! =( Exiting\n");
-            return false;
-        }
-
-        DEBUG_FUNCTION_LINE("Found %d modules!\n",module_list_count);
-
-        printInfos();
-
-        DEBUG_FUNCTION_LINE("Relocating them now\n");
         unsigned char * space = (unsigned char*)0x01000000;
 
-        if(!Module_ListLink(&space)){
-            return false;
+        loadElf(&modules, "sd:/wiiu/plugins/hid_to_vpad.mod",&space);
+        loadElf(&modules, "sd:/wiiu/plugins/sdcafiine.mod",&space);
+        loadElf(&modules, "sd:/wiiu/plugins/padcon.mod",&space);
+        loadElf(&modules, "sd:/wiiu/plugins/swipswapme.mod",&space);
+
+        copyDataIntoGlobalStruct(&modules);
+
+        // Free memory.
+        for(size_t i = 0; i< modules.size();i++){
+            ModuleData * cur_module = modules[i];
+            if(cur_module != NULL){
+                free(cur_module);
+            }
         }
-        Module_ListLinkFinal();
 
         DEBUG_FUNCTION_LINE("Flush memory\n");
 
         DCFlushRange ((void*)getApplicationEndAddr(),0x01000000-getApplicationEndAddr());
         DCInvalidateRange((void*)getApplicationEndAddr(),0x01000000-getApplicationEndAddr());
 
-        if(module_relocations_count != 0){
-            DEBUG_FUNCTION_LINE("We still have undefined symbol. Make sure to link them in =/ Exiting\n");
-            return false;
-        }
-
-        DEBUG_FUNCTION_LINE("Printing some information before replacing the functions\n");
-
-        printReplacementInfos();
-
         unmount_sd_fat("sd");
     }
     return true;
 }
 
-void loadElf(const char * elfPath){
-    DEBUG_FUNCTION_LINE("Reading elf from path: %s\n",elfPath);
+static void copyDataIntoGlobalStruct(std::vector<ModuleData *>* modules){
+    int module_index = 0;
+    // Copy data to global struct.
+    for(size_t i = 0; i< modules->size();i++){
+        ModuleData * cur_module = modules->at(i);
 
-    DEBUG_FUNCTION_LINE("Try to load %s\n",elfPath);
-    if(Module_CheckFile(elfPath)){
-        Module_Load(elfPath);
-    }
-}
+        std::vector<EntryData *> entry_data_list = cur_module->getEntryDataList();
+        std::vector<HookData *> hook_data_list = cur_module->getHookDataList();
+        if(module_index >= MAXIMUM_MODULES ){
+            DEBUG_FUNCTION_LINE("Maximum of %d modules reached. %s won't be loaded!\n",MAXIMUM_MODULES,cur_module->getName().c_str());
+            continue;
+        }
+        if(entry_data_list.size() > MAXIMUM_FUNCTION_PER_MODULE){
+            DEBUG_FUNCTION_LINE("Module %s would replace to many function (%d, maximum is %d). It won't be loaded.\n",cur_module->getName().c_str(),entry_data_list.size(),MAXIMUM_FUNCTION_PER_MODULE);
+            continue;
+        }
+        if(hook_data_list.size() > MAXIMUM_HOOKS_PER_MODULE){
+            DEBUG_FUNCTION_LINE("Module %s would set too many hooks (%d, maximum is %d). It won't be loaded.\n",cur_module->getName().c_str(),hook_data_list.size(),MAXIMUM_HOOKS_PER_MODULE);
+            continue;
+        }
 
-static void printReplacementInfos(){
-    DEBUG_FUNCTION_LINE("Found modules: %d\n",gbl_replacement_data.number_used_modules);
-    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
         replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
-        DEBUG_FUNCTION_LINE("Module name: %s\n",module_data->module_name);
-        DEBUG_FUNCTION_LINE("Functions that will be replaced: %d\n",module_data->number_used_functions);
-        for(int j=0;j<module_data->number_used_functions;j++){
+
+        strncpy(module_data->module_name,cur_module->getName().c_str(),MAXIMUM_MODULE_NAME_LENGTH-1);
+
+        for(size_t j = 0; j < entry_data_list.size();j++){
             replacement_data_function_t * function_data = &module_data->functions[j];
-            DEBUG_FUNCTION_LINE("[%d] function: %s from lib %d\n",j,function_data->function_name, function_data->library);
+
+            EntryData * cur_entry = entry_data_list[j];
+            DEBUG_FUNCTION_LINE("Adding entry \"%s\" for module \"%s\"\n",cur_entry->getName().c_str(),module_data->module_name);
+
+            //TODO: Warning/Error if string is too long.
+            strncpy(function_data->function_name,cur_entry->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
+
+            function_data->library = cur_entry->getLibrary();
+            function_data->replaceAddr = (u32) cur_entry->getReplaceAddress();
+            function_data->replaceCall = (u32) cur_entry->getReplaceCall();
+
+            module_data->number_used_functions++;
         }
-        DEBUG_FUNCTION_LINE("--- function list end ---\n");
+
+        DEBUG_FUNCTION_LINE("Entries for module \"%s\": %d\n",module_data->module_name,module_data->number_used_functions);
+
+        for(size_t j = 0; j < hook_data_list.size();j++){
+            replacement_data_hook_t * hook_data = &module_data->hooks[j];
+
+            HookData * hook_entry = hook_data_list[j];
+
+            DEBUG_FUNCTION_LINE("Set hook for module \"%s\" of type %08X to target %08X\n",module_data->module_name,hook_entry->getType(),(void*) hook_entry->getFunctionPointer());
+            hook_data->func_pointer = (void*) hook_entry->getFunctionPointer();
+            hook_data->type         = hook_entry->getType();
+            module_data->number_used_hooks++;
+        }
+
+        DEBUG_FUNCTION_LINE("Hooks for module \"%s\": %d\n",module_data->module_name,module_data->number_used_hooks);
+
+        module_index++;
+        gbl_replacement_data.number_used_modules++;
     }
-    DEBUG_FUNCTION_LINE("--- module list end ---\n");
 }
 
-static void printInfos(){
-        for (unsigned int i = 0; i < module_list_count; i++) {
-            DEBUG_FUNCTION_LINE("--- Module %d ---\n",i);
-            DEBUG_FUNCTION_LINE("name: %s\n",module_list[i]->name);
-            DEBUG_FUNCTION_LINE("path: %s\n",module_list[i]->path);
-            DEBUG_FUNCTION_LINE("author: %s\n",module_list[i]->author);
-        }
-        DEBUG_FUNCTION_LINE("--- Module list end ---\n");
-        for (unsigned int i = 0; i < module_entries_count; i++) {
-            DEBUG_FUNCTION_LINE("--- Entry %d ---\n",i);
-            if( module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION ||
-                module_entries[i].type == WUPS_LOADER_ENTRY_FUNCTION_MANDATORY){
-                DEBUG_FUNCTION_LINE("library:  %d \n",module_entries[i]._function.library);
-                DEBUG_FUNCTION_LINE("function: %s \n",module_entries[i]._function.name);
-                DEBUG_FUNCTION_LINE("pointer:  %08X \n",module_entries[i]._function.target);
-            }
-        }
-        DEBUG_FUNCTION_LINE("--- Entry list end ---\n");
-        for (unsigned int i = 0; i < module_relocations_count; i++) {
-            DEBUG_FUNCTION_LINE("--- Relocation %d ---\n",i);
-            DEBUG_FUNCTION_LINE("name: %s\n",module_relocations[i].name);
-        }
-        DEBUG_FUNCTION_LINE("--- Relocation list end ---\n");
+static void loadElf(std::vector<ModuleData *>* modules, const char * elfPath, uint8_t ** space){
+    DEBUG_FUNCTION_LINE("Try to load %s\n",elfPath);
+
+    ModuleData * module = new ModuleData(elfPath,space);
+    if(module->isLoadedSuccessfully()){
+        DEBUG_FUNCTION_LINE("%s loading was successful!. \n", elfPath);
+        modules->push_back(module);
+    } else {
+        DEBUG_FUNCTION_LINE("%s loading failed. \n", elfPath);
+    }
 }

@@ -12,6 +12,4 @@ void dumpHex(const void* data, size_t size);
 }
 #endif
 
-void *Module_ListAllocate(void *list, size_t entry_size, size_t num,size_t *capacity, size_t *count, size_t default_capacity);
-
 #endif
