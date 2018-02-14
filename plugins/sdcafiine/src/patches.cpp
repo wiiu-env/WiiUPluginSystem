@@ -26,7 +26,7 @@ DECL_FUNCTION(void, __PPCExit, void){
 DECL_FUNCTION(u32, ProcUIProcessMessages, u32 u){
     u32 res = real_ProcUIProcessMessages(u);
     if(res != gAppStatus){
-        DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
+        //DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
         gAppStatus = res;
     }
 

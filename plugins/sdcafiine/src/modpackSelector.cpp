@@ -32,11 +32,11 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
     if(gSDInitDone & SDUSB_MOUNTED_OS_SD){ mounting_points[std::string(SD_PATH)] = std::string(NAME_PREFIX_SD); }
     if(gSDInitDone & SD_MOUNTED_LIBFAT){ mounting_points[std::string(SD_PATH)] = std::string(NAME_PREFIX_SD); }
     if(gSDInitDone & USB_MOUNTED_LIBFAT){ mounting_points[std::string(USB_PATH)] = std::string(NAME_PREFIX_USB); }
-    int i = 0;
+    //int i = 0;
 
-    for (i = 0; i < ntfs_mount_count; i++){
+    //for (i = 0; i < ntfs_mount_count; i++){
         //mounting_points[std::string(((ntfs_md *)ntfs_mounts)[i].name) + ":"] = StringTools::strfmt("%s:(%s)",((ntfs_md *)ntfs_mounts)[i].name, ntfsGetVolumeName(((ntfs_md *)ntfs_mounts)[i].name));
-    }
+    //}
 
    for (std::map<std::string,std::string>::iterator it=mounting_points.begin(); it!=mounting_points.end(); ++it){
 
