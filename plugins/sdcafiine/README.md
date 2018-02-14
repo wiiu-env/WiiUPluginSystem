@@ -5,12 +5,11 @@ See https://github.com/Maschell/SDCafiine for more information.
 # Currently supported
 
 - Modpack selector
-- Loads mods on games with native SD Access (Smash 4)
+- FAT32 support for SD and USB
 
 Whats NOT working:
 
-- SD Access for all other games
-- USB support (both FAT32 and NTFS)
+- NTFS support
 
 ## Building
 

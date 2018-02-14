@@ -1,3 +1,4 @@
+[Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  
 # Plugin system for the Wii U. (WIP) [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
 I decided to make this entirely public, so everbody can contribute.
@@ -110,7 +111,10 @@ This is just an short overview. Look at the issued for detailed information.
 
 # How to build
 
-For building you need: 
+For building the loader you need: 
+- [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
+- [libfat](https://github.com/aliaspider/libfat/)
+- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.
 
@@ -119,7 +123,7 @@ Also install this plugin system with.
 make
 ```
 
-then you can build the example_plugin.
+The individual plugins can be found in the "plugins" folder. They might have more dependencies, checkout their readmes.
 
 # Logging
 For logging you need to start the UdpDebugReader. This has been created by @dimok789 and can be found in the tools folder.

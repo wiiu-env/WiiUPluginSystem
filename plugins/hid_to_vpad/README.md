@@ -6,11 +6,11 @@ See https://github.com/Maschell/hid_to_vpad for more information.
 
 - Support for Controller with built in support.
 - Network Client support
-- Alle attached devices are mapped automatically to the Gamepad
+- All attached devices are mapped automatically to the Gamepad
+- Loading configuration files (to extend controller support or change configs)
 
 Whats NOT working:
 
-- Loading configuration files (to extend controller support or change configs)
 - Mapping the controllers individually (No GUI for this)
 
 ## Building
