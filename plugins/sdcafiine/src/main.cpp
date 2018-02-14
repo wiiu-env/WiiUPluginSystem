@@ -21,7 +21,6 @@ WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
-
 INITIALIZE(){
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
