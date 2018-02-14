@@ -31,6 +31,12 @@ extern "C" {
 //! C wrapper for our C++ functions
 int Menu_Main(int argc, char **argv);
 
+void Init_SD_USB();
+
+void DeInit_SD_USB();
+
+void DeInit();
+
 #ifdef __cplusplus
 }
 #endif

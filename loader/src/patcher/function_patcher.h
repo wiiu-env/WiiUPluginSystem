@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef _FUNCTION_HOOKS_H_
-#define _FUNCTION_HOOKS_H_
+#ifndef _FUNCTION_PATCHER_HOOKS_H_
+#define _FUNCTION_PATCHER_HOOKS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,12 +88,8 @@ u32 new_GetAddressOfFunction(const char * functionName,wups_loader_library_type_
 s32 new_isDynamicFunction(u32 physicalAddress);
 void new_resetLibs();
 
-//Orignal code by Chadderz.
-#define MAKE_MAGIC(x, lib,functionType) { (u32) my_ ## x, (u32) &real_ ## x, lib, # x,0,0,functionType,0}
-#define MAKE_MAGIC_NAME(x,y, lib,functionType) { (u32) my_ ## x, (u32) &real_ ## x, lib, # y,0,0,functionType,0}
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _FS_H */
+#endif /* _FUNCTION_PATCHER_HOOKS_H_ */

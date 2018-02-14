@@ -36,9 +36,10 @@ BUILD_DBG	:=  $(TARGET)_dbg
 SOURCES   :=  src/libelf \
 SOURCES   :=  src/patcher \
               src/common \
+              src/myutils \
               src/
-              
-DATA		:=	
+
+DATA		:=
 
 INCLUDES  :=  src/libelf \
               src/
@@ -50,12 +51,12 @@ CFLAGS	:=  -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
 		    -O0 -D__wiiu__ -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(INCLUDE)
 CXXFLAGS := -std=gnu++11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
 		    -O0 -D__wiiu__ -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -D_GNU_SOURCE $(INCLUDE)
-			
+
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
    CXXFLAGS += -D__LOGGING__
-endif	
-			
+endif
+
 ASFLAGS	:= -mregnames
 LDFLAGS	:= -nostartfiles -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,--gc-sections
 
@@ -65,7 +66,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lm -lgcc -lutils -ldynamiclibs
+LIBS	:= -lm -lgcc -lfat -lntfs -liosuhax -lutils -ldynamiclibs
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -119,8 +120,8 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
                     -I$(PORTLIBS)/include -I$(CURDIR)/$(BUILD) \
-					-I$(PORTLIBS)/include/libutils 
-					
+					-I$(PORTLIBS)/include/libutils
+
 
 #---------------------------------------------------------------------------------
 # build a list of library paths
@@ -132,14 +133,38 @@ export OUTPUT	:=	$(CURDIR)/$(TARGET)
 .PHONY: $(BUILD) clean install
 
 #---------------------------------------------------------------------------------
-$(BUILD):
+$(BUILD): $(CURDIR)/src/mocha/ios_kernel/ios_kernel.bin.h
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	
+
+$(CURDIR)/src/mocha/ios_kernel/ios_kernel.bin.h: $(CURDIR)/src/mocha/ios_usb/ios_usb.bin.h $(CURDIR)/src/mocha/ios_mcp/ios_mcp.bin.h $(CURDIR)/src/mocha/ios_fs/ios_fs.bin.h $(CURDIR)/src/mocha/ios_bsp/ios_bsp.bin.h $(CURDIR)/src/mocha/ios_acp/ios_acp.bin.h
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_kernel -f  $(CURDIR)/src/mocha/ios_kernel/Makefile
+
+$(CURDIR)/src/mocha/ios_usb/ios_usb.bin.h:
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_usb -f  $(CURDIR)/src/mocha/ios_usb/Makefile
+
+$(CURDIR)/src/mocha/ios_fs/ios_fs.bin.h:
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_fs -f  $(CURDIR)/src/mocha/ios_fs/Makefile
+
+$(CURDIR)/src/mocha/ios_bsp/ios_bsp.bin.h:
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_bsp -f  $(CURDIR)/src/mocha/ios_bsp/Makefile
+
+$(CURDIR)/src/mocha/ios_mcp/ios_mcp.bin.h:
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_mcp -f  $(CURDIR)/src/mocha/ios_mcp/Makefile
+
+$(CURDIR)/src/mocha/ios_acp/ios_acp.bin.h:
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_acp -f  $(CURDIR)/src/mocha/ios_acp/Makefile
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_kernel -f  $(CURDIR)/src/mocha/ios_kernel/Makefile clean
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_usb -f  $(CURDIR)/src/mocha/ios_usb/Makefile clean
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_fs -f  $(CURDIR)/src/mocha/ios_fs/Makefile clean
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_bsp -f  $(CURDIR)/src/mocha/ios_bsp/Makefile clean
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_mcp -f  $(CURDIR)/src/mocha/ios_mcp/Makefile clean
+	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_acp -f $(CURDIR)/src/mocha/ios_acp/Makefile clean
 
 #---------------------------------------------------------------------------------
 else

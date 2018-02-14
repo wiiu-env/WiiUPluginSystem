@@ -4,6 +4,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/socket_functions.h>
@@ -15,16 +18,26 @@
 #include <fs/sd_fat_devoptab.h>
 #include <utils/utils.h>
 #include <system/exception_handler.h>
+
 #include "common/retain_vars.h"
 #include "common/common.h"
 #include "ModuleData.h"
 
-#include <wups.h>
+#include <utils/function_patcher.h>
 
-#include "version.h"
+#include <wups.h>
+#include <iosuhax.h>
+#include <fat.h>
+#include <ntfs.h>
+
 #include "main.h"
 #include "utils.h"
 #include "patcher/function_patcher.h"
+#include "patcher/hooks_patcher.h"
+#include "myutils/mocha.h"
+#include "myutils/libntfs.h"
+#include "myutils/libfat.h"
+#include "version.h"
 
 static bool loadSamplePlugins();
 static void ApplyPatches();
@@ -39,6 +52,10 @@ u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
+    if(gAppStatus == 2){
+        //"No, we don't want to patch stuff again.");
+        return EXIT_RELAUNCH_ON_LOAD;
+    }
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitSysFunctionPointers();
@@ -49,6 +66,9 @@ extern "C" int Menu_Main(int argc, char **argv){
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
     setup_os_exceptions();
+
+    DEBUG_FUNCTION_LINE("Mount SD partition\n");
+    Init_SD_USB();
 
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
@@ -61,6 +81,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     if(!isFirstBoot && isInMiiMakerHBL()){
         DEBUG_FUNCTION_LINE("Returing to the Homebrew Launcher!\n");
         isFirstBoot = 0;
+        DeInit();
         RestorePatches();
         return EXIT_SUCCESS;
     } else {
@@ -83,12 +104,14 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     DEBUG_FUNCTION_LINE("Application is ending now.\n");
 
+    DeInit();
     RestorePatches();
 
     return EXIT_SUCCESS;
 }
 
 void ApplyPatches(){
+    PatchInvidualMethodHooks(method_hooks_hooks, method_hooks_size_hooks, method_calls_hooks);
     for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
         new_PatchInvidualMethodHooks(&gbl_replacement_data.module_data[module_index]);
     }
@@ -117,11 +140,16 @@ void CallHook(wups_loader_hook_type_t hook_type){
     }
 }
 
+void DeInit(){
+    DeInit_SD_USB();
+}
+
 void RestorePatches(){
     for(int module_index=gbl_replacement_data.number_used_modules-1;module_index>=0;module_index--){
         DEBUG_FUNCTION_LINE("Restoring function for module: %d\n",module_index);
         new_RestoreInvidualInstructions(&gbl_replacement_data.module_data[module_index]);
     }
+    RestoreInvidualInstructions(method_hooks_hooks, method_hooks_size_hooks);
 }
 
 s32 isInMiiMakerHBL(){
@@ -139,11 +167,8 @@ s32 isInMiiMakerHBL(){
 #define PLUGIN_LOCATION_END_ADDRESS 0x01000000
 
 bool loadSamplePlugins(){
-    DEBUG_FUNCTION_LINE("Mount SD partition\n");
-
-    int res = 0;
-    if((res = mount_sd_fat("sd")) >= 0){
-        DEBUG_FUNCTION_LINE("Mounting successful\n");
+    if((gSDInitDone & (SDUSB_MOUNTED_OS_SD | SD_MOUNTED_LIBFAT)) > 0){
+        DEBUG_FUNCTION_LINE("Mounting successful. Loading modules\n");
 
         std::vector<ModuleData *> modules;
 
@@ -177,7 +202,7 @@ bool loadSamplePlugins(){
         // TODO: keep it mounted for the plugins. But this would require sharing the read/write/open etc. functions from this loader.
         // Idea: Giving the init hook the pointers. Hiding the __wrap function of the plugin behind the INITIALIZE macro.
         // Needs to be tested if this is working. This would have the advantage of adopting all right/accesses from the loader (libfat, libntfs, iosuhax etc.)
-        unmount_sd_fat("sd");
+        //unmount_sd_fat("sd");
     }
     return true;
 }
@@ -253,4 +278,82 @@ static void loadElf(std::vector<ModuleData *>* modules, const char * elfPath, ui
     } else {
         DEBUG_FUNCTION_LINE("%s loading failed. \n", elfPath);
     }
+}
+
+void Init_SD_USB() {
+    int res = IOSUHAX_Open(NULL);
+    if(res < 0){
+        ExecuteIOSExploitWithDefaultConfig();
+    }
+    deleteDevTabsNames();
+    mount_fake();
+    gSDInitDone |= SDUSB_MOUNTED_FAKE;
+
+    if(res < 0){
+        DEBUG_FUNCTION_LINE("IOSUHAX_open failed\n");
+        if((res = mount_sd_fat("sd")) >= 0){
+            DEBUG_FUNCTION_LINE("mount_sd_fat success\n");
+            gSDInitDone |= SDUSB_MOUNTED_OS_SD;
+        }else{
+            DEBUG_FUNCTION_LINE("mount_sd_fat failed %d\n",res);
+        }
+    }else{
+        DEBUG_FUNCTION_LINE("Using IOSUHAX for SD/USB access\n");
+        gSDInitDone |= SDUSB_LIBIOSU_LOADED;
+        int ntfs_mounts = mountAllNTFS();
+        if(ntfs_mounts > 0){
+            gSDInitDone |= USB_MOUNTED_LIBNTFS;
+        }
+
+        if(mount_libfatAll() == 0){
+            gSDInitDone |= SD_MOUNTED_LIBFAT;
+            gSDInitDone |= USB_MOUNTED_LIBFAT;
+        }
+    }
+    DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
+}
+
+void DeInit_SD_USB(){
+    DEBUG_FUNCTION_LINE("Called this function.\n");
+
+    if(gSDInitDone & SDUSB_MOUNTED_FAKE){
+       DEBUG_FUNCTION_LINE("Unmounting fake\n");
+       unmount_fake();
+       gSDInitDone &= ~SDUSB_MOUNTED_FAKE;
+    }
+    if(gSDInitDone & SDUSB_MOUNTED_OS_SD){
+        DEBUG_FUNCTION_LINE("Unmounting OS SD\n");
+        unmount_sd_fat("sd");
+        gSDInitDone &= ~SDUSB_MOUNTED_OS_SD;
+    }
+
+    if(gSDInitDone & SD_MOUNTED_LIBFAT){
+        DEBUG_FUNCTION_LINE("Unmounting LIBFAT SD\n");
+        unmount_libfat("sd");
+        gSDInitDone &= ~SD_MOUNTED_LIBFAT;
+    }
+
+    if(gSDInitDone & USB_MOUNTED_LIBFAT){
+        DEBUG_FUNCTION_LINE("Unmounting LIBFAT USB\n");
+        unmount_libfat("usb");
+        gSDInitDone &= ~USB_MOUNTED_LIBFAT;
+    }
+
+    if(gSDInitDone & USB_MOUNTED_LIBNTFS){
+        DEBUG_FUNCTION_LINE("Unmounting LIBNTFS USB\n");
+        unmountAllNTFS();
+        gSDInitDone &= ~USB_MOUNTED_LIBNTFS;
+    }
+
+    if(gSDInitDone & SDUSB_LIBIOSU_LOADED){
+        DEBUG_FUNCTION_LINE("Calling IOSUHAX_Close\n");
+        IOSUHAX_Close();
+        gSDInitDone &= ~SDUSB_LIBIOSU_LOADED;
+
+    }
+    deleteDevTabsNames();
+    if(gSDInitDone != SDUSB_MOUNTED_NONE){
+        DEBUG_FUNCTION_LINE("WARNING. Some devices are still mounted.\n");
+    }
+    DEBUG_FUNCTION_LINE("Function end.\n");
 }
