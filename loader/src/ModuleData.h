@@ -138,8 +138,6 @@ class ModuleData{
 
         bool metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
 
-        bool elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals);
-
         bool linkModuleElf(Elf *elf, uint8_t **space);
 
         bool loadedSuccessfully = false;

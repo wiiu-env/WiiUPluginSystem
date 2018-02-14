@@ -103,10 +103,12 @@ bool ModuleData::load(uint8_t ** space) {
     }
 
 exit_error:
-    if (elf != NULL)
+    if (elf != NULL){
         elf_end(elf);
-    if (fd != -1)
+    }
+    if (fd != -1){
         close(fd);
+    }
     return result;
 }
 
@@ -287,7 +289,7 @@ bool ModuleData::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, 
 
             ElfTools::elfLoadSymbols(elf_ndxscn(scn), metadata, symtab, symtab_count);
 
-            if (!elfLink(elf, elf_ndxscn(scn), metadata, symtab, symtab_count, symtab_strndx, false)) {
+            if (!ElfTools::elfLink(elf, elf_ndxscn(scn), metadata, symtab, symtab_count, symtab_strndx, false)) {
                 DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - .wups.meta contains invalid relocations.\n", path);
                 goto exit_error;
             }
@@ -403,202 +405,6 @@ exit_error:
     return false;
 }
 
-bool ModuleData::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals) {
-    Elf_Scn *scn;
-
-    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
-        Elf32_Shdr *shdr;
-
-        shdr = elf32_getshdr(scn);
-        if (shdr == NULL)
-            continue;
-
-        switch (shdr->sh_type) {
-            case SHT_REL: {
-                const Elf32_Rel *rel;
-                Elf_Data *data;
-                size_t i;
-
-                if (shdr->sh_info != shndx){
-                    continue;
-                }
-
-                data = elf_getdata(scn, NULL);
-                if (data == NULL){
-                    continue;
-                }
-
-                rel = (const Elf32_Rel *) data->d_buf;
-
-                for (i = 0; i < shdr->sh_size / sizeof(Elf32_Rel); i++) {
-                    uint32_t symbol_addr;
-                    size_t symbol;
-
-                    symbol = ELF32_R_SYM(rel[i].r_info);
-
-                    if (symbol > symtab_count)
-                        return false;
-
-                    switch (symtab[symbol].st_shndx) {
-                        case SHN_ABS: {
-                            symbol_addr = symtab[symbol].st_value;
-                            break;
-                        } case SHN_COMMON: {
-                            return false;
-                        } case SHN_UNDEF: {
-
-                            if (allow_globals) {
-                                DEBUG_FUNCTION_LINE("The elf still have unresolved relocations. This is not supported.");
-                                /*
-                                Not support and not needed.
-
-                                module_unresolved_relocation_t *reloc;
-                                char *name;
-
-                                reloc = (module_unresolved_relocation_t *) Module_ListAllocate(
-                                    &module_relocations,
-                                    sizeof(module_unresolved_relocation_t), 1,
-                                    &module_relocations_capacity,
-                                    &module_relocations_count,
-                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
-                                if (reloc == NULL)
-                                    return false;
-
-                                name = elf_strptr(
-                                    elf, symtab_strndx, symtab[symbol].st_name);
-
-                                if (name == NULL) {
-                                    module_relocations_count--;
-                                    return false;
-                                }
-
-                                reloc->name = strdup(name);
-                                if (reloc->name == NULL) {
-                                    module_relocations_count--;
-                                    return false;
-                                }
-
-                                reloc->module = index;
-                                reloc->address = destination;
-                                reloc->offset = rel[i].r_offset;
-                                reloc->type = ELF32_R_TYPE(rel[i].r_info);
-                                reloc->addend = *(int *)((char *)destination + rel[i].r_offset);
-
-                                continue;
-                                */
-                                return false;
-                            } else {
-                                return false;
-                            }
-                        } default: {
-                            if (symtab[symbol].st_other != 1) {
-                                return false;
-                            }
-
-                            symbol_addr = symtab[symbol].st_value;
-                            break;
-                        }
-                    }
-
-                    if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rel[i].r_info), rel[i].r_offset, *(int *)((char *)destination + rel[i].r_offset), destination, symbol_addr)){
-                        return false;
-                    }
-                }
-                break;
-            } case SHT_RELA: {
-                const Elf32_Rela *rela;
-                Elf_Data *data;
-                size_t i;
-
-                if (shdr->sh_info != shndx)
-                    continue;
-
-                data = elf_getdata(scn, NULL);
-                if (data == NULL)
-                    continue;
-
-                rela = (const Elf32_Rela *) data->d_buf;
-
-                for (i = 0; i < shdr->sh_size / sizeof(Elf32_Rela); i++) {
-                    uint32_t symbol_addr;
-                    size_t symbol;
-
-                    symbol = ELF32_R_SYM(rela[i].r_info);
-
-                    if (symbol > symtab_count)
-                        return false;
-
-                    switch (symtab[symbol].st_shndx) {
-                        case SHN_ABS: {
-                            symbol_addr = symtab[symbol].st_value;
-                            break;
-                        } case SHN_COMMON: {
-                            return false;
-                        } case SHN_UNDEF: {
-                            if (allow_globals) {
-                                DEBUG_FUNCTION_LINE("The elf still have unresolved relocations. This is not supported.");
-                                /*
-                                Not support and not needed.
-                                module_unresolved_relocation_t *reloc;
-                                char *name;
-
-                                reloc = (module_unresolved_relocation_t *) Module_ListAllocate(
-                                    &module_relocations,
-                                    sizeof(module_unresolved_relocation_t), 1,
-                                    &module_relocations_capacity,
-                                    &module_relocations_count,
-                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
-                                if (reloc == NULL)
-                                    return false;
-
-                                name = elf_strptr(
-                                    elf, symtab_strndx, symtab[symbol].st_name);
-
-                                if (name == NULL) {
-                                    module_relocations_count--;
-                                    return false;
-                                }
-
-                                reloc->name = strdup(name);
-                                if (reloc->name == NULL) {
-                                    module_relocations_count--;
-                                    return false;
-                                }
-
-                                DEBUG_FUNCTION_LINE("Adding relocation!\n");
-
-                                reloc->module = index;
-                                reloc->address = destination;
-                                reloc->offset = rela[i].r_offset;
-                                reloc->type = ELF32_R_TYPE(rela[i].r_info);
-                                reloc->addend = rela[i].r_addend;
-
-                                continue;*/
-                                return false;
-                            } else
-                                return false;
-                        } default: {
-
-                            if (symtab[symbol].st_other != 1){
-                                return false;
-                            }
-                            symbol_addr = symtab[symbol].st_value;
-                            break;
-                        }
-                    }
-
-                    if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rela[i].r_info), rela[i].r_offset,rela[i].r_addend, destination, symbol_addr)){
-                        return false;
-                    }
-                }
-                break;
-            }
-        }
-    }
-
-    return true;
-}
-
 bool ModuleData::linkModuleElf(Elf *elf, uint8_t **space) {
     Elf_Scn *scn;
     size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count, hooks_count;
@@ -630,7 +436,6 @@ bool ModuleData::linkModuleElf(Elf *elf, uint8_t **space) {
     destinations = (uint8_t **) malloc(sizeof(uint8_t *) * section_count);
 
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
-
         Elf32_Shdr *shdr;
 
         shdr = elf32_getshdr(scn);
@@ -738,7 +543,7 @@ bool ModuleData::linkModuleElf(Elf *elf, uint8_t **space) {
             (shdr->sh_flags & SHF_ALLOC) &&
             destinations[elf_ndxscn(scn)] != NULL) {
 
-            if (!elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true)){
+            if (!ElfTools::elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true)){
                 goto exit_error;
             }
         }

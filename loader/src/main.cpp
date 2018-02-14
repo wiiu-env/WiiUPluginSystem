@@ -53,7 +53,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
         if(!loadSamplePlugins()){
-            return    EXIT_SUCCESS;
+            return EXIT_SUCCESS;
         }
     }
 

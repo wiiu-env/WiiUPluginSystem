@@ -42,6 +42,7 @@ public:
     static bool elfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr,void *destination);
     static bool loadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count, size_t *symtab_strndx);
     static void elfLoadSymbols(size_t shndx, const void *destination, Elf32_Sym *symtab, size_t symtab_count);
+    static bool elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals);
     static bool elfLinkOne(char type, size_t offset, int addend, void *destination, uint32_t symbol_addr);
 };
 
