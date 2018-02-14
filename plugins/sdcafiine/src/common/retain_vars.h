@@ -11,5 +11,4 @@ extern volatile u8 gSDInitDone;
 
 extern char gModFolder[FS_MAX_ENTNAME_SIZE];
 
-
 #endif // RETAINS_VARS_H_

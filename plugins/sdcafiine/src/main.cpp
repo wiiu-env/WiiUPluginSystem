@@ -1,7 +1,5 @@
 #include <wups.h>
 #include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/vpad_functions.h>
 #include <dynamic_libs/sys_functions.h>
@@ -21,14 +19,30 @@ WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
-INITIALIZE(){
+INITIALIZE(args){
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
+    InitVPadFunctionPointers(); //For logging
 
     log_init();
 
     if(FileReplacerUtils::setGroupAndOwnerID()){
         DEBUG_FUNCTION_LINE("SUCCESS\n");
+    }
+
+    if(args != NULL){
+        gSDInitDone = args->device_mounted;
+        /*if((args->device_mounted & WUPS_SD_MOUNTED) > 0){
+            DEBUG_FUNCTION_LINE("Yay, SD was mounted!\n");
+            gSDInitDone = WUPS_SD_MOUNTED;
+
+            DEBUG_FUNCTION_LINE("opendir result %08X!\n",opendir("sd:/"));
+
+        } else {
+            DEBUG_FUNCTION_LINE("SD wasn't mounted...!\n");
+        }*/
+    }else {
+        DEBUG_FUNCTION_LINE("args were NULL!\n");
     }
 
     HandleMultiModPacks(OSGetTitleID());
@@ -40,4 +54,3 @@ void deInitApplication(){
     //FileReplacerUtils::getInstance()->StopAsyncThread();
     FileReplacerUtils::destroyInstance();
 }
-

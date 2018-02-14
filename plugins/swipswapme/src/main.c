@@ -44,7 +44,7 @@ u8 isFirstBoot __attribute__((section(".data"))) = 1;
 u32 SplashScreen(s32 time,s32 combotime);
 
 /* Entry point */
-INITIALIZE(){
+INITIALIZE(args){
     if(gAppStatus == 2){
         log_printf("No, we don't want to patch stuff again.");
         return;

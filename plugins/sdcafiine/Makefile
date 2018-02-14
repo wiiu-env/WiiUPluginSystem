@@ -88,7 +88,8 @@ ASFLAGS	:= -mregnames
 # -Map: generate a map file
 
 LDFLAG_COMMON += -u wups_load -u wups_meta -u wups_hooks -T $(WUPSDIR)/wups.ld \
-				 -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,--gc-sections
+                 -Wl,-wrap,open,-wrap,close,-wrap,write,-wrap,read,-wrap,lseek,-wrap,stat,-wrap,fstat,-wrap,opendir,-wrap,closedir,-wrap,readdir \
+				 -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,-wrap,opendir,--gc-sections
 
 LDFLAGS_MOD  +=  	$(LDFLAG_COMMON),--relocatable
 LDFLAGS_ELF  +=  	--relocatable -s -T $(WUPSDIR)/wups_elf.ld
@@ -160,7 +161,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
                     -L$(PORTLIBS)/lib 
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
-.PHONY: $(BUILD) clean install
+.PHONY: all $(BUILD) clean install
 
 #---------------------------------------------------------------------------------
 $(BUILD):

@@ -11,7 +11,7 @@ WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
 
-INITIALIZE(){
+INITIALIZE(args){
    InitOSFunctionPointers();
    InitSocketFunctionPointers();
    InitVPadFunctionPointers();

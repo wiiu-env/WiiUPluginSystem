@@ -19,14 +19,6 @@ extern "C" {
 #define ELF_DATA_SIZE               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x04))
 #define MAIN_ENTRY_ADDR             (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x00))
 
-#define SDUSB_MOUNTED_NONE          0
-#define SDUSB_MOUNTED_FAKE          (1<<0)
-#define SDUSB_MOUNTED_OS_SD         (1<<1)
-#define SDUSB_LIBIOSU_LOADED        (1<<2)
-#define SD_MOUNTED_LIBFAT           (1<<3)
-#define USB_MOUNTED_LIBFAT          (1<<4)
-#define USB_MOUNTED_LIBNTFS         (1<<5)
-
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS                0
 #endif

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/vpad_functions.h>
+#include <dynamic_libs/padscore_functions.h>
 #include <dynamic_libs/socket_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
 #include <controller_patcher/ControllerPatcher.hpp>
@@ -13,29 +14,40 @@ WUPS_MODULE_VERSION("v1.0");
 WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
+#define SD_PATH                     "sd:"
+#define WIIU_PATH "/wiiu"
+#define DEFAULT_HID_TO_VPAD_PATH SD_PATH WIIU_PATH "/apps/hidtovpad"
 
-INITIALIZE(){
+INITIALIZE(args){
     InitOSFunctionPointers();
     InitSocketFunctionPointers();
     InitVPadFunctionPointers();
     InitProcUIFunctionPointers();
+    InitPadScoreFunctionPointers();
 
     log_init();
     log_print("Init of hid_to_vpad!\n");    
-
-    ControllerPatcher::Init(NULL);    
+    if(args != NULL && (args->device_mounted & WUPS_SD_MOUNTED) > 0){
+        DEBUG_FUNCTION_LINE("Loading with SD Access\n");
+        ControllerPatcher::Init(CONTROLLER_PATCHER_PATH);
+    } else {
+        DEBUG_FUNCTION_LINE("Loading without SD Access\n");
+        ControllerPatcher::Init(NULL);
+    }
+    
 
     ControllerPatcher::disableControllerMapping();
     
     log_print("Start network server\n");
     ControllerPatcher::startNetworkServer();
+    //TODO: ControllerPatcher::DeInit() on restore.
 } 
 
 
 DECL_FUNCTION(void, __PPCExit, void){    
     ControllerPatcher::resetCallbackData();
 
-    ControllerPatcher::DeInit();
+    ControllerPatcher::destroyConfigHelper();
     ControllerPatcher::stopNetworkServer();
     real___PPCExit();
 }
