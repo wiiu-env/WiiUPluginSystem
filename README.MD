@@ -1,155 +1,79 @@
 [Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  
 # Plugin system for the Wii U. (WIP) [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
-I decided to make this entirely public, so everbody can contribute.
+WARNING: THIS PROJECT HAS JUST STARTED AND IS FOR DEVS AND PEOPLE WHO WANT TO PLAY AROUND WITH NEW THINGS. IT MAY BE BUGGY, FEATURE COULD BREAK AT ANY TIME, INTERFACES CAN CHANGE, AND MANY BUGS CAN OCCUR. THIS APPLICATION COMES WITH NO WARRANTY-
 
-# Goal
+# What is the Wii U Plugin System?
 
-The goal is provide a mechanism to modifiy your Wii U experience in a modular way.
-Currently each features has it's own application (TCPGecko, SwapDRC, HIDtoVPAD, SDCafiine) and you can only start one applicationa the same time.
-This means, you can't mix any of these features. One way would be to create an own App for each feature combination (like geckiine) or create one app that has all features.
-Both approaches have the same disadvantage, it's nearly impossible (and time consuming) to support everthing requested/possible.
+The Wii U Plugin allows you to load multiple plugins on your Wii U which enhance your experience. 
+For example you can mod your games, use USB controller, swap your gamepad and TV screen and much more.
 
-The idea is now:
-- Each feature will be deployed as an individual module/plugin
-- These modules will be loaded with ONE generic loader
-- And can be mixed in any way
-- A GUI can (de)activate them without any new compiling
-- Everything can be handled easily on the console itself
-	
-# Planned features
+# Features
 
-## Short-term goals
-Possbile to create a plugin which:
-* can override existing system function
-  * provide a hook function which will be called
-  * on each start of an application
-  * everytime a application will be closed
-  * on each frame
-* can be combined with other plugins
+The project is still in it's very early days, but it already has basic functions to play with.
 
-With an simple, generic loader which:
-* Loads the plugins from the SDCard
-* Combines them and use them ALL at the same time.	
+- The plugins will be loaded, even when you swap the running game.
+- Support for up to 32 plugins at the same time.
+- Each plugin can override up to 100 different existing system functions.
+- Multiple plugins can override the same system functions.
+- Plugins can register for certain hook (for example whenever an application was started)
+- Plugins inherit the SD/USB access from the loader. All plugins have global SD and USB (FAT32 only) access.
 
-General:
-* Port some currently available tools.
-	
-## Mid-term goals
-General:
-- Port all common applications like TCPGecko etc.
-
-Loader:
-- Allow to patch the currently loaded RPX
-  - This would lead game binaries
-	
-More advanced plugin loader:
-- Create configuration system:
-  - (de)activate certain plugin only in set applications.
-  - (de)activate plugins completly without removing them from the SDCard.
-		
-## Long-term goals
-Even more advanced plugin loader:
-- Downloading plugins directly on the console
-- Updatin existing plugins
-- Share configurations with other user
-- Allow the plugin to have an own configuration window.
-
-
-# Technical problems
-
-To achieve this, serveral "problems" need to be resolved (feature need to be implemented).
-This is just an short overview. Look at the issued for detailed information.
-	
-### plugin	
-- Create an stable interface the plugins will use.
-  - with hooks for
-  - application start
-    - application end
-    - each frame
-    - functions
-  - some way to configure them?		
-- Prodivde the plugin as a .elf?
-  - Keep the file ending?
-  - Compress/zip it?
-- How to add meta information?
-  - Compatibility with
-    - Plugin loader
-    - Wii U FW
-  - Information about the plugin
-    - Author(s)
-    - Version
-    - Description
-- Linking / building
-  - How to link the files
-  - Write a proper (base) makefile
-  - Is position independent code possible?
-    - Is it reliable?
-  - If not, how does elf relocation work?
-
-## function patching
-- (elf relocation)
-- use the information from the plugin
-  - parse it
-    - HOW to store it?
-- save the patching order
-- add basic disable/enable mechanism
-	
-## general
-- provided general hooking points
-- How to store the plugins
-  - Where is enough, unused space
-- keep tracking of the plugins
-- simple gui?
-- provide functions?
-  - like libfat, libiosu activated
-  - kernel copy function
-- pass information into the plugins
-  - Running on which FW
-  - arguments?
-  - ???
 
 # How to build
 
-For building the loader you need: 
+The building process is split into multiple parts. 
+
+### WUPS library
+First we have the "Wii U Plugin System" (WUPS) library. 
+To compile this, you need DEVKITPRO and DEVKITPPC installed and set in your environment.
+Then call the following command in the root directory.
+
+```
+make
+make install
+```
+The "make" builds the library, the "make install" copies it into your DEVKITPRO folder.
+
+### Plugin loader
+The plugin loader is the software run via the Homebrew Launcher, that uses the plugins.
+It contains a copy mocha, so for building you need a copy of DEVKITARM installed and set in your environment.
+
+For building the loader you need:  
 - [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
 - [libfat](https://github.com/aliaspider/libfat/)
 - [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
-- [libutils](https://github.com/Maschell/libutils) for common functions.
+- [libutils](https://github.com/Maschell/libutils) for common functions.  
 
-Also install this plugin system with.
+Then call the following command in the "loader" directory.
+
+```
+make
+```
+This should create an "wiiupluginloader.elf" which can be loaded with the Homebrew Launcher.
+
+### Plugins
+Last but not least you need to build the plugins that should be loaded.
+Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
+In the folder "plugins" you can find serveral example plugins. In their READMEs are information about needed dependencies.
+
+You can build them all with the following command in the "plugins" folder (when all dependencies are installed).
 ```
 make
 ```
 
-The individual plugins can be found in the "plugins" folder. They might have more dependencies, checkout their readmes.
+You can also check out the travis script for needed dependencies of the library, loader and example plugins.
 
 # Logging
-For logging you need to start the UdpDebugReader. This has been created by @dimok789 and can be found in the tools folder.
+For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
+This has been created by @dimok789 and can be found in the tools folder.
 
-# Similar projects
-
-## function-patcher-example
-Platform: Wii U
-Notes: TODO
-https://github.com/Maschell/function-patcher-example
-
-## COSSubstrate
-Platform: Wii U
-Notes: TODO
-https://github.com/QuarkTheAwesome/COSSubstrate
-
-## brainslug-wii
-Platform: Wii
-Notes: TODO
-https://github.com/Chadderz121/brainslug-wii
-
-## substitute
-Platform: IOS
-Notes: TODO
-https://github.com/comex/substitute
+# Future
+Checkout the PLANS.MD for goals, issues and future plans.
 
 # Credits
-Some files are based on brainslug by Chadderz:
-https://github.com/Chadderz121/brainslug-wii
+Some files are based on brainslug by Chadderz:  
+https://github.com/Chadderz121/brainslug-wii  
+Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff in based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
+Also thanks to everyone who made actual exploits.
