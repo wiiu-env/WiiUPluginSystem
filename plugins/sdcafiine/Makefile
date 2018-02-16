@@ -100,7 +100,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -liosuhax -lfswrapper -lutils -ldynamiclibs
+LIBS	:= -lwups -liosuhax -lfswrapper -lutils -ldynamiclibs
 #  
 
 #---------------------------------------------------------------------------------
@@ -152,13 +152,14 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 					-I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include \
 					-I$(PORTLIBS)/include/libutils -I$(PORTLIBS)/include/libfswrapper \
-          -I$(WUPSDIR)/include
+                    -I$(WUPSDIR)/include
 
 #---------------------------------------------------------------------------------
 # build a list of library paths
 #---------------------------------------------------------------------------------
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
-                    -L$(PORTLIBS)/lib 
+                    -L$(PORTLIBS)/lib \
+                    -L$(WUPSDIR)/lib 
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 .PHONY: all $(BUILD) clean install

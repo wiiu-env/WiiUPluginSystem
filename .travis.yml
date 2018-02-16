@@ -52,7 +52,7 @@ install:
   - (cd controller_patcher-master && make -j8 && make install)
 
 script:
-- make
+- make && make install
 - (cd loader && make)
 - (cd plugins && make)
 

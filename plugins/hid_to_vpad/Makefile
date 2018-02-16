@@ -99,7 +99,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lcontrollerpatcher -lutils -ldynamiclibs
+LIBS	:= -lwups -lcontrollerpatcher -lutils -ldynamiclibs
 #  
 
 #---------------------------------------------------------------------------------
@@ -156,7 +156,8 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 # build a list of library paths
 #---------------------------------------------------------------------------------
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
-                    -L$(PORTLIBS)/lib 
+                    -L$(PORTLIBS)/lib \
+                    -L$(WUPSDIR)/lib 
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 .PHONY: $(BUILD) clean install

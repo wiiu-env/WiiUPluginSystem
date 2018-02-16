@@ -20,6 +20,7 @@ WUPS_MODULE_AUTHOR("Maschell");
 WUPS_MODULE_LICENSE("GPL");
 
 INITIALIZE(args){
+    WUPS_InitFS(args);
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitVPadFunctionPointers(); //For logging
