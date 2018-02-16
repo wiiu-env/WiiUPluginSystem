@@ -54,7 +54,6 @@ install:
 script:
 - make
 - (cd loader && make)
-- (cd example_plugin && make)
 - (cd plugins && make)
 
 before_deploy:
@@ -64,7 +63,6 @@ before_deploy:
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
 - (cd loader && make)
-- cp example_plugin/example_plugin.mod wiiu/plugins
 - find plugins -type f -name "*.mod" | xargs -i cp {} wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
