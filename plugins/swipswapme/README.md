@@ -12,6 +12,7 @@ Press the TV button (or your button combo) on the Gamepad to swap the screens. T
 ## Building
 
 For building you need: 
+- [wups](https://github.com/Maschell/WiiUPluginSystem)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.
 

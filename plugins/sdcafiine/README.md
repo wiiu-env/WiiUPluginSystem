@@ -14,6 +14,7 @@ Whats NOT working:
 ## Building
 
 For building you need: 
+- [wups](https://github.com/Maschell/WiiUPluginSystem)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.
 - [libfswrapper](https://github.com/Maschell/fs_wrapper) to replace the fs functions.
