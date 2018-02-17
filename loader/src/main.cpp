@@ -76,7 +76,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     InitGX2FunctionPointers();
     InitSysFunctionPointers();
     InitVPadFunctionPointers();
-    InitPad ScoreFunctionPointers();
+    InitPadScoreFunctionPointers();
     InitAXFunctionPointers();
     InitProcUIFunctionPointers();
 
