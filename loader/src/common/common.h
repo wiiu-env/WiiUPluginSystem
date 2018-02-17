@@ -8,7 +8,7 @@ extern "C" {
 #include <dynamic_libs/os_defs.h>
 
 #define CAFE_OS_SD_PATH             "/vol/external01"
-#define GAME_MOD_FOLDER             "/sdcafiine"
+#define WIIU_PATH                   "/wiiu"
 #define SD_PATH                     "sd:"
 #define USB_PATH                    "usb:"
 #define DEFAULT_NAME_PACKAGE        "DEFAULT"
@@ -24,6 +24,10 @@ extern "C" {
 #endif
 #define EXIT_HBL_EXIT               0xFFFFFFFE
 #define EXIT_RELAUNCH_ON_LOAD       0xFFFFFFFD
+
+#define DEFAULT_WUPSLOADER_PATH     SD_PATH WIIU_PATH "/apps/wiiupluginsystem"
+#define DEFAULT_LANG_PATH           DEFAULT_WUPSLOADER_PATH "/languages"
+#define LANGUAGE_FILE_EXT           ".lang"
 
 #ifdef __cplusplus
 }

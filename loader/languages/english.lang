@@ -1,0 +1,26 @@
+# English translations for Wii U Plugin System loader
+# This file is distributed under the same license as the PACKAGE package.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-05-08 17:13+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/menu/content/ContentHome.cpp:20
+msgid "Welcome to the Wii U plugin loader"
+msgstr ""
+
+#: src/menu/content/ContentHome.cpp:29
+msgid "Exit to HBL  "
+msgstr ""
+
+#: src/menu/content/ContentHome.cpp:32
+msgid "Apply Patches"
+msgstr ""

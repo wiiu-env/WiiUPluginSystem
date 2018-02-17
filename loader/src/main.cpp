@@ -10,20 +10,27 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <dynamic_libs/os_functions.h>
-#include <dynamic_libs/socket_functions.h>
-#include <dynamic_libs/sys_functions.h>
-#include <dynamic_libs/fs_functions.h>
-#include <dynamic_libs/vpad_functions.h>
+#include "dynamic_libs/os_functions.h"
+#include "dynamic_libs/gx2_functions.h"
+#include "dynamic_libs/ax_functions.h"
+#include "dynamic_libs/socket_functions.h"
+#include "dynamic_libs/sys_functions.h"
+#include "dynamic_libs/fs_functions.h"
+#include "dynamic_libs/nn_nim_functions.h"
+#include "dynamic_libs/vpad_functions.h"
+#include "dynamic_libs/padscore_functions.h"
+#include "dynamic_libs/proc_ui_functions.h"
+
 #include <utils/logger.h>
 #include <fs/FSUtils.h>
 #include <fs/sd_fat_devoptab.h>
 #include <utils/utils.h>
 #include <system/exception_handler.h>
+#include <system/memory.h>
 
 #include "common/retain_vars.h"
 #include "common/common.h"
-#include "ModuleData.h"
+#include "modules/ModuleData.h"
 
 #include <utils/function_patcher.h>
 
@@ -34,12 +41,14 @@
 
 #include "main.h"
 #include "utils.h"
+#include "Application.h"
 #include "patcher/function_patcher.h"
 #include "patcher/hooks_patcher.h"
 #include "myutils/mocha.h"
 #include "myutils/libntfs.h"
 #include "myutils/libfat.h"
 #include "version.h"
+#include "settings/CSettings.h"
 
 static bool loadSamplePlugins();
 static void ApplyPatches();
@@ -52,6 +61,8 @@ static void loadElf(std::vector<ModuleData *>* modules, const char * elfPath, ui
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
+#define PLUGIN_LOCATION_END_ADDRESS 0x01000000
+
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
     if(gAppStatus == 2){
@@ -62,8 +73,16 @@ extern "C" int Menu_Main(int argc, char **argv){
     InitSocketFunctionPointers(); //For logging
     InitSysFunctionPointers();
     InitFSFunctionPointers();
+    InitGX2FunctionPointers();
+    InitSysFunctionPointers();
+    InitVPadFunctionPointers();
+    InitPad ScoreFunctionPointers();
+    InitAXFunctionPointers();
+    InitProcUIFunctionPointers();
 
     log_init();
+
+    DEBUG_FUNCTION_LINE("We have %d kb for plugins.\n",(PLUGIN_LOCATION_END_ADDRESS-getApplicationEndAddr())/1024);
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
@@ -77,7 +96,27 @@ extern "C" int Menu_Main(int argc, char **argv){
         if(!loadSamplePlugins()){
             return EXIT_SUCCESS;
         }
+
+        //!*******************************************************************
+        //!                    Initialize heap memory                        *
+        //!*******************************************************************
+        DEBUG_FUNCTION_LINE("Initialize memory management\n");
+        memoryInitialize();
+
+        DEBUG_FUNCTION_LINE("Start main application\n");
+        s32 result = Application::instance()->exec();
+        DEBUG_FUNCTION_LINE("Main application stopped result: %d\n",result);
+        Application::destroyInstance();
+
+        DEBUG_FUNCTION_LINE("Release memory\n");
+        memoryRelease();
+        CSettings::destroyInstance();
+        if(result == APPLICATION_CLOSE_MIIMAKER){
+            DeInit();
+            return EXIT_SUCCESS;
+        }
     }
+
 
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
@@ -181,8 +220,6 @@ s32 isInMiiMakerHBL(){
     }
     return 0;
 }
-
-#define PLUGIN_LOCATION_END_ADDRESS 0x01000000
 
 bool loadSamplePlugins(){
     if((gSDInitDone & WUPS_SD_MOUNTED) > 0){

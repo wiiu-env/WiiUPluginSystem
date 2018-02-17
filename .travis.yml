@@ -25,6 +25,7 @@ before_install:
   - wget https://download.sourceforge.net/devkitpro/devkitARM_r47-x86_64-linux.tar.bz2 -O devkitARM-linux.tar.bz2
   - wget https://github.com/Maschell/dynamic_libs/archive/lib.tar.gz -O dynamic_libs.tar.gz
   - wget https://github.com/Maschell/libutils/archive/master.tar.gz -O libutils.tar.gz
+  - wget https://github.com/Maschell/libgui/archive/master.tar.gz -O libgui.tar.gz
   - wget https://github.com/aliaspider/libfat/archive/master.tar.gz -O libfat.tar.gz
   - wget https://github.com/dimok789/libiosuhax/archive/master.tar.gz -O libiosuhax.tar.gz
   - wget https://github.com/Maschell/libntfs-wiiu/archive/master.tar.gz -O libntfs.tar.gz
@@ -36,6 +37,7 @@ install:
   - tar -xjf devkitARM-linux.tar.bz2 -C ${DEVKITPRO}/
   - tar -xzvf dynamic_libs.tar.gz
   - tar -xzvf libutils.tar.gz
+  - tar -xzvf libgui.tar.gz
   - tar -xzvf libfat.tar.gz
   - tar -xzvf libiosuhax.tar.gz
   - tar -xzvf libntfs.tar.gz
@@ -48,6 +50,7 @@ install:
   - (cd libntfs-wiiu-master && make wiiu-install)
   - (cd dynamic_libs-lib && make -j8 && make install)
   - (cd libutils-master && make -j8 && make install)
+  - (cd libgui-master && make -j8 && make install)
   - (cd fs_wrapper-master && make -j8 && make install)
   - (cd controller_patcher-master && make -j8 && make install)
 

@@ -33,13 +33,20 @@ print-%  : ; @echo $* = $($*)
 TARGET    :=  wiiupluginloader
 BUILD     :=  build
 BUILD_DBG	:=  $(TARGET)_dbg
-SOURCES   :=  src/libelf \
-SOURCES   :=  src/patcher \
-              src/common \
+SOURCES   :=  src/common \
+              src/libelf \
+              src/menu/content \
+              src/menu \
+              src/modules \
               src/myutils \
+              src/patcher \
+              src/resources \
+              src/settings \
               src/
 
-DATA		:=
+DATA		:=  data/images \
+                data/sounds \
+                data/fonts \
 
 INCLUDES  :=  src/libelf \
               src/
@@ -66,7 +73,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lm -lgcc -lfat -lntfs -liosuhax -lutils -ldynamiclibs
+LIBS	:= -lgui -lm -lgcc -lfat -lntfs -liosuhax -lutils -ldynamiclibs  -lfreetype -lgd -lpng -ljpeg -lz  -lmad -lvorbisidec
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -93,6 +100,8 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 #---------------------------------------------------------------------------------
 # automatically build a list of object files for our project
 #---------------------------------------------------------------------------------
+FILELIST	:=	$(shell bash ./filelist.sh)
+LANGUAGES	:=	$(shell bash ./updatelang.sh)
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
@@ -120,7 +129,8 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
                     -I$(PORTLIBS)/include -I$(CURDIR)/$(BUILD) \
-					-I$(PORTLIBS)/include/libutils
+					-I$(PORTLIBS)/include/libutils \
+                    -I$(PORTLIBS)/include/freetype2 -I$(PORTLIBS)/include/libgui
 
 
 #---------------------------------------------------------------------------------

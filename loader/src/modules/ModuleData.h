@@ -57,13 +57,13 @@ class ModuleData{
         ~ModuleData(){
             for(size_t i = 0;i< entry_data_list.size();i++){
                 if(entry_data_list[i] != NULL){
-                    free(entry_data_list[i]);
+                    delete entry_data_list[i];
                 }
             }
 
             for(size_t i = 0;i< hook_data_list.size();i++){
                 if(hook_data_list[i] != NULL){
-                    free(hook_data_list[i]);
+                    delete hook_data_list[i];
                 }
             }
         }
