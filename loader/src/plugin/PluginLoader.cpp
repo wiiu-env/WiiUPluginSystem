@@ -301,17 +301,13 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                     goto exit_error;
                 }
 
-                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,curAddress);
+                //DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,curAddress);
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, (void*) curAddress)){
                     goto exit_error;
                 }
                 ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void*) curAddress, symtab, symtab_count);
             }
         }
-    }
-
-    if (entries == NULL){
-        goto exit_error;
     }
 
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
