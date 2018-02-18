@@ -30,8 +30,7 @@ MainWindow::MainWindow(s32 w, s32 h)
     : width(w)
     , height(h)
 {
-    for(s32 i = 0; i < 4; i++)
-    {
+    for(s32 i = 0; i < 4; i++) {
         std::string filename = StringTools::strfmt("player%i_point.png", i+1);
         pointerImgData[i] = Resources::GetImageData(filename.c_str());
         pointerImg[i] = new GuiImage(pointerImgData[i]);

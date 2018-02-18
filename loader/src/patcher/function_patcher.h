@@ -38,6 +38,7 @@ struct rpl_handling {
 #define DYNAMIC_FUNCTION         1
 
 #define FUNCTION_PATCHER_METHOD_STORE_SIZE                  7
+#define MAXIMUM_PLUGIN_PATH_NAME_LENGTH                     256
 #define MAXIMUM_PLUGIN_NAME_LENGTH                          51
 #define MAXIMUM_FUNCTION_NAME_LENGTH                        51
 
@@ -66,6 +67,7 @@ struct replacement_data_hook_t{
 #define MAXIMUM_FUNCTION_PER_PLUGIN                     100
 
 struct replacement_data_plugin_t{
+    char                        path[MAXIMUM_PLUGIN_PATH_NAME_LENGTH];
     char                        plugin_name[MAXIMUM_PLUGIN_NAME_LENGTH] = "";        // Name of this plugin
     int                         priority;                                       // Priority of this plugin
     int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN

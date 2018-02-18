@@ -29,6 +29,7 @@
 #include <vector>
 #include "PluginInformation.h"
 #include "PluginData.h"
+#include "dynamic_libs/os_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +76,7 @@ public:
         \return a list of MetaInformation objects for all plugins currently loaded and linked (relocated). Will only contain
                 plugin which are still on the sd card.
     **/
-    //std::vector<PluginInformation *> getPluginsLoadedInMemory();
+    std::vector<PluginInformation *> getPluginsLoadedInMemory();
 
     /**
         \brief  Takes a list of plugins that should be linked (relocated) loaded into the memory.
@@ -86,6 +87,26 @@ public:
         \param A list of plugin that should be linked (relocated) an loaded into memory
     **/
     void loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation);
+
+    /**
+        \brief  Iterates through the vector and delete all it's elements
+
+        \param A list of PluginInformation* that should be deleted.
+    **/
+    void clearPluginInformation(std::vector<PluginInformation*> PluginInformation);
+
+    size_t getTotalSpace(){
+        return ((u32) this->endAddress - (u32) this->startAddress);
+    }
+
+    size_t getAvailableSpace(){
+        return ((u32) this->currentStoreAddress - (u32) this->startAddress);
+    }
+
+    size_t getUsedSpace(){
+        return getTotalSpace() - getAvailableSpace();
+    }
+
 private:
     PluginLoader(void * startAddress, void * endAddress){
         // TODO: Check if endAddress > startAddress.

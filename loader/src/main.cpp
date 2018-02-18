@@ -56,8 +56,6 @@ void CallHook(wups_loader_hook_type_t hook_type);
 static void RestorePatches();
 s32 isInMiiMakerHBL();
 
-u8 isFirstBoot __attribute__((section(".data"))) = 1;
-
 /* Entry point */
 extern "C" int Menu_Main(int argc, char **argv){
     if(gAppStatus == 2){
@@ -86,8 +84,12 @@ extern "C" int Menu_Main(int argc, char **argv){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
     Init_SD_USB();
 
-    if(isFirstBoot){
-        memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
+    s32 result = 0;
+
+    //Reset everything when were going back to the Mii Maker
+    if(isInMiiMakerHBL()){
+        // Restore patches as the patched functions could change.
+        RestorePatches();
 
         PluginLoader * pluginLoader  = PluginLoader::getInstance();
         std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
@@ -100,50 +102,33 @@ extern "C" int Menu_Main(int argc, char **argv){
         memoryInitialize();
 
         DEBUG_FUNCTION_LINE("Start main application\n");
-        s32 result = Application::instance()->exec();
+        result = Application::instance()->exec();
         DEBUG_FUNCTION_LINE("Main application stopped result: %d\n",result);
         Application::destroyInstance();
 
         DEBUG_FUNCTION_LINE("Release memory\n");
         memoryRelease();
         CSettings::destroyInstance();
-        if(result == APPLICATION_CLOSE_MIIMAKER){
-            DeInit();
-            return EXIT_SUCCESS;
-        }
+        PluginLoader::destroyInstance();
     }
 
+    DEBUG_FUNCTION_LINE("Apply patches.\n");
+    ApplyPatches();
 
-    //Reset everything when were going back to the Mii Maker
-    if(!isFirstBoot && isInMiiMakerHBL()){
-        DEBUG_FUNCTION_LINE("Returing to the Homebrew Launcher!\n");
-        isFirstBoot = 0;
-        DeInit();
-        RestorePatches();
-        return EXIT_SUCCESS;
-    } else {
-        DEBUG_FUNCTION_LINE("Apply patches.\n");
-        ApplyPatches();
-    }
-
-    if(!isInMiiMakerHBL()){ //Starting the application
-        DEBUG_FUNCTION_LINE("Calling init hook.\n");
+    if(!isInMiiMakerHBL()){
         CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
-    if(isFirstBoot){ // First boot back to SysMenu
-        DEBUG_FUNCTION_LINE("Loading the System Menu\n");
-        isFirstBoot = 0;
+    if(result == APPLICATION_CLOSE_APPLY){
+        DEBUG_FUNCTION_LINE("Loading the system menu.\n");
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
-    DEBUG_FUNCTION_LINE("Application is ending now.\n");
-
-    DeInit();
+    DEBUG_FUNCTION_LINE("Going back to the Homebrew Launcher\n");
     RestorePatches();
-
+    DeInit();
     return EXIT_SUCCESS;
 }
 

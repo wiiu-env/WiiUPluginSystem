@@ -77,6 +77,18 @@ std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char *
     return result;
 }
 
+std::vector<PluginInformation *> PluginLoader::getPluginsLoadedInMemory(){
+    std::vector<PluginInformation *> pluginInformation;
+    for(s32 i = 0; i < gbl_replacement_data.number_used_plugins; i++){
+        replacement_data_plugin_t * pluginInfo = &gbl_replacement_data.plugin_data[i];
+        PluginInformation * curPlugin = PluginInformation::loadPluginInformation(pluginInfo->path);
+        if(curPlugin != NULL){
+            pluginInformation.push_back(curPlugin);
+        }
+    }
+    return pluginInformation;
+}
+
 void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation){
     std::vector<PluginData *> loadedPlugins;
     for(size_t i = 0;i < pluginInformation.size(); i++){
@@ -104,6 +116,14 @@ void PluginLoader::clearPluginData(std::vector<PluginData *> pluginData){
     }
 }
 
+void PluginLoader::clearPluginInformation(std::vector<PluginInformation *> pluginInformation){
+    for(size_t i = 0;i < pluginInformation.size(); i++){
+        PluginInformation * curPluginInformation = pluginInformation[i];
+        if(curPluginInformation != NULL){
+            delete curPluginInformation;
+        }
+    }
+}
 
 PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformation){
     DEBUG_FUNCTION_LINE("\n");
@@ -376,6 +396,7 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
         replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
 
         strncpy(plugin_data->plugin_name,cur_pluginInformation->getName().c_str(),MAXIMUM_PLUGIN_NAME_LENGTH-1);
+        strncpy(plugin_data->path,cur_pluginInformation->getPath().c_str(),MAXIMUM_PLUGIN_PATH_NAME_LENGTH-1);
 
         for(size_t j = 0; j < entry_data_list.size();j++){
             replacement_data_function_t * function_data = &plugin_data->functions[j];
