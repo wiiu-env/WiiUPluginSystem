@@ -79,7 +79,7 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
-    //setup_os_exceptions();
+    setup_os_exceptions();
 
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
     Init_SD_USB();

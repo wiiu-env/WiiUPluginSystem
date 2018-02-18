@@ -6,6 +6,7 @@
 #include "utils/logger.h"
 
 WUPS_PLUGIN_NAME("Padcon");
+WUPS_PLUGIN_DESCRIPTION("Turns the gamepad screen on/off when pressing the right stick.");
 WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");

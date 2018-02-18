@@ -10,6 +10,7 @@
 #include <fs/sd_fat_devoptab.h>
 
 WUPS_PLUGIN_NAME("HID to VPAD lite");
+WUPS_PLUGIN_DESCRIPTION("Enables HID devices as controllers on your Wii U");
 WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");

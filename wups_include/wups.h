@@ -215,10 +215,11 @@ typedef struct wups_loader_entry_t {
     extern const char wups_meta_ ## id [] WUPS_SECTION("meta"); \
     const char wups_meta_ ## id [] = #id "=" value
 
-#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.1")
+#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.1"); WUPS_META(buildtimestamp, __DATE__ " " __TIME__)
 #define WUPS_PLUGIN_AUTHOR(x)  WUPS_META(author, x)
 #define WUPS_PLUGIN_VERSION(x) WUPS_META(version, x)
 #define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)
+#define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
 
 void WUPS_InitFS(wups_loader_init_args_t* args);
 

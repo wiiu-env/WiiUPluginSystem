@@ -79,6 +79,14 @@ class PluginInformation{
             return this->license;
         }
 
+        std::string getBuildTimestamp(){
+            return this->buildtimestamp;
+        }
+
+        std::string getDescription(){
+            return this->description;
+        }
+
         std::string getPath(){
             return path;
         }
@@ -107,6 +115,14 @@ class PluginInformation{
             this->license = license;
         }
 
+        void setBuildTimestamp(const char * buildtimestamp){
+            this->buildtimestamp = buildtimestamp;
+        }
+
+        void setDescription(const char * description){
+            this->description = description;
+        }
+
         void setSize(size_t size){
             this->size = size;
         }
@@ -126,6 +142,8 @@ class PluginInformation{
         std::string author;
         std::string version;
         std::string license;
+        std::string buildtimestamp;
+        std::string description;
         size_t size;
 };
 

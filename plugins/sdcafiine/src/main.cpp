@@ -15,6 +15,7 @@
 #include "modpackSelector.h"
 
 WUPS_PLUGIN_NAME("SDCaffiine lite");
+WUPS_PLUGIN_DESCRIPTION("Replaces the game files on the fly. Can be used for gamemods");
 WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");

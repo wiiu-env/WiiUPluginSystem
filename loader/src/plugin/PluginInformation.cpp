@@ -239,7 +239,7 @@ exit_error:
 
 bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
     char *metadata = NULL, *metadata_cur, *metadata_end;
-    const char *game, *name, *author, *version, *license, *wups;
+    const char *name, *author, *version, *license, *wups, *buildtimestamp, *description;
 
     Elf_Scn *scn;
     size_t shstrndx;
@@ -300,12 +300,13 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
         goto exit_error;
     }
 
-    game = NULL;
     name = NULL;
     author = NULL;
     version = NULL;
     license = NULL;
     wups = NULL;
+    buildtimestamp = NULL;
+    description = NULL;
 
     for (metadata_cur = metadata; metadata_cur < metadata_end; metadata_cur = strchr(metadata_cur, '\0') + 1) {
 
@@ -324,13 +325,7 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
             continue;
         }
 
-        if (strncmp(metadata_cur, "game", eq - metadata_cur) == 0) {
-            if (game != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_GAME declarations.\n", path);
-                goto exit_error;
-            }
-            game = eq + 1;
-        } else if (strncmp(metadata_cur, "name", eq - metadata_cur) == 0) {
+        if (strncmp(metadata_cur, "name", eq - metadata_cur) == 0) {
             if (name != NULL) {
                 DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_NAME declarations.\n", path);
                 goto exit_error;
@@ -354,6 +349,18 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
                 goto exit_error;
             }
             license = eq + 1;
+        } else if (strncmp(metadata_cur, "buildtimestamp", eq - metadata_cur) == 0) {
+            if (buildtimestamp != NULL) {
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_TIMESTAMP declarations.\n", path);
+                goto exit_error;
+            }
+            buildtimestamp = eq + 1;
+        } else if (strncmp(metadata_cur, "description", eq - metadata_cur) == 0) {
+            if (description != NULL) {
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_LICENSE declarations.\n", path);
+                goto exit_error;
+            }
+            description = eq + 1;
         } else if (strncmp(metadata_cur, "wups", eq - metadata_cur) == 0) {
             if (wups != NULL) {
                 DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_NAME declarations.\n", path);
@@ -363,14 +370,18 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
         }
     }
 
-    if (game == NULL){
-        game = "";
+    if (description == NULL){
+        description = "";
     }
-    // TODO:
-    /*if (wups == NULL || strcmp(wups, "0.1") != 0) {
+
+    if (wups == NULL || strcmp(wups, "0.1") != 0) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Unrecognised WUPS version.\n", path);
         goto exit_error;
-    }*/
+    }
+    if (buildtimestamp == NULL) {
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Couldn't find buildtimestamp.\n", path);
+        goto exit_error;
+    }
     if (name == NULL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_PLUGIN_NAME declaration.\n",path);
         goto exit_error;
@@ -392,6 +403,8 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
     this->setAuthor(author);
     this->setVersion(version);
     this->setLicense(license);
+    this->setBuildTimestamp(buildtimestamp);
+    this->setDescription(description);
 
     return true;
 

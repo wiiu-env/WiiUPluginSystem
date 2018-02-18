@@ -66,7 +66,8 @@ std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char *
             DEBUG_FUNCTION_LINE("Found file: %s\n",full_file_path.c_str()) ;
             PluginInformation * plugin = PluginInformation::loadPluginInformation(full_file_path);
             if(plugin != NULL){
-                DEBUG_FUNCTION_LINE("Found plugin %s by %s. Size: %d kb \n",plugin->getName().c_str(),plugin->getAuthor().c_str(),plugin->getSize()/1024) ;
+                DEBUG_FUNCTION_LINE("Found plugin %s by %s. Built on %s Size: %d kb \n",plugin->getName().c_str(),plugin->getAuthor().c_str(),plugin->getBuildTimestamp().c_str(),plugin->getSize()/1024) ;
+                DEBUG_FUNCTION_LINE("Description: %s \n",plugin->getDescription().c_str()) ;
                 result.push_back(plugin);
             } else {
                 DEBUG_FUNCTION_LINE("%s is not a valid plugin\n",full_file_path.c_str()) ;
@@ -92,7 +93,6 @@ std::vector<PluginInformation *> PluginLoader::getPluginsLoadedInMemory(){
 void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation){
     std::vector<PluginData *> loadedPlugins;
     for(size_t i = 0;i < pluginInformation.size(); i++){
-        DEBUG_FUNCTION_LINE("loadAndLinkPlugins for %d\n",i) ;
         PluginInformation * cur_info = pluginInformation[i];
         PluginData * pluginData = loadAndLinkPlugin(cur_info);
         if(pluginData == NULL){
@@ -126,7 +126,6 @@ void PluginLoader::clearPluginInformation(std::vector<PluginInformation *> plugi
 }
 
 PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformation){
-    DEBUG_FUNCTION_LINE("\n");
     PluginData * result = NULL;
     int fd = -1;
     Elf *elf = NULL;
@@ -160,7 +159,6 @@ PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformati
         goto exit_error;
     }
 
-    DEBUG_FUNCTION_LINE("\n");
     result = new PluginData(pluginInformation);
     if(result == NULL){
         DEBUG_FUNCTION_LINE("Failed to create object\n");

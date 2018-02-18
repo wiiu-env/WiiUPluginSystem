@@ -6,7 +6,8 @@
 #include "dynamic_libs/fs_functions.h"
 #include "utils/logger.h"
 
-WUPS_PLUGIN_NAME("test PLUGIN");
+WUPS_PLUGIN_NAME("Example plugin");
+WUPS_PLUGIN_DESCRIPTION("This is just an example plugin and will log the FSOpenFile function.");
 WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("BSD");
