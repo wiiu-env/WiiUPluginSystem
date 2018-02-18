@@ -6,10 +6,10 @@
 #include "dynamic_libs/fs_functions.h"
 #include "utils/logger.h"
 
-WUPS_MODULE_NAME("test module");
-WUPS_MODULE_VERSION("v1.0");
-WUPS_MODULE_AUTHOR("Maschell");
-WUPS_MODULE_LICENSE("BSD");
+WUPS_PLUGIN_NAME("test PLUGIN");
+WUPS_PLUGIN_VERSION("v1.0");
+WUPS_PLUGIN_AUTHOR("Maschell");
+WUPS_PLUGIN_LICENSE("BSD");
 
 INITIALIZE(args){
    InitOSFunctionPointers();

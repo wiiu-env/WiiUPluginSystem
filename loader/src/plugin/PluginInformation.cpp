@@ -1,4 +1,4 @@
-/* based on module.c
+/* based on plugin.c
  *   by Alex Chadwick
  *
  * Copyright (C) 2014, Alex Chadwick
@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "ModuleInformation.h"
+#include "PluginInformation.h"
 #include <utils/logger.h>
 #include <dynamic_libs/os_types.h>
 #include <libelf.h>
@@ -36,7 +36,7 @@
 #include <utils/utils.h>
 #include "ElfTools.h"
 
-bool ModuleInformation::checkFileExtenstion(const char * path) {
+bool PluginInformation::checkFileExtenstion(const char * path) {
     if(path == NULL){
         return false;
     }
@@ -63,7 +63,7 @@ bool ModuleInformation::checkFileExtenstion(const char * path) {
     return false;
 }
 
-bool ModuleInformation::openAndParseElf() {
+bool PluginInformation::openAndParseElf() {
     bool result = false;
     int fd = -1;
     Elf *elf = NULL;
@@ -110,7 +110,7 @@ exit_error:
     return result;
 }
 
-bool ModuleInformation::parseElf( Elf *elf) {
+bool PluginInformation::parseElf( Elf *elf) {
     bool res = false;
     Elf_Scn *scn;
     Elf32_Ehdr *ehdr;
@@ -237,7 +237,7 @@ exit_error:
     return res;
 }
 
-bool ModuleInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
+bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
     char *metadata = NULL, *metadata_cur, *metadata_end;
     const char *game, *name, *author, *version, *license, *wups;
 
@@ -296,7 +296,7 @@ bool ModuleInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
     }
 
     if (metadata == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not a WUPS module file.\n", path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not a WUPS plugin file.\n", path);
         goto exit_error;
     }
 
@@ -326,37 +326,37 @@ bool ModuleInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
 
         if (strncmp(metadata_cur, "game", eq - metadata_cur) == 0) {
             if (game != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_GAME declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_GAME declarations.\n", path);
                 goto exit_error;
             }
             game = eq + 1;
         } else if (strncmp(metadata_cur, "name", eq - metadata_cur) == 0) {
             if (name != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_NAME declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_NAME declarations.\n", path);
                 goto exit_error;
             }
             name = eq + 1;
         } else if (strncmp(metadata_cur, "author", eq - metadata_cur) == 0) {
             if (author != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_AUTHOR declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_AUTHOR declarations.\n", path);
                 goto exit_error;
             }
             author = eq + 1;
         } else if (strncmp(metadata_cur, "version", eq - metadata_cur) == 0) {
             if (version != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_VERSION declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_VERSION declarations.\n", path);
                 goto exit_error;
             }
             version = eq + 1;
         } else if (strncmp(metadata_cur, "license", eq - metadata_cur) == 0) {
             if (license != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_LICENSE declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_LICENSE declarations.\n", path);
                 goto exit_error;
             }
             license = eq + 1;
         } else if (strncmp(metadata_cur, "wups", eq - metadata_cur) == 0) {
             if (wups != NULL) {
-                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_MODULE_NAME declarations.\n", path);
+                DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Multiple WUPS_PLUGIN_NAME declarations.\n", path);
                 goto exit_error;
             }
             wups = eq + 1;
@@ -372,19 +372,19 @@ bool ModuleInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
         goto exit_error;
     }*/
     if (name == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_MODULE_NAME declaration.\n",path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_PLUGIN_NAME declaration.\n",path);
         goto exit_error;
     }
     if (author == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_MODULE_AUTHOR declaration.\n", path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_PLUGIN_AUTHOR declaration.\n", path);
         goto exit_error;
     }
     if (version == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_MODULE_VERSION declaration.\n", path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_PLUGIN_VERSION declaration.\n", path);
         goto exit_error;
     }
     if (license == NULL) {
-        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_MODULE_LICENSE declaration.\n", path);
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Missing WUPS_PLUGIN_LICENSE declaration.\n", path);
         goto exit_error;
     }
 

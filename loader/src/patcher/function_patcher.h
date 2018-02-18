@@ -38,7 +38,7 @@ struct rpl_handling {
 #define DYNAMIC_FUNCTION         1
 
 #define FUNCTION_PATCHER_METHOD_STORE_SIZE                  7
-#define MAXIMUM_MODULE_NAME_LENGTH                          51
+#define MAXIMUM_PLUGIN_NAME_LENGTH                          51
 #define MAXIMUM_FUNCTION_NAME_LENGTH                        51
 
 struct replacement_data_function_t{
@@ -62,28 +62,28 @@ struct replacement_data_hook_t{
 
 };
 
-#define MAXIMUM_HOOKS_PER_MODULE                        10
-#define MAXIMUM_FUNCTION_PER_MODULE                     100
+#define MAXIMUM_HOOKS_PER_PLUGIN                        10
+#define MAXIMUM_FUNCTION_PER_PLUGIN                     100
 
-struct replacement_data_module_t{
-    char                        module_name[MAXIMUM_MODULE_NAME_LENGTH] = "";        // Name of this module
-    int                         priority;                                       // Priority of this module
-    int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_MODULE
-    replacement_data_function_t functions[MAXIMUM_FUNCTION_PER_MODULE];         // Replacement information for each function.
+struct replacement_data_plugin_t{
+    char                        plugin_name[MAXIMUM_PLUGIN_NAME_LENGTH] = "";        // Name of this plugin
+    int                         priority;                                       // Priority of this plugin
+    int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
+    replacement_data_function_t functions[MAXIMUM_FUNCTION_PER_PLUGIN];         // Replacement information for each function.
 
-    int                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_MODULE
-    replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_MODULE];                 // Replacement information for each function.
+    int                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_PLUGIN
+    replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_PLUGIN];                 // Replacement information for each function.
 };
 
-#define MAXIMUM_MODULES                                 32
+#define MAXIMUM_PLUGINS                                 32
 
 struct replacement_data_t{
-    int                         number_used_modules = 0;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_MODULE
-    replacement_data_module_t   module_data[MAXIMUM_MODULES];
+    int                         number_used_plugins = 0;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
+    replacement_data_plugin_t   plugin_data[MAXIMUM_PLUGINS];
 };
 
-void new_PatchInvidualMethodHooks(replacement_data_module_t * data);
-void new_RestoreInvidualInstructions(replacement_data_module_t * module_data);
+void new_PatchInvidualMethodHooks(replacement_data_plugin_t * data);
+void new_RestoreInvidualInstructions(replacement_data_plugin_t * plugin_data);
 u32 new_GetAddressOfFunction(const char * functionName,wups_loader_library_type_t library);
 s32 new_isDynamicFunction(u32 physicalAddress);
 void new_resetLibs();

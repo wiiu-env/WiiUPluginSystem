@@ -99,20 +99,20 @@ rpl_handling rpl_handles[] __attribute__((section(".data"))) = {
     {WUPS_LOADER_LIBRARY_ZLIB125,   "zlib125.rpl"   ,0}
 };
 
-void new_PatchInvidualMethodHooks(replacement_data_module_t * module_data){
+void new_PatchInvidualMethodHooks(replacement_data_plugin_t * plugin_data){
     InitAcquireOS();
     new_resetLibs();
 
-    DEBUG_FUNCTION_LINE("Patching %d given functions\n",module_data->number_used_functions);
+    DEBUG_FUNCTION_LINE("Patching %d given functions\n",plugin_data->number_used_functions);
 
-    s32 method_hooks_count = module_data->number_used_functions;
+    s32 method_hooks_count = plugin_data->number_used_functions;
 
     u32 skip_instr = 1;
     u32 my_instr_len = 6;
     u32 instr_len = my_instr_len + skip_instr;
     u32 flush_len = 4*instr_len;
     for(s32 i = 0; i < method_hooks_count; i++){
-        replacement_data_function_t * function_data = &module_data->functions[i];
+        replacement_data_function_t * function_data = &plugin_data->functions[i];
         /* Patch branches to it.  */
         volatile u32 *space = function_data->replace_data;
 
@@ -209,15 +209,15 @@ void new_PatchInvidualMethodHooks(replacement_data_module_t * module_data){
 /* ****************************************************************** */
 /*                  RESTORE ORIGINAL INSTRUCTIONS                     */
 /* ****************************************************************** */
-void new_RestoreInvidualInstructions(replacement_data_module_t * module_data){
+void new_RestoreInvidualInstructions(replacement_data_plugin_t * plugin_data){
     InitAcquireOS();
     new_resetLibs();
     DEBUG_FUNCTION_LINE("Restoring given functions!\n");
 
-    s32 method_hooks_count = module_data->number_used_functions;
+    s32 method_hooks_count = plugin_data->number_used_functions;
 
     for(s32 i = 0; i < method_hooks_count; i++){
-        replacement_data_function_t * function_data = &module_data->functions[i];
+        replacement_data_function_t * function_data = &plugin_data->functions[i];
 
         DEBUG_FUNCTION_LINE("Restoring %s... ",function_data->function_name);
         if(function_data->restoreInstruction == 0 || function_data->realAddr == 0){

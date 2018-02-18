@@ -175,7 +175,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                                     sizeof(module_unresolved_relocation_t), 1,
                                     &module_relocations_capacity,
                                     &module_relocations_count,
-                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
+                                    PLUGIN_RELOCATIONS_CAPCITY_DEFAULT);
                                 if (reloc == NULL)
                                     return false;
 
@@ -262,7 +262,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                                     sizeof(module_unresolved_relocation_t), 1,
                                     &module_relocations_capacity,
                                     &module_relocations_count,
-                                    MODULE_RELOCATIONS_CAPCITY_DEFAULT);
+                                    PLUGIN_RELOCATIONS_CAPCITY_DEFAULT);
                                 if (reloc == NULL)
                                     return false;
 
@@ -422,7 +422,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
 
     result = true;
 exit_error:
-    if (!result) DEBUG_FUNCTION_LINE("Module_ElfLinkOne: exit_error\n");
+    if (!result) DEBUG_FUNCTION_LINE("Plugin_ElfLinkOne: exit_error\n");
     return result;
 }
 

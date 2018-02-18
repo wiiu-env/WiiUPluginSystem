@@ -34,10 +34,10 @@
 #include <utils/logger.h>
 #include <common/c_retain_vars.h>
 
-WUPS_MODULE_NAME("SwipSwapMe");
-WUPS_MODULE_VERSION("v1.0");
-WUPS_MODULE_AUTHOR("Maschell");
-WUPS_MODULE_LICENSE("GPL");
+WUPS_PLUGIN_NAME("SwipSwapMe");
+WUPS_PLUGIN_VERSION("v1.0");
+WUPS_PLUGIN_AUTHOR("Maschell");
+WUPS_PLUGIN_LICENSE("GPL");
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 

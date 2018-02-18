@@ -5,10 +5,10 @@
 #include "dynamic_libs/socket_functions.h"
 #include "utils/logger.h"
 
-WUPS_MODULE_NAME("Padcon");
-WUPS_MODULE_VERSION("v1.0");
-WUPS_MODULE_AUTHOR("Maschell");
-WUPS_MODULE_LICENSE("GPL");
+WUPS_PLUGIN_NAME("Padcon");
+WUPS_PLUGIN_VERSION("v1.0");
+WUPS_PLUGIN_AUTHOR("Maschell");
+WUPS_PLUGIN_LICENSE("GPL");
 
 
 INITIALIZE(args){

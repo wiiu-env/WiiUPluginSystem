@@ -23,12 +23,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODULE_LOADER_H_
-#define _MODULE_LOADER_H_
+#ifndef _PLUGIN_LOADER_H_
+#define _PLUGIN_LOADER_H_
 
 #include <vector>
-#include "ModuleInformation.h"
-#include "ModuleData.h"
+#include "PluginInformation.h"
+#include "PluginData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,12 +43,12 @@ extern "C" {
 
 #define PLUGIN_LOCATION_END_ADDRESS 0x01000000
 
-class ModuleLoader{
+class PluginLoader{
 
 public:
-    static ModuleLoader *getInstance() {
+    static PluginLoader *getInstance() {
         if(!instance){
-            instance = new ModuleLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
+            instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
         }
         return instance;
     }
@@ -65,9 +65,9 @@ public:
 
         \param path the path of the directory which should be scanned.
 
-        \return a list of ModuleInformation objects, one for each valid plugin.
+        \return a list of PluginInformation objects, one for each valid plugin.
     **/
-    std::vector<ModuleInformation *> getModuleInformation(const char * path);
+    std::vector<PluginInformation *> getPluginInformation(const char * path);
 
     /**
         \brief Gets plugin information from the global struct.
@@ -75,64 +75,64 @@ public:
         \return a list of MetaInformation objects for all plugins currently loaded and linked (relocated). Will only contain
                 plugin which are still on the sd card.
     **/
-    //std::vector<ModuleInformation *> getModulesLoadedInMemory();
+    //std::vector<PluginInformation *> getPluginsLoadedInMemory();
 
     /**
-        \brief  Takes a list of modules that should be linked (relocated) loaded into the memory.
+        \brief  Takes a list of plugins that should be linked (relocated) loaded into the memory.
                 The function that should be replaced will be replaced in the order of the given plugin list.
                 So two plugin will override the same function, the plugin first in this list will override the function first.
                 Also the hooks of the plugins will be called in the order their plugin where passed to this method.
 
         \param A list of plugin that should be linked (relocated) an loaded into memory
     **/
-    void loadAndLinkModules(std::vector<ModuleInformation *> moduleInformation);
+    void loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation);
 private:
-    ModuleLoader(void * startAddress, void * endAddress){
+    PluginLoader(void * startAddress, void * endAddress){
         // TODO: Check if endAddress > startAddress.
         this->startAddress = startAddress;
         this->endAddress = endAddress;
         this->currentStoreAddress = endAddress;
     }
 
-    ~ModuleLoader(){
+    ~PluginLoader(){
 
     }
 
-    static ModuleLoader *instance;
+    static PluginLoader *instance;
 
     /**
         \brief  Iterates through the vector and delete all it's elements
 
-        \param A list of ModuleData* that should be deleted.
+        \param A list of PluginData* that should be deleted.
     **/
-    void clearModuleData(std::vector<ModuleData *> moduleData);
+    void clearPluginData(std::vector<PluginData *> pluginData);
 
     /**
         \brief Load
 
-        \param moduleInformation a ModuleInformation object of the plugin that should be linked (relocated) and loaded.
+        \param pluginInformation a PluginInformation object of the plugin that should be linked (relocated) and loaded.
 
-        \return NULL on error. On success it will return a ModuleData object.
+        \return NULL on error. On success it will return a PluginData object.
     **/
-    ModuleData * loadAndLinkModule(ModuleInformation * moduleInformation);
+    PluginData * loadAndLinkPlugin(PluginInformation * pluginInformation);
 
     /**
         \brief  Loads a plugin into memory (in the startAddress/endAddress range defined in this loader) and relocates it.
-                Modifies the moduleData param. Adds loaded functions and hooks.
-        \param moduleData object where the result should be stored
+                Modifies the pluginData param. Adds loaded functions and hooks.
+        \param pluginData object where the result should be stored
         \param elf source elf from where the sections will be loaded
         \param storeAddressEnd the address where the plugin data will be stored in memory. Saving BACKWARD.
 
     **/
-    bool loadAndLinkElf(ModuleData * moduleData, Elf *elf, void * storeAddressEnd);
+    bool loadAndLinkElf(PluginData * pluginData, Elf *elf, void * storeAddressEnd);
 
      /**
         \brief  Copies the needed information into a global, persistent struct. This struct holds information on which
                 function should be override in which order and which hook should be called.
-        \param modules list of modules that should be used.
+        \param plugins list of plugins that should be used.
 
     **/
-    void copyModuleDataIntoGlobalStruct(std::vector<ModuleData *> modules);
+    void copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plugins);
 
     void * getCurrentStoreAddress(){
         return this->currentStoreAddress;

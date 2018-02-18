@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _MODULE_INFORMATION_H_
-#define _MODULE_INFORMATION_H_
+#ifndef _PLUGIN_INFORMATION_H_
+#define _PLUGIN_INFORMATION_H_
 
 #include <string>
 #include <vector>
@@ -42,20 +42,20 @@ extern "C" {
 }
 #endif
 
-class ModuleInformation{
+class PluginInformation{
     public:
         /**
 
-        returns ModuleInformation* if a valid plugin was found at the given path. Otherwise returns NULL
+        returns PluginInformation* if a valid plugin was found at the given path. Otherwise returns NULL
         **/
-        static ModuleInformation * loadModuleInformation(std::string path){
-            if(ModuleInformation::checkFileExtenstion(path.c_str())){
-                DEBUG_FUNCTION_LINE("Checkfile successfully, loading now Module Information\n");
-                ModuleInformation * moduleInformation = new ModuleInformation(path);
-                if(moduleInformation->openAndParseElf()){
-                    return moduleInformation;
+        static PluginInformation * loadPluginInformation(std::string path){
+            if(PluginInformation::checkFileExtenstion(path.c_str())){
+                DEBUG_FUNCTION_LINE("Checkfile successfully, loading now Plugin Information\n");
+                PluginInformation * pluginInformation = new PluginInformation(path);
+                if(pluginInformation->openAndParseElf()){
+                    return pluginInformation;
                 }else{
-                    delete moduleInformation;
+                    delete pluginInformation;
                     return NULL;
                 }
             } else {
@@ -87,7 +87,7 @@ class ModuleInformation{
             return this->size;
         }
     private:
-        ModuleInformation(std::string path){
+        PluginInformation(std::string path){
             this->path = path;
         }
 

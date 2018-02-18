@@ -9,10 +9,10 @@
 #include <utils/logger.h>
 #include <fs/sd_fat_devoptab.h>
 
-WUPS_MODULE_NAME("HID to VPAD lite");
-WUPS_MODULE_VERSION("v1.0");
-WUPS_MODULE_AUTHOR("Maschell");
-WUPS_MODULE_LICENSE("GPL");
+WUPS_PLUGIN_NAME("HID to VPAD lite");
+WUPS_PLUGIN_VERSION("v1.0");
+WUPS_PLUGIN_AUTHOR("Maschell");
+WUPS_PLUGIN_LICENSE("GPL");
 
 #define SD_PATH                     "sd:"
 #define WIIU_PATH "/wiiu"

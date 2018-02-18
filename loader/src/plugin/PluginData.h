@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef _MODULE_DATA_H_
-#define _MODULE_DATA_H_
+#ifndef _PLUGIN_DATA_H_
+#define _PLUGIN_DATA_H_
 
 #include <string>
 #include <vector>
 #include "EntryData.h"
 #include "HookData.h"
-#include "ModuleInformation.h"
+#include "PluginInformation.h"
 #include <utils/logger.h>
 
 #ifdef __cplusplus
@@ -35,13 +35,13 @@ extern "C" {
 }
 #endif
 
-class ModuleData{
+class PluginData{
     public:
-        ModuleData(ModuleInformation * moduleInformation){
-            this->moduleInformation = moduleInformation;
+        PluginData(PluginInformation * pluginInformation){
+            this->pluginInformation = pluginInformation;
         }
 
-        ~ModuleData(){
+        ~PluginData(){
             for(size_t i = 0;i< entry_data_list.size();i++){
                 if(entry_data_list[i] != NULL){
                     delete entry_data_list[i];
@@ -71,13 +71,13 @@ class ModuleData{
             return hook_data_list;
         }
 
-        ModuleInformation * getModuleInformation(){
-            return moduleInformation;
+        PluginInformation * getPluginInformation(){
+            return pluginInformation;
         }
 
     private:
 
-        ModuleInformation * moduleInformation;
+        PluginInformation * pluginInformation;
 
         std::vector<EntryData *> entry_data_list;
         std::vector<HookData *> hook_data_list;

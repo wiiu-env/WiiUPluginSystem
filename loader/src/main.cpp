@@ -30,8 +30,8 @@
 
 #include "common/retain_vars.h"
 #include "common/common.h"
-#include "modules/ModuleLoader.h"
-#include "modules/ModuleData.h"
+#include "plugin/PluginLoader.h"
+#include "plugin/PluginInformation.h"
 
 #include <utils/function_patcher.h>
 
@@ -89,9 +89,9 @@ extern "C" int Menu_Main(int argc, char **argv){
     if(isFirstBoot){
         memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
 
-        ModuleLoader * moduleLoader  = ModuleLoader::getInstance();
-        std::vector<ModuleInformation *> moduleList = moduleLoader->getModuleInformation("sd:/wiiu/plugins/");
-        moduleLoader->loadAndLinkModules(moduleList);
+        PluginLoader * pluginLoader  = PluginLoader::getInstance();
+        std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
+        pluginLoader->loadAndLinkPlugins(pluginList);
 
         //!*******************************************************************
         //!                    Initialize heap memory                        *
@@ -149,18 +149,18 @@ extern "C" int Menu_Main(int argc, char **argv){
 
 void ApplyPatches(){
     PatchInvidualMethodHooks(method_hooks_hooks, method_hooks_size_hooks, method_calls_hooks);
-    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
-        new_PatchInvidualMethodHooks(&gbl_replacement_data.module_data[module_index]);
+    for(int plugin_index=0;plugin_index<gbl_replacement_data.number_used_plugins;plugin_index++){
+        new_PatchInvidualMethodHooks(&gbl_replacement_data.plugin_data[plugin_index]);
     }
 }
 
 void CallHook(wups_loader_hook_type_t hook_type){
-    for(int module_index=0;module_index<gbl_replacement_data.number_used_modules;module_index++){
-        replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
-        DEBUG_FUNCTION_LINE("Checking hook functions for %s.\n",module_data->module_name);
-        DEBUG_FUNCTION_LINE("Found hooks: %d\n",module_data->number_used_hooks);
-        for(int j=0;j<module_data->number_used_hooks;j++){
-            replacement_data_hook_t * hook_data = &module_data->hooks[j];
+    for(int plugin_index=0;plugin_index<gbl_replacement_data.number_used_plugins;plugin_index++){
+        replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
+        DEBUG_FUNCTION_LINE("Checking hook functions for %s.\n",plugin_data->plugin_name);
+        DEBUG_FUNCTION_LINE("Found hooks: %d\n",plugin_data->number_used_hooks);
+        for(int j=0;j<plugin_data->number_used_hooks;j++){
+            replacement_data_hook_t * hook_data = &plugin_data->hooks[j];
             if(hook_data->type == hook_type){
                 DEBUG_FUNCTION_LINE("Calling hook of type %d\n",hook_data->type);
                 void * func_ptr = hook_data->func_pointer;
@@ -198,9 +198,9 @@ void DeInit(){
 }
 
 void RestorePatches(){
-    for(int module_index=gbl_replacement_data.number_used_modules-1;module_index>=0;module_index--){
-        DEBUG_FUNCTION_LINE("Restoring function for module: %d\n",module_index);
-        new_RestoreInvidualInstructions(&gbl_replacement_data.module_data[module_index]);
+    for(int plugin_index=gbl_replacement_data.number_used_plugins-1;plugin_index>=0;plugin_index--){
+        DEBUG_FUNCTION_LINE("Restoring function for plugin: %d\n",plugin_index);
+        new_RestoreInvidualInstructions(&gbl_replacement_data.plugin_data[plugin_index]);
     }
     RestoreInvidualInstructions(method_hooks_hooks, method_hooks_size_hooks);
 }

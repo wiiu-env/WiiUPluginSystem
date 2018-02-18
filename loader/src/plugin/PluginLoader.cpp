@@ -29,15 +29,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "ElfTools.h"
-#include "ModuleData.h"
-#include "ModuleLoader.h"
+#include "PluginData.h"
+#include "PluginLoader.h"
 #include "utils/StringTools.h"
 #include "common/retain_vars.h"
 
-ModuleLoader * ModuleLoader::instance = NULL;
+PluginLoader * PluginLoader::instance = NULL;
 
-std::vector<ModuleInformation *> ModuleLoader::getModuleInformation(const char * path){
-    std::vector<ModuleInformation *> result;
+std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char * path){
+    std::vector<PluginInformation *> result;
     struct dirent *dp;
     DIR *dfd = NULL;
 
@@ -64,10 +64,10 @@ std::vector<ModuleInformation *> ModuleLoader::getModuleInformation(const char *
             continue;
         }else{
             DEBUG_FUNCTION_LINE("Found file: %s\n",full_file_path.c_str()) ;
-            ModuleInformation * module = ModuleInformation::loadModuleInformation(full_file_path);
-            if(module != NULL){
-                DEBUG_FUNCTION_LINE("Found plugin %s by %s. Size: %d kb \n",module->getName().c_str(),module->getAuthor().c_str(),module->getSize()/1024) ;
-                result.push_back(module);
+            PluginInformation * plugin = PluginInformation::loadPluginInformation(full_file_path);
+            if(plugin != NULL){
+                DEBUG_FUNCTION_LINE("Found plugin %s by %s. Size: %d kb \n",plugin->getName().c_str(),plugin->getAuthor().c_str(),plugin->getSize()/1024) ;
+                result.push_back(plugin);
             } else {
                 DEBUG_FUNCTION_LINE("%s is not a valid plugin\n",full_file_path.c_str()) ;
             }
@@ -77,46 +77,46 @@ std::vector<ModuleInformation *> ModuleLoader::getModuleInformation(const char *
     return result;
 }
 
-void ModuleLoader::loadAndLinkModules(std::vector<ModuleInformation *> moduleInformation){
-    std::vector<ModuleData *> loadedModules;
-    for(size_t i = 0;i < moduleInformation.size(); i++){
-        DEBUG_FUNCTION_LINE("loadAndLinkModules for %d\n",i) ;
-        ModuleInformation * cur_info = moduleInformation[i];
-        ModuleData * moduleData = loadAndLinkModule(cur_info);
-        if(moduleData == NULL){
-            DEBUG_FUNCTION_LINE("loadAndLinkModules failed for %d\n",i) ;
+void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation){
+    std::vector<PluginData *> loadedPlugins;
+    for(size_t i = 0;i < pluginInformation.size(); i++){
+        DEBUG_FUNCTION_LINE("loadAndLinkPlugins for %d\n",i) ;
+        PluginInformation * cur_info = pluginInformation[i];
+        PluginData * pluginData = loadAndLinkPlugin(cur_info);
+        if(pluginData == NULL){
+            DEBUG_FUNCTION_LINE("loadAndLinkPlugins failed for %d\n",i) ;
             continue;
         } else {
-            loadedModules.push_back(moduleData);
+            loadedPlugins.push_back(pluginData);
         }
     }
 
-    copyModuleDataIntoGlobalStruct(loadedModules);
-    clearModuleData(loadedModules);
+    copyPluginDataIntoGlobalStruct(loadedPlugins);
+    clearPluginData(loadedPlugins);
 }
 
-void ModuleLoader::clearModuleData(std::vector<ModuleData *> moduleData){
-    for(size_t i = 0;i < moduleData.size(); i++){
-        ModuleData * curModuleData = moduleData[i];
-        if(curModuleData != NULL){
-            delete curModuleData;
+void PluginLoader::clearPluginData(std::vector<PluginData *> pluginData){
+    for(size_t i = 0;i < pluginData.size(); i++){
+        PluginData * curPluginData = pluginData[i];
+        if(curPluginData != NULL){
+            delete curPluginData;
         }
     }
 }
 
 
-ModuleData * ModuleLoader::loadAndLinkModule(ModuleInformation * moduleInformation){
+PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformation){
     DEBUG_FUNCTION_LINE("\n");
-    ModuleData * result = NULL;
+    PluginData * result = NULL;
     int fd = -1;
     Elf *elf = NULL;
 
-    if(moduleInformation == NULL){
-        DEBUG_FUNCTION_LINE("moduleInformation was NULL\n");
+    if(pluginInformation == NULL){
+        DEBUG_FUNCTION_LINE("pluginInformation was NULL\n");
         goto exit_error;
     }
 
-    if(moduleInformation->getSize() > ((u32) this->getCurrentStoreAddress() - (u32) this->startAddress)){
+    if(pluginInformation->getSize() > ((u32) this->getCurrentStoreAddress() - (u32) this->startAddress)){
         DEBUG_FUNCTION_LINE("Not enough space left to loader the plugin into memory\n");
         goto exit_error;
     }
@@ -126,10 +126,10 @@ ModuleData * ModuleLoader::loadAndLinkModule(ModuleInformation * moduleInformati
         goto exit_error;
     }
 
-    fd = open(moduleInformation->getPath().c_str(), O_RDONLY, 0);
+    fd = open(pluginInformation->getPath().c_str(), O_RDONLY, 0);
 
     if (fd == -1){
-        DEBUG_FUNCTION_LINE("failed to open '%s' \n", moduleInformation->getPath().c_str());
+        DEBUG_FUNCTION_LINE("failed to open '%s' \n", pluginInformation->getPath().c_str());
         goto exit_error;
     }
 
@@ -141,7 +141,7 @@ ModuleData * ModuleLoader::loadAndLinkModule(ModuleInformation * moduleInformati
     }
 
     DEBUG_FUNCTION_LINE("\n");
-    result = new ModuleData(moduleInformation);
+    result = new PluginData(pluginInformation);
     if(result == NULL){
         DEBUG_FUNCTION_LINE("Failed to create object\n");
         goto exit_error;
@@ -162,8 +162,8 @@ exit_error:
     return result;
 }
 
-bool ModuleLoader::loadAndLinkElf(ModuleData * moduleData, Elf *elf, void * endAddress) {
-    if(moduleData == NULL || elf == NULL || endAddress == NULL){
+bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endAddress) {
+    if(pluginData == NULL || elf == NULL || endAddress == NULL){
         return false;
     }
 
@@ -317,16 +317,16 @@ bool ModuleLoader::loadAndLinkElf(ModuleData * moduleData, Elf *elf, void * endA
     for(size_t j=0;j<hook_t_list.size();j++){
         wups_loader_hook_t * hook = hook_t_list[j];
 
-        DEBUG_FUNCTION_LINE("Saving hook of module \"%s\". Type: %08X, target: %08X\n",moduleData->getModuleInformation()->getName().c_str(),hook->type,(void*) hook->target);
+        DEBUG_FUNCTION_LINE("Saving hook of plugin \"%s\". Type: %08X, target: %08X\n",pluginData->getPluginInformation()->getName().c_str(),hook->type,(void*) hook->target);
         HookData * hook_data = new HookData((void *) hook->target,hook->type);
-        moduleData->addHookData(hook_data);
+        pluginData->addHookData(hook_data);
     }
 
     for(size_t j=0;j<entry_t_list.size();j++){
         wups_loader_entry_t * entry = entry_t_list[j];
-        DEBUG_FUNCTION_LINE("Saving entry \"%s\" of module \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",entry->_function.name,moduleData->getModuleInformation()->getName().c_str(),entry->_function.library,entry->_function.target, (void *) entry->_function.call_addr);
+        DEBUG_FUNCTION_LINE("Saving entry \"%s\" of plugin \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",entry->_function.name,pluginData->getPluginInformation()->getName().c_str(),entry->_function.library,entry->_function.target, (void *) entry->_function.call_addr);
         EntryData * entry_data = new EntryData(entry->_function.name,entry->_function.library, (void *) entry->_function.target, (void *) entry->_function.call_addr);
-        moduleData->addEntryData(entry_data);
+        pluginData->addEntryData(entry_data);
     }
 
     this->setCurrentStoreAddress((void *) curAddress);
@@ -349,39 +349,39 @@ exit_error:
     return result;
 }
 
-void ModuleLoader::copyModuleDataIntoGlobalStruct(std::vector<ModuleData *> modules){
+void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plugins){
     // Reset data
     memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
-    int module_index = 0;
+    int plugin_index = 0;
     // Copy data to global struct.
-    for(size_t i = 0; i< modules.size();i++){
-        ModuleData * cur_module = modules.at(i);
-        ModuleInformation * cur_moduleInformation = cur_module->getModuleInformation();
+    for(size_t i = 0; i< plugins.size();i++){
+        PluginData * cur_plugin = plugins.at(i);
+        PluginInformation * cur_pluginInformation = cur_plugin->getPluginInformation();
 
-        std::vector<EntryData *> entry_data_list = cur_module->getEntryDataList();
-        std::vector<HookData *> hook_data_list = cur_module->getHookDataList();
-        if(module_index >= MAXIMUM_MODULES ){
-            DEBUG_FUNCTION_LINE("Maximum of %d modules reached. %s won't be loaded!\n",MAXIMUM_MODULES,cur_moduleInformation->getName().c_str());
+        std::vector<EntryData *> entry_data_list = cur_plugin->getEntryDataList();
+        std::vector<HookData *> hook_data_list = cur_plugin->getHookDataList();
+        if(plugin_index >= MAXIMUM_PLUGINS ){
+            DEBUG_FUNCTION_LINE("Maximum of %d plugins reached. %s won't be loaded!\n",MAXIMUM_PLUGINS,cur_pluginInformation->getName().c_str());
             continue;
         }
-        if(entry_data_list.size() > MAXIMUM_FUNCTION_PER_MODULE){
-            DEBUG_FUNCTION_LINE("Module %s would replace to many function (%d, maximum is %d). It won't be loaded.\n",cur_moduleInformation->getName().c_str(),entry_data_list.size(),MAXIMUM_FUNCTION_PER_MODULE);
+        if(entry_data_list.size() > MAXIMUM_FUNCTION_PER_PLUGIN){
+            DEBUG_FUNCTION_LINE("Plugin %s would replace to many function (%d, maximum is %d). It won't be loaded.\n",cur_pluginInformation->getName().c_str(),entry_data_list.size(),MAXIMUM_FUNCTION_PER_PLUGIN);
             continue;
         }
-        if(hook_data_list.size() > MAXIMUM_HOOKS_PER_MODULE){
-            DEBUG_FUNCTION_LINE("Module %s would set too many hooks (%d, maximum is %d). It won't be loaded.\n",cur_moduleInformation->getName().c_str(),hook_data_list.size(),MAXIMUM_HOOKS_PER_MODULE);
+        if(hook_data_list.size() > MAXIMUM_HOOKS_PER_PLUGIN){
+            DEBUG_FUNCTION_LINE("Plugin %s would set too many hooks (%d, maximum is %d). It won't be loaded.\n",cur_pluginInformation->getName().c_str(),hook_data_list.size(),MAXIMUM_HOOKS_PER_PLUGIN);
             continue;
         }
 
-        replacement_data_module_t * module_data = &gbl_replacement_data.module_data[module_index];
+        replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
 
-        strncpy(module_data->module_name,cur_moduleInformation->getName().c_str(),MAXIMUM_MODULE_NAME_LENGTH-1);
+        strncpy(plugin_data->plugin_name,cur_pluginInformation->getName().c_str(),MAXIMUM_PLUGIN_NAME_LENGTH-1);
 
         for(size_t j = 0; j < entry_data_list.size();j++){
-            replacement_data_function_t * function_data = &module_data->functions[j];
+            replacement_data_function_t * function_data = &plugin_data->functions[j];
 
             EntryData * cur_entry = entry_data_list[j];
-            DEBUG_FUNCTION_LINE("Adding entry \"%s\" for module \"%s\"\n",cur_entry->getName().c_str(),module_data->module_name);
+            DEBUG_FUNCTION_LINE("Adding entry \"%s\" for plugin \"%s\"\n",cur_entry->getName().c_str(),plugin_data->plugin_name);
 
             //TODO: Warning/Error if string is too long.
             strncpy(function_data->function_name,cur_entry->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
@@ -390,25 +390,25 @@ void ModuleLoader::copyModuleDataIntoGlobalStruct(std::vector<ModuleData *> modu
             function_data->replaceAddr = (u32) cur_entry->getReplaceAddress();
             function_data->replaceCall = (u32) cur_entry->getReplaceCall();
 
-            module_data->number_used_functions++;
+            plugin_data->number_used_functions++;
         }
 
-        DEBUG_FUNCTION_LINE("Entries for module \"%s\": %d\n",module_data->module_name,module_data->number_used_functions);
+        DEBUG_FUNCTION_LINE("Entries for plugin \"%s\": %d\n",plugin_data->plugin_name,plugin_data->number_used_functions);
 
         for(size_t j = 0; j < hook_data_list.size();j++){
-            replacement_data_hook_t * hook_data = &module_data->hooks[j];
+            replacement_data_hook_t * hook_data = &plugin_data->hooks[j];
 
             HookData * hook_entry = hook_data_list[j];
 
-            DEBUG_FUNCTION_LINE("Set hook for module \"%s\" of type %08X to target %08X\n",module_data->module_name,hook_entry->getType(),(void*) hook_entry->getFunctionPointer());
+            DEBUG_FUNCTION_LINE("Set hook for plugin \"%s\" of type %08X to target %08X\n",plugin_data->plugin_name,hook_entry->getType(),(void*) hook_entry->getFunctionPointer());
             hook_data->func_pointer = (void*) hook_entry->getFunctionPointer();
             hook_data->type         = hook_entry->getType();
-            module_data->number_used_hooks++;
+            plugin_data->number_used_hooks++;
         }
 
-        DEBUG_FUNCTION_LINE("Hooks for module \"%s\": %d\n",module_data->module_name,module_data->number_used_hooks);
+        DEBUG_FUNCTION_LINE("Hooks for plugin \"%s\": %d\n",plugin_data->plugin_name,plugin_data->number_used_hooks);
 
-        module_index++;
-        gbl_replacement_data.number_used_modules++;
+        plugin_index++;
+        gbl_replacement_data.number_used_plugins++;
     }
 }
