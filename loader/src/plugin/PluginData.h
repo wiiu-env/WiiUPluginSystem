@@ -20,7 +20,7 @@
 
 #include <string>
 #include <vector>
-#include "EntryData.h"
+#include "FunctionData.h"
 #include "HookData.h"
 #include "PluginInformation.h"
 #include <utils/logger.h>
@@ -42,9 +42,9 @@ class PluginData{
         }
 
         ~PluginData(){
-            for(size_t i = 0;i< entry_data_list.size();i++){
-                if(entry_data_list[i] != NULL){
-                    delete entry_data_list[i];
+            for(size_t i = 0;i< function_data_list.size();i++){
+                if(function_data_list[i] != NULL){
+                    delete function_data_list[i];
                 }
             }
 
@@ -55,12 +55,12 @@ class PluginData{
             }
         }
 
-        void addEntryData(EntryData * entry_data){
-            entry_data_list.push_back(entry_data);
+        void addFunctionData(FunctionData * function_data){
+            function_data_list.push_back(function_data);
         }
 
-        std::vector<EntryData *> getEntryDataList(){
-            return entry_data_list;
+        std::vector<FunctionData *> getFunctionDataList(){
+            return function_data_list;
         }
 
         void addHookData(HookData * hook_data){
@@ -79,7 +79,7 @@ class PluginData{
 
         PluginInformation * pluginInformation;
 
-        std::vector<EntryData *> entry_data_list;
+        std::vector<FunctionData *> function_data_list;
         std::vector<HookData *> hook_data_list;
 };
 

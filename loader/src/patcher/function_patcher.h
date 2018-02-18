@@ -50,37 +50,33 @@ struct replacement_data_function_t{
     u32 realAddr;                                                   /* [will be filled] Address of the real function we want to replace. */
     volatile u32 replace_data [FUNCTION_PATCHER_METHOD_STORE_SIZE]; /* [will be filled] Space for us to store some jump instructions */
     u32 restoreInstruction;                                         /* [will be filled] Copy of the instruction we replaced to jump to our code. */
-    u8 functionType;                                                /* [needs to be filled] name of the function we want to replace */
+    u8 functionType;                                                /* [will be filled] */
     u8 alreadyPatched;                                              /* [will be filled] */
-    u32 entry_index;                                                /* [needs to be filled] name of the function we want to replace */
-
 };
 
 struct replacement_data_hook_t{
     void * func_pointer = NULL;                                     /* [will be filled] */
     wups_loader_hook_type_t type;                                   /* [will be filled] */
-    u32 hook_index;                                                 /* [needs to be filled] name of the function we want to replace */
-
 };
 
 #define MAXIMUM_HOOKS_PER_PLUGIN                        10
 #define MAXIMUM_FUNCTION_PER_PLUGIN                     100
 
 struct replacement_data_plugin_t{
-    char                        path[MAXIMUM_PLUGIN_PATH_NAME_LENGTH];
-    char                        plugin_name[MAXIMUM_PLUGIN_NAME_LENGTH] = "";        // Name of this plugin
+    char                        path[MAXIMUM_PLUGIN_PATH_NAME_LENGTH] = "";     // Path where the plugin is stored
+    char                        plugin_name[MAXIMUM_PLUGIN_NAME_LENGTH] = "";   // Name of this plugin
     int                         priority;                                       // Priority of this plugin
     int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
     replacement_data_function_t functions[MAXIMUM_FUNCTION_PER_PLUGIN];         // Replacement information for each function.
 
     int                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_PLUGIN
-    replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_PLUGIN];                 // Replacement information for each function.
+    replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_PLUGIN];                // Replacement information for each function.
 };
 
 #define MAXIMUM_PLUGINS                                 32
 
 struct replacement_data_t{
-    int                         number_used_plugins = 0;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
+    int                         number_used_plugins = 0;                        // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
     replacement_data_plugin_t   plugin_data[MAXIMUM_PLUGINS];
 };
 

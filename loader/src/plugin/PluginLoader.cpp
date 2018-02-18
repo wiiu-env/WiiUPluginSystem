@@ -200,7 +200,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     std::vector<wups_loader_entry_t *> entry_t_list;
     std::vector<wups_loader_hook_t *> hook_t_list;
 
-    std::vector<EntryData *> entry_data_list;
+    std::vector<FunctionData *> function_data_list;
     std::vector<HookData *> hook_data_list;
 
     if (!ElfTools::loadElfSymtab(elf, &symtab, &symtab_count, &symtab_strndx)){
@@ -341,10 +341,10 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     }
 
     for(size_t j=0;j<entry_t_list.size();j++){
-        wups_loader_entry_t * entry = entry_t_list[j];
-        DEBUG_FUNCTION_LINE("Saving entry \"%s\" of plugin \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",entry->_function.name,pluginData->getPluginInformation()->getName().c_str(),entry->_function.library,entry->_function.target, (void *) entry->_function.call_addr);
-        EntryData * entry_data = new EntryData(entry->_function.name,entry->_function.library, (void *) entry->_function.target, (void *) entry->_function.call_addr);
-        pluginData->addEntryData(entry_data);
+        wups_loader_entry_t * cur_function = entry_t_list[j];
+        DEBUG_FUNCTION_LINE("Saving function \"%s\" of plugin \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",cur_function->_function.name,pluginData->getPluginInformation()->getName().c_str(),cur_function->_function.library,cur_function->_function.target, (void *) cur_function->_function.call_addr);
+        FunctionData * function_data = new FunctionData(cur_function->_function.name,cur_function->_function.library, (void *) cur_function->_function.target, (void *) cur_function->_function.call_addr);
+        pluginData->addFunctionData(function_data);
     }
 
     this->setCurrentStoreAddress((void *) curAddress);
@@ -376,14 +376,14 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
         PluginData * cur_plugin = plugins.at(i);
         PluginInformation * cur_pluginInformation = cur_plugin->getPluginInformation();
 
-        std::vector<EntryData *> entry_data_list = cur_plugin->getEntryDataList();
+        std::vector<FunctionData *> function_data_list = cur_plugin->getFunctionDataList();
         std::vector<HookData *> hook_data_list = cur_plugin->getHookDataList();
         if(plugin_index >= MAXIMUM_PLUGINS ){
             DEBUG_FUNCTION_LINE("Maximum of %d plugins reached. %s won't be loaded!\n",MAXIMUM_PLUGINS,cur_pluginInformation->getName().c_str());
             continue;
         }
-        if(entry_data_list.size() > MAXIMUM_FUNCTION_PER_PLUGIN){
-            DEBUG_FUNCTION_LINE("Plugin %s would replace to many function (%d, maximum is %d). It won't be loaded.\n",cur_pluginInformation->getName().c_str(),entry_data_list.size(),MAXIMUM_FUNCTION_PER_PLUGIN);
+        if(function_data_list.size() > MAXIMUM_FUNCTION_PER_PLUGIN){
+            DEBUG_FUNCTION_LINE("Plugin %s would replace to many function (%d, maximum is %d). It won't be loaded.\n",cur_pluginInformation->getName().c_str(),function_data_list.size(),MAXIMUM_FUNCTION_PER_PLUGIN);
             continue;
         }
         if(hook_data_list.size() > MAXIMUM_HOOKS_PER_PLUGIN){
@@ -396,18 +396,18 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
         strncpy(plugin_data->plugin_name,cur_pluginInformation->getName().c_str(),MAXIMUM_PLUGIN_NAME_LENGTH-1);
         strncpy(plugin_data->path,cur_pluginInformation->getPath().c_str(),MAXIMUM_PLUGIN_PATH_NAME_LENGTH-1);
 
-        for(size_t j = 0; j < entry_data_list.size();j++){
+        for(size_t j = 0; j < function_data_list.size();j++){
             replacement_data_function_t * function_data = &plugin_data->functions[j];
 
-            EntryData * cur_entry = entry_data_list[j];
-            DEBUG_FUNCTION_LINE("Adding entry \"%s\" for plugin \"%s\"\n",cur_entry->getName().c_str(),plugin_data->plugin_name);
+            FunctionData * cur_function = function_data_list[j];
+            DEBUG_FUNCTION_LINE("Adding function \"%s\" for plugin \"%s\"\n",cur_function->getName().c_str(),plugin_data->plugin_name);
 
             //TODO: Warning/Error if string is too long.
-            strncpy(function_data->function_name,cur_entry->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
+            strncpy(function_data->function_name,cur_function->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
 
-            function_data->library = cur_entry->getLibrary();
-            function_data->replaceAddr = (u32) cur_entry->getReplaceAddress();
-            function_data->replaceCall = (u32) cur_entry->getReplaceCall();
+            function_data->library = cur_function->getLibrary();
+            function_data->replaceAddr = (u32) cur_function->getReplaceAddress();
+            function_data->replaceCall = (u32) cur_function->getReplaceCall();
 
             plugin_data->number_used_functions++;
         }

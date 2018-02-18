@@ -28,7 +28,7 @@
 
 #include <string>
 #include <vector>
-#include "EntryData.h"
+#include "FunctionData.h"
 #include "HookData.h"
 #include <utils/logger.h>
 

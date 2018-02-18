@@ -15,23 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef _ENTRY_DATA_H_
-#define _ENTRY_DATA_H_
+#ifndef _FUNCTION_DATA_H_
+#define _FUNCTION_DATA_H_
 
 #include <wups.h>
 #include <string>
 
-class EntryData{
+class FunctionData{
 
 public:
-    EntryData(const char * name, wups_loader_library_type_t library, void * target, void * call_addr){
+    FunctionData(const char * name, wups_loader_library_type_t library, void * target, void * call_addr){
         this->name = name;
         this->library = library;
         this->replaceAddr = target;
         this->replaceCall = call_addr;
     }
 
-    ~EntryData(){
+    ~FunctionData(){
 
     }
 

@@ -188,10 +188,10 @@ typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
 	struct {
 		const char *name;                           /* Name of the function that will be replaced */
-		const wups_loader_library_type_t library;   /**/            
-		const char *my_function_name;               /* Function name of your own, new function (my_XXX) */     
-		const void *call_addr;                      /* Function name of function, to call the real function.(real_XXX) */            
-		const void *target;                         /*Address of our own, new function (my_XXX)*/
+		const wups_loader_library_type_t library;   /**/
+		const char *my_function_name;               /* Function name of your own, new function (my_XXX) */
+		const void *target;                         /* Address of our own, new function (my_XXX)*/
+		const void *call_addr;                      /* Address for calling the real function.(real_XXX) */
 	} _function;
 } wups_loader_entry_t;
 
@@ -206,8 +206,8 @@ typedef struct wups_loader_entry_t {
                 .name = #replace_function_name, \
                 .library = rpl_type, \
                 .my_function_name = #replace_func, \
-                .call_addr = (const void*)&(original_func), \
-                .target = (const void*)&(replace_func) \
+                .target = (const void*)&(replace_func), \
+                .call_addr = (const void*)&(original_func) \
             } \
     }
 
