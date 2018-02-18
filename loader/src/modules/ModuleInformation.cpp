@@ -23,12 +23,11 @@
  * SOFTWARE.
  */
 
-#include "ModuleData.h"
+#include "ModuleInformation.h"
 #include <utils/logger.h>
 #include <dynamic_libs/os_types.h>
 #include <libelf.h>
 #include <string.h>
-#include <assert.h>
 #include <sys/types.h>
 #include <wups.h>
 #include <sys/stat.h>
@@ -37,20 +36,23 @@
 #include <utils/utils.h>
 #include "ElfTools.h"
 
-bool ModuleData::checkFile() {
+bool ModuleInformation::checkFileExtenstion(const char * path) {
+    if(path == NULL){
+        return false;
+    }
     const char *extension;
 
-    const char * path_c = getPath().c_str();
-
     /* find the file extension */
-    extension = strrchr(path_c, '.');
+    extension = strrchr(path, '.');
     if (extension == NULL){
-        extension = strchr(path_c, '\0');
+        extension = strchr(path, '\0');
     }else{
         extension++;
     }
 
-    assert(extension != NULL);
+    if(extension == NULL){
+        return false;
+    }
 
     if (strcmp(extension, "mod") == 0 ||
         strcmp(extension, "o") == 0 ||
@@ -61,14 +63,13 @@ bool ModuleData::checkFile() {
     return false;
 }
 
-bool ModuleData::load(uint8_t ** space) {
+bool ModuleInformation::openAndParseElf() {
     bool result = false;
     int fd = -1;
     Elf *elf = NULL;
 
     /* check for compile errors */
     if (elf_version(EV_CURRENT) == EV_NONE){
-        DEBUG_FUNCTION_LINE("Compiler errors in '%s' \n", getPath().c_str());
         goto exit_error;
     }
 
@@ -92,10 +93,7 @@ bool ModuleData::load(uint8_t ** space) {
             DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Archives not yet supported.\n", getPath().c_str());
             goto exit_error;
         case ELF_K_ELF:
-            if(!this->loadElf(elf)){
-                goto exit_error;
-            }
-            result = linkModuleElf(elf,space);
+            result = this->parseElf(elf);
             break;
         default:
             DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF file.\n", getPath().c_str());
@@ -112,7 +110,7 @@ exit_error:
     return result;
 }
 
-bool ModuleData::loadElf( Elf *elf) {
+bool ModuleInformation::parseElf( Elf *elf) {
     bool res = false;
     Elf_Scn *scn;
     Elf32_Ehdr *ehdr;
@@ -124,8 +122,8 @@ bool ModuleData::loadElf( Elf *elf) {
 
     const char * path_c = getPath().c_str();
 
-    assert(elf != NULL);
-    assert(elf_kind(elf) == ELF_K_ELF);
+    if(elf == NULL){ goto exit_error; }
+    if(elf_kind(elf) != ELF_K_ELF){ goto exit_error; }
 
     ident = elf_getident(elf, &sz);
 
@@ -174,9 +172,7 @@ bool ModuleData::loadElf( Elf *elf) {
         goto exit_error;
     }
 
-    assert(symtab != NULL);
-
-    DEBUG_FUNCTION_LINE("Reading metadata from path %s.\n", path_c);
+    if(symtab == NULL){ goto exit_error; }
 
     if(!metadataRead(elf, symtab, symtab_count, symtab_strndx)){
         goto exit_error;
@@ -241,7 +237,7 @@ exit_error:
     return res;
 }
 
-bool ModuleData::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
+bool ModuleInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx) {
     char *metadata = NULL, *metadata_cur, *metadata_end;
     const char *game, *name, *author, *version, *license, *wups;
 
@@ -315,7 +311,9 @@ bool ModuleData::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, 
 
         char *eq;
 
-        assert(metadata_cur >= metadata && metadata_cur < metadata_end);
+        if(metadata_cur < metadata || metadata_cur >= metadata_end){
+            goto exit_error;
+        }
 
         if (*metadata_cur == '\0'){
             continue;
@@ -403,181 +401,4 @@ exit_error:
         free(metadata);
     }
     return false;
-}
-
-bool ModuleData::linkModuleElf(Elf *elf, uint8_t **space) {
-    Elf_Scn *scn;
-    size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count, hooks_count;
-    Elf32_Sym *symtab = NULL;
-    uint8_t **destinations = NULL;
-    wups_loader_entry_t *entries = NULL;
-    wups_loader_hook_t *hooks = NULL;
-    bool result = false;
-
-    std::vector<wups_loader_entry_t *> entry_t_list;
-    std::vector<wups_loader_hook_t *> hook_t_list;
-
-    std::vector<EntryData *> entry_data_list;
-    std::vector<HookData *> hook_data_list;
-
-    if (!ElfTools::loadElfSymtab(elf, &symtab, &symtab_count, &symtab_strndx)){
-        goto exit_error;
-    }
-
-    assert(symtab != NULL);
-
-    if (elf_getshdrnum(elf, &section_count) != 0){
-        goto exit_error;
-    }
-    if (elf_getshdrstrndx(elf, &shstrndx) != 0){
-        goto exit_error;
-    }
-
-    destinations = (uint8_t **) malloc(sizeof(uint8_t *) * section_count);
-
-    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
-        Elf32_Shdr *shdr;
-
-        shdr = elf32_getshdr(scn);
-        if (shdr == NULL){
-            continue;
-        }
-
-        if ((shdr->sh_type == SHT_PROGBITS || shdr->sh_type == SHT_NOBITS) &&
-            (shdr->sh_flags & SHF_ALLOC)) {
-
-            const char *name;
-
-            destinations[elf_ndxscn(scn)] = NULL;
-
-            name = elf_strptr(elf, shstrndx, shdr->sh_name);
-            if (name == NULL){
-                continue;
-            }
-
-            if (strcmp(name, ".wups.meta") == 0) {
-                continue;
-            } else if (strcmp(name, ".wups.load") == 0) {
-                if (entries != NULL){
-                    goto exit_error;
-                }
-
-                entries_count = shdr->sh_size / sizeof(wups_loader_entry_t);
-                entries = (wups_loader_entry_t *) malloc(sizeof(wups_loader_entry_t) * entries_count);
-
-                if (entries == NULL){
-                    goto exit_error;
-                }
-
-                destinations[elf_ndxscn(scn)] = (uint8_t *)entries;
-                if (!ElfTools::elfLoadSection(elf, scn, shdr, entries)){
-                    goto exit_error;
-                }
-
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), entries, symtab, symtab_count);
-
-                for(size_t i = 0;i< entries_count;i++){
-                    entry_t_list.push_back(&entries[i]);
-                }
-            }else if (strcmp(name, ".wups.hooks") == 0) {
-                if (hooks != NULL){
-                    goto exit_error;
-                }
-
-                hooks_count = shdr->sh_size / sizeof(wups_loader_hook_t);
-                hooks = (wups_loader_hook_t *) malloc(sizeof(wups_loader_hook_t) * hooks_count);
-
-                if (hooks == NULL){
-                    goto exit_error;
-                }
-
-                destinations[elf_ndxscn(scn)] = (uint8_t *)hooks;
-                if (!ElfTools::elfLoadSection(elf, scn, shdr, hooks)){
-                    goto exit_error;
-                }
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), hooks, symtab, symtab_count);
-
-                for(size_t i = 0;i< hooks_count;i++){
-                    hook_t_list.push_back(&hooks[i]);
-                }
-
-            } else {
-                *space -= shdr->sh_size;
-
-                if (shdr->sh_addralign > 3)
-                    *space = (uint8_t *)((int)*space &
-                        ~(shdr->sh_addralign - 1));
-                else
-                    *space = (uint8_t *)((int)*space & ~3);
-
-                destinations[elf_ndxscn(scn)] = *space;
-
-                assert(*space != NULL);
-                if((u32) *space < getApplicationEndAddr()){
-                    DEBUG_FUNCTION_LINE("Not enough space to load function %s into memory at %08X.\n",name,*space);
-                    goto exit_error;
-                }
-
-                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,*space);
-                if (!ElfTools::elfLoadSection(elf, scn, shdr, *space)){
-                    goto exit_error;
-                }
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), *space, symtab, symtab_count);
-            }
-        }
-    }
-
-    if (entries == NULL){
-        goto exit_error;
-    }
-
-    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
-        Elf32_Shdr *shdr;
-
-        shdr = elf32_getshdr(scn);
-        if (shdr == NULL){
-            continue;
-        }
-
-        if ((shdr->sh_type == SHT_PROGBITS || shdr->sh_type == SHT_NOBITS) &&
-            (shdr->sh_flags & SHF_ALLOC) &&
-            destinations[elf_ndxscn(scn)] != NULL) {
-
-            if (!ElfTools::elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true)){
-                goto exit_error;
-            }
-        }
-    }
-
-    for(size_t j=0;j<hook_t_list.size();j++){
-        wups_loader_hook_t * hook = hook_t_list[j];
-
-        DEBUG_FUNCTION_LINE("Saving hook of module \"%s\". Type: %08X, target: %08X\n",getName().c_str(),hook->type,(void*) hook->target);
-        HookData * hook_data = new HookData((void *) hook->target,hook->type);
-        addHookData(hook_data);
-    }
-
-    for(size_t j=0;j<entry_t_list.size();j++){
-        wups_loader_entry_t * entry = entry_t_list[j];
-        DEBUG_FUNCTION_LINE("Saving entry \"%s\" of module \"%s\". Library: %08X, target: %08X, call_addr: %08X\n",entry->_function.name,getName().c_str(),entry->_function.library,entry->_function.target, (void *) entry->_function.call_addr);
-        EntryData * entry_data = new EntryData(entry->_function.name,entry->_function.library, (void *) entry->_function.target, (void *) entry->_function.call_addr);
-        addEntryData(entry_data);
-    }
-
-    result = true;
-exit_error:
-    if (!result) DEBUG_FUNCTION_LINE("exit_error\n");
-    if (destinations != NULL){
-        free(destinations);
-    }
-    if (symtab != NULL){
-        free(symtab);
-    }
-    if (hooks != NULL){
-        free(hooks);
-    }
-    if (entries != NULL){
-        free(entries);
-    }
-    return result;
 }

@@ -26,13 +26,11 @@
 #include "ElfTools.h"
 #include <string.h>
 #include <malloc.h>
-#include <assert.h>
 #include <libelf.h>
 #include <utils/logger.h>
 
 bool ElfTools::elfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr,void *destination) {
-
-    assert(destination != NULL);
+    if (destination == NULL) { return false; }
 
     switch (shdr->sh_type) {
         case SHT_SYMTAB:
@@ -58,29 +56,33 @@ bool ElfTools::loadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,
     Elf_Scn *scn;
     bool result = false;
 
-    for (scn = elf_nextscn(elf, NULL);
-         scn != NULL;
-         scn = elf_nextscn(elf, scn)) {
+    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
 
         Elf32_Shdr *shdr;
 
         shdr = elf32_getshdr(scn);
-        if (shdr == NULL)
+        if (shdr == NULL){
             continue;
+        }
 
         if (shdr->sh_type == SHT_SYMTAB) {
             size_t sym;
 
-            assert (*symtab == NULL);
-            *symtab = (Elf32_Sym *)malloc(shdr->sh_size);
-            if (*symtab == NULL)
+            if (*symtab != NULL){
                 continue;
+            }
+
+            *symtab = (Elf32_Sym *)malloc(shdr->sh_size);
+            if (*symtab == NULL){
+                continue;
+            }
 
             *symtab_count = shdr->sh_size / sizeof(Elf32_Sym);
             *symtab_strndx = shdr->sh_link;
 
-            if (!elfLoadSection(elf, scn, shdr, *symtab))
+            if (!elfLoadSection(elf, scn, shdr, *symtab)){
                 goto exit_error;
+            }
 
             for (sym = 0; sym < *symtab_count; sym++){
                 (*symtab)[sym].st_other = 0;
@@ -90,8 +92,9 @@ bool ElfTools::loadElfSymtab(Elf *elf, Elf32_Sym **symtab, size_t *symtab_count,
         }
     }
 
-    if (*symtab == NULL)
+    if (*symtab == NULL){
         goto exit_error;
+    }
 
     result = true;
 exit_error:
@@ -354,7 +357,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
             value = addend - (int)symbol_addr;
             break;
         } default:
-            DEBUG_FUNCTION_LINE("Module_ElfLinkOne01: %02X\n",type);
+            DEBUG_FUNCTION_LINE("Unknown relocation type: %02X\n",type);
             goto exit_error;
     }
 
@@ -414,7 +417,6 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
                 (*(int *)target & 0x00000003) | (value & 0xfffffffc);
             break;
         }default:
-            DEBUG_FUNCTION_LINE("Module_ElfLinkOne01: %02X\n",type);
             goto exit_error;
     }
 
