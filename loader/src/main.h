@@ -35,6 +35,7 @@ void Init_SD_USB();
 
 void DeInit_SD_USB();
 
+void Init();
 void DeInit();
 
 #ifdef __cplusplus

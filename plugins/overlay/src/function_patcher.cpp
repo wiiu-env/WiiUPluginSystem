@@ -17,52 +17,38 @@
 #include <wups.h>
 #include "main.h"
 #include <utils/logger.h>
+#include <utils/StringTools.h>
 #include <dynamic_libs/vpad_functions.h>
 #include <dynamic_libs/os_functions.h>
 
-u8 logVSync __attribute__((section(".data"))) = 0;
+void SplashScreen_callback(wups_overlay_options_type_t screen){
+    s32 i=0;
+
+    while(i<100){
+        WUPS_Overlay_OSScreenClear(screen);
+        
+        WUPS_Overlay_PrintTextOnScreen(screen, 0,0,"This could be something cool.");
+        WUPS_Overlay_PrintTextOnScreen(screen, 0,5,"Testing changing text: %d",i);
+
+        WUPS_Overlay_FlipBuffers(screen);
+        
+        i++;
+    }
+}
+
+
 u8 gCallbackCooldown __attribute__((section(".data"))) = 0;
-
-struct buffer_store{
-    void * buffer;
-    s32 buffer_size;
-    s32 mode;
-    s32 surface_format;
-    vs32 buffering_mode;
-};
-
-struct buffer_store drc_store __attribute__((section(".data")));
-struct buffer_store tv_store __attribute__((section(".data")));
-
-
-DECL_FUNCTION(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s32 format, s32 buffering_mode){
-    tv_store.buffer = buffer;
-    tv_store.buffer_size = buffer_size;
-    tv_store.mode = tv_render_mode;
-    tv_store.surface_format = format;
-    tv_store.buffering_mode = buffering_mode;
-    
-    return real_GX2SetTVBuffer(buffer,buffer_size,tv_render_mode,format,buffering_mode);
-}
-
-DECL_FUNCTION(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 surface_format, s32 buffering_mode){
-    drc_store.buffer = buffer;
-    drc_store.buffer_size = buffer_size;
-    drc_store.mode = drc_mode;
-    drc_store.surface_format = surface_format;
-    drc_store.buffering_mode = buffering_mode;
-    
-    return real_GX2SetDRCBuffer(buffer,buffer_size,drc_mode,surface_format,buffering_mode);
-}
 
 DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
     int result = real_VPADRead(chan, buffer, buffer_size, error);
     int btns = VPAD_BUTTON_Y | VPAD_BUTTON_X | VPAD_BUTTON_A | VPAD_BUTTON_B;
     if(result > 0 && ((buffer[0].btns_h & (btns)) == btns) && gCallbackCooldown == 0 ){
         gCallbackCooldown = 0x3C;
-        logVSync = 1;
-        DCFlushRange(&logVSync,sizeof(logVSync));
-        DCInvalidateRange(&logVSync,sizeof(logVSync));
+        
+        WUPS_OpenOverlay(WUPS_OVERLAY_DRC_ONLY                  ,SplashScreen_callback);
+        WUPS_OpenOverlay(WUPS_OVERLAY_TV_ONLY                   ,SplashScreen_callback);
+        WUPS_OpenOverlay(WUPS_OVERLAY_DRC_AND_TV                ,SplashScreen_callback);
+        WUPS_OpenOverlay(WUPS_OVERLAY_DRC_AND_TV_WITH_DRC_PRIO  ,SplashScreen_callback);
     }
     if(gCallbackCooldown > 0){
         gCallbackCooldown--;
@@ -71,21 +57,4 @@ DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *e
     return result;
 }
 
-DECL_FUNCTION(void, GX2WaitForVsync, void){
-    real_GX2WaitForVsync();
-    if(logVSync){
-        if(OSIsHomeButtonMenuEnabled()){
-            SplashScreen(2);
-            
-            // Restore the original buffer.
-            real_GX2SetTVBuffer(tv_store.buffer,tv_store.buffer_size,tv_store.mode,tv_store.surface_format,tv_store.buffering_mode);
-            real_GX2SetDRCBuffer(drc_store.buffer,drc_store.buffer_size,drc_store.mode,drc_store.surface_format,drc_store.buffering_mode);
-        }
-        logVSync = 0;
-    }
-}
-
-WUPS_MUST_REPLACE(GX2SetTVBuffer,    WUPS_LOADER_LIBRARY_GX2,        GX2SetTVBuffer);
-WUPS_MUST_REPLACE(GX2SetDRCBuffer,   WUPS_LOADER_LIBRARY_GX2,        GX2SetDRCBuffer);
-WUPS_MUST_REPLACE(GX2WaitForVsync,   WUPS_LOADER_LIBRARY_GX2,        GX2WaitForVsync);
 WUPS_MUST_REPLACE(VPADRead,          WUPS_LOADER_LIBRARY_VPAD,       VPADRead);

@@ -143,6 +143,15 @@ typedef struct wups_loader_hook_t {
 #define WUPS_SD_MOUNTED                  (WUPS_SDUSB_MOUNTED_OS_SD | WUPS_SD_MOUNTED_LIBFAT)
 #define WUPS_USB_MOUNTED                 (WUPS_USB_MOUNTED_LIBFAT)
     
+    
+typedef enum wups_overlay_options_type_t {
+    WUPS_OVERLAY_NONE,
+    WUPS_OVERLAY_DRC_ONLY,                          /* Tries to display only on gamepad screen */
+    WUPS_OVERLAY_TV_ONLY,                           /* Tries to display only on tv screen */
+    WUPS_OVERLAY_DRC_AND_TV,                        /* Tries to display on both screens. Prioritizes the TV screen if memory is low. */
+    WUPS_OVERLAY_DRC_AND_TV_WITH_DRC_PRIO           /* Tries to display on both screens. But if memory is low, prioritize the DRC screen.*/
+} wups_overlay_options_type_t;
+ 
 typedef struct wups_loader_init_args_t {
     int device_mounted;
     struct {		        
@@ -157,7 +166,11 @@ typedef struct wups_loader_init_args_t {
 		const void * closedir_repl;
 		const void * readdir_repl;
 	} fs_wrapper;
+    const void * overlayfunction_ptr;
 } wups_loader_init_args_t;
+
+void WUPS_InitFS(wups_loader_init_args_t* args);
+void WUPS_InitOverlay(wups_loader_init_args_t* args);
     
 #ifdef __cplusplus
     #define EXTERN_C_START      extern "C" {
@@ -173,6 +186,9 @@ typedef struct wups_loader_init_args_t {
     WUPS_HOOK_INIT(init); \
     void init(wups_loader_init_args_t* args){ \
         if(args != NULL){\
+            WUPS_InitFS(args);\
+            WUPS_InitOverlay(args);\
+        \
         }\
         myInit(args);\
     } \
@@ -221,7 +237,15 @@ typedef struct wups_loader_entry_t {
 #define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)
 #define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
 
-void WUPS_InitFS(wups_loader_init_args_t* args);
+typedef void (*overlay_callback)(wups_overlay_options_type_t);
+
+void WUPS_Overlay_PrintTextOnScreen(wups_overlay_options_type_t screen, int x,int y, const char * msg, ...);
+
+void WUPS_Overlay_OSScreenClear(wups_overlay_options_type_t screen);
+
+void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen);
+
+void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback);
 
 #ifdef __cplusplus
 }

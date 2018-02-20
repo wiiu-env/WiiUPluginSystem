@@ -21,7 +21,6 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
 INITIALIZE(args){
-    WUPS_InitFS(args);
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitVPadFunctionPointers(); //For logging

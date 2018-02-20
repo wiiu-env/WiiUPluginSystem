@@ -31,7 +31,4 @@ extern "C" {
 }
 #endif
 
-
-u32 SplashScreen(s32 time);
-
 #endif

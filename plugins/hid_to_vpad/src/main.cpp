@@ -36,7 +36,6 @@ INITIALIZE(args){
         ControllerPatcher::Init(NULL);
     }
     
-
     ControllerPatcher::disableControllerMapping();
     
     log_print("Start network server\n");

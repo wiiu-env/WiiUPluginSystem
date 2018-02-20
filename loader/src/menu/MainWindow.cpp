@@ -20,6 +20,7 @@
 #include <dynamic_libs/padscore_functions.h>
 #include <utils/StringTools.h>
 #include <utils/logger.h>
+#include "myutils/overlay_helper.h"
 #include "MainWindow.h"
 #include "MainWindowGUI.h"
 #include "Application.h"

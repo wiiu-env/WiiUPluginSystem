@@ -48,6 +48,7 @@
 #include "myutils/mocha.h"
 #include "myutils/libntfs.h"
 #include "myutils/libfat.h"
+#include "myutils/overlay_helper.h"
 #include "version.h"
 #include "settings/CSettings.h"
 
@@ -81,8 +82,7 @@ extern "C" int Menu_Main(int argc, char **argv){
 
     setup_os_exceptions();
 
-    DEBUG_FUNCTION_LINE("Mount SD partition\n");
-    Init_SD_USB();
+    Init();
 
     s32 result = 0;
 
@@ -167,6 +167,7 @@ void CallHook(wups_loader_hook_type_t hook_type){
                         args.fs_wrapper.opendir_repl = (const void*)&opendir;
                         args.fs_wrapper.closedir_repl = (const void*)&closedir;
                         args.fs_wrapper.readdir_repl = (const void*)&readdir;
+                        args.overlayfunction_ptr = (const void*)&overlay_helper;
 
                         ( (void (*)(wups_loader_init_args_t *))((unsigned int*)func_ptr) )(&args);
                     }
@@ -200,6 +201,13 @@ s32 isInMiiMakerHBL(){
             return 1;
     }
     return 0;
+}
+
+void Init(){
+    memset(&tv_store,0,sizeof(tv_store));
+    memset(&drc_store,0,sizeof(drc_store));
+    DEBUG_FUNCTION_LINE("Mount SD partition\n");
+    Init_SD_USB();
 }
 
 void Init_SD_USB() {

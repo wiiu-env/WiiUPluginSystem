@@ -61,7 +61,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 export TOPDIR ?= $(CURDIR)/..
 export DEPSDIR := $(CURDIR)/$(BUILD)
 
-export INCLUDEDIR := $(PORTLIBS)/include/libgui
+export INCLUDEDIR := $(PORTLIBS)/include/
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
@@ -78,7 +78,7 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) 
+            -I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
@@ -119,7 +119,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(WIIUBIN)	:	$(OFILES) $(LIB)
 	@rm -f "$(WIIUBIN)"
-	@$(AR) rcs "$(WIIUBIN)" $(OFILES)
+	@$(AR) rcs "$(WIIUBIN)" $(OFILES) 
 	@echo built ... $(notdir $@)
 	
 
