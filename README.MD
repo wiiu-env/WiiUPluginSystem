@@ -45,6 +45,7 @@ For building the loader you need:
 - [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.  
+- [libgui](https://github.com/Maschell/libgui) for the gui elements.
 
 Then call the following command in the "loader" directory.
 
