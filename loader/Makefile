@@ -148,22 +148,22 @@ $(BUILD): $(CURDIR)/src/mocha/ios_kernel/ios_kernel.bin.h
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 $(CURDIR)/src/mocha/ios_kernel/ios_kernel.bin.h: $(CURDIR)/src/mocha/ios_usb/ios_usb.bin.h $(CURDIR)/src/mocha/ios_mcp/ios_mcp.bin.h $(CURDIR)/src/mocha/ios_fs/ios_fs.bin.h $(CURDIR)/src/mocha/ios_bsp/ios_bsp.bin.h $(CURDIR)/src/mocha/ios_acp/ios_acp.bin.h
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_kernel -f  $(CURDIR)/src/mocha/ios_kernel/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_kernel -f  $(CURDIR)/src/mocha/ios_kernel/Makefile
 
 $(CURDIR)/src/mocha/ios_usb/ios_usb.bin.h:
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_usb -f  $(CURDIR)/src/mocha/ios_usb/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_usb -f  $(CURDIR)/src/mocha/ios_usb/Makefile
 
 $(CURDIR)/src/mocha/ios_fs/ios_fs.bin.h:
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_fs -f  $(CURDIR)/src/mocha/ios_fs/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_fs -f  $(CURDIR)/src/mocha/ios_fs/Makefile
 
 $(CURDIR)/src/mocha/ios_bsp/ios_bsp.bin.h:
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_bsp -f  $(CURDIR)/src/mocha/ios_bsp/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_bsp -f  $(CURDIR)/src/mocha/ios_bsp/Makefile
 
 $(CURDIR)/src/mocha/ios_mcp/ios_mcp.bin.h:
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_mcp -f  $(CURDIR)/src/mocha/ios_mcp/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_mcp -f  $(CURDIR)/src/mocha/ios_mcp/Makefile
 
 $(CURDIR)/src/mocha/ios_acp/ios_acp.bin.h:
-	@$(MAKE) --no-print-directory -C $(CURDIR)/src/mocha/ios_acp -f  $(CURDIR)/src/mocha/ios_acp/Makefile
+	@$(MAKE) -j1 --no-print-directory -C $(CURDIR)/src/mocha/ios_acp -f  $(CURDIR)/src/mocha/ios_acp/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
