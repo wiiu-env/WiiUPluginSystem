@@ -21,7 +21,7 @@
 #include "ContentTemplate.h"
 #include "language/gettext.h"
 
-class ContentHome : public ContentTemplate{
+class ContentHome : public ContentTemplate {
 public:
     ContentHome();
     virtual ~ContentHome();

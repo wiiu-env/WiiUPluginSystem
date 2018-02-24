@@ -25,9 +25,9 @@
 #include "content/ContentHome.h"
 #include "MainWindowContent.h"
 
-class MainWindowContent : public GuiFrame, public sigslot::has_slots<>{
+class MainWindowContent : public GuiFrame, public sigslot::has_slots<> {
 public:
-    enum eContentNames{
+    enum eContentNames {
         CONTENT_HOME,
     };
 
@@ -38,11 +38,15 @@ public:
     void RemoveScreen();
     ContentTemplate * getContent();
 
-     //If you call this function, please also delete the object. This class isn't taking care of it
-    static ContentTemplate * createNewContent(eContentNames contentName){
-        switch(contentName){
-            case CONTENT_HOME: {           return new ContentHome();  break;}
-            default: return NULL;
+    //If you call this function, please also delete the object. This class isn't taking care of it
+    static ContentTemplate * createNewContent(eContentNames contentName) {
+        switch(contentName) {
+        case CONTENT_HOME: {
+            return new ContentHome();
+            break;
+        }
+        default:
+            return NULL;
         }
     }
 

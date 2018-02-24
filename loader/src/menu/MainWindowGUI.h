@@ -23,7 +23,7 @@
 #include "menu/content/ContentTemplate.h"
 #include <language/gettext.h>
 
-class MainWindowGUI : public GuiFrame, public sigslot::has_slots<>{
+class MainWindowGUI : public GuiFrame, public sigslot::has_slots<> {
 public:
     MainWindowGUI(s32 w, s32 h);
     virtual ~MainWindowGUI();

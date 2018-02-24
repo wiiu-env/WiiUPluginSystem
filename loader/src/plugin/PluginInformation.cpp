@@ -37,27 +37,27 @@
 #include "ElfTools.h"
 
 bool PluginInformation::checkFileExtenstion(const char * path) {
-    if(path == NULL){
+    if(path == NULL) {
         return false;
     }
     const char *extension;
 
     /* find the file extension */
     extension = strrchr(path, '.');
-    if (extension == NULL){
+    if (extension == NULL) {
         extension = strchr(path, '\0');
-    }else{
+    } else {
         extension++;
     }
 
-    if(extension == NULL){
+    if(extension == NULL) {
         return false;
     }
 
     if (strcmp(extension, "mod") == 0 ||
-        strcmp(extension, "o") == 0 ||
-        strcmp(extension, "a") == 0 ||
-        strcmp(extension, "elf") == 0) {
+            strcmp(extension, "o") == 0 ||
+            strcmp(extension, "a") == 0 ||
+            strcmp(extension, "elf") == 0) {
         return true;
     }
     return false;
@@ -69,42 +69,42 @@ bool PluginInformation::openAndParseElf() {
     Elf *elf = NULL;
 
     /* check for compile errors */
-    if (elf_version(EV_CURRENT) == EV_NONE){
+    if (elf_version(EV_CURRENT) == EV_NONE) {
         goto exit_error;
     }
 
     fd = open(getPath().c_str(), O_RDONLY, 0);
 
-    if (fd == -1){
+    if (fd == -1) {
         DEBUG_FUNCTION_LINE("failed to open '%s' \n", getPath().c_str());
         goto exit_error;
     }
 
     elf = elf_begin(fd, ELF_C_READ, NULL);
 
-    if (elf == NULL){
+    if (elf == NULL) {
         DEBUG_FUNCTION_LINE("elf was NULL\n");
         goto exit_error;
     }
 
     switch (elf_kind(elf)) {
-        case ELF_K_AR:
-            /* TODO */
-            DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Archives not yet supported.\n", getPath().c_str());
-            goto exit_error;
-        case ELF_K_ELF:
-            result = this->parseElf(elf);
-            break;
-        default:
-            DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF file.\n", getPath().c_str());
-            goto exit_error;
+    case ELF_K_AR:
+        /* TODO */
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Archives not yet supported.\n", getPath().c_str());
+        goto exit_error;
+    case ELF_K_ELF:
+        result = this->parseElf(elf);
+        break;
+    default:
+        DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF file.\n", getPath().c_str());
+        goto exit_error;
     }
 
 exit_error:
-    if (elf != NULL){
+    if (elf != NULL) {
         elf_end(elf);
     }
-    if (fd != -1){
+    if (fd != -1) {
         close(fd);
     }
     return result;
@@ -122,8 +122,12 @@ bool PluginInformation::parseElf( Elf *elf) {
 
     const char * path_c = getPath().c_str();
 
-    if(elf == NULL){ goto exit_error; }
-    if(elf_kind(elf) != ELF_K_ELF){ goto exit_error; }
+    if(elf == NULL) {
+        goto exit_error;
+    }
+    if(elf_kind(elf) != ELF_K_ELF) {
+        goto exit_error;
+    }
 
     ident = elf_getident(elf, &sz);
 
@@ -172,9 +176,11 @@ bool PluginInformation::parseElf( Elf *elf) {
         goto exit_error;
     }
 
-    if(symtab == NULL){ goto exit_error; }
+    if(symtab == NULL) {
+        goto exit_error;
+    }
 
-    if(!metadataRead(elf, symtab, symtab_count, symtab_strndx)){
+    if(!metadataRead(elf, symtab, symtab_count, symtab_strndx)) {
         goto exit_error;
     }
 
@@ -187,17 +193,17 @@ bool PluginInformation::parseElf( Elf *elf) {
         Elf32_Shdr *shdr;
 
         shdr = elf32_getshdr(scn);
-        if (shdr == NULL){
+        if (shdr == NULL) {
             continue;
         }
 
         if ((shdr->sh_type == SHT_PROGBITS || shdr->sh_type == SHT_NOBITS) &&
-            (shdr->sh_flags & SHF_ALLOC)) {
+                (shdr->sh_flags & SHF_ALLOC)) {
 
             const char *name;
 
             name = elf_strptr(elf, shstrndx, shdr->sh_name);
-            if (name == NULL){
+            if (name == NULL) {
                 continue;
             }
 
@@ -212,10 +218,10 @@ bool PluginInformation::parseElf( Elf *elf) {
             } else {
                 cur_size += shdr->sh_size;
                 /* add alignment padding to size */
-                if (shdr->sh_addralign > 3){
+                if (shdr->sh_addralign > 3) {
                     /* roundup to multiple of sh_addralign  */
                     cur_size += (-cur_size & (shdr->sh_addralign - 1));
-                }else{
+                } else {
                     /* roundup to multiple of 4 */
                     cur_size += (-cur_size & 3);
                 }
@@ -230,7 +236,7 @@ bool PluginInformation::parseElf( Elf *elf) {
 
     res = true;
 exit_error:
-    if (symtab != NULL){
+    if (symtab != NULL) {
         free(symtab);
     }
 
@@ -254,27 +260,27 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
         const char *name;
 
         shdr = elf32_getshdr(scn);
-        if (shdr == NULL){
+        if (shdr == NULL) {
             continue;
         }
 
         name = elf_strptr(elf, shstrndx, shdr->sh_name);
-        if (name == NULL){
+        if (name == NULL) {
             continue;
         }
 
         if (strcmp(name, ".wups.meta") == 0) {
-            if (shdr->sh_size == 0){
+            if (shdr->sh_size == 0) {
                 continue;
             }
 
-            if (metadata != NULL){
+            if (metadata != NULL) {
                 continue;
             }
 
             metadata = (char*) malloc(shdr->sh_size);
 
-            if (metadata == NULL){
+            if (metadata == NULL) {
                 continue;
             }
 
@@ -312,16 +318,16 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
 
         char *eq;
 
-        if(metadata_cur < metadata || metadata_cur >= metadata_end){
+        if(metadata_cur < metadata || metadata_cur >= metadata_end) {
             goto exit_error;
         }
 
-        if (*metadata_cur == '\0'){
+        if (*metadata_cur == '\0') {
             continue;
         }
 
         eq = strchr(metadata_cur, '=');
-        if (eq == NULL){
+        if (eq == NULL) {
             continue;
         }
 
@@ -370,7 +376,7 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
         }
     }
 
-    if (description == NULL){
+    if (description == NULL) {
         description = "";
     }
 
@@ -410,7 +416,7 @@ bool PluginInformation::metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_
 
 exit_error:
 
-    if (metadata != NULL){
+    if (metadata != NULL) {
         free(metadata);
     }
     return false;

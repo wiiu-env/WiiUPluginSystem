@@ -8,7 +8,11 @@ plugins/*/bin/*
 plugins/*/build/*
 loader/WiiUPluginLoader.cscope_file_list
 loader/WiiUPluginLoader.layout
+loader/screenshots/*
 release/*
 
 *.mod
 *.cbp
+*.id*
+*.nam
+*.til

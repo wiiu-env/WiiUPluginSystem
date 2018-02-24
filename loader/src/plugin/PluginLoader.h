@@ -44,18 +44,18 @@ extern "C" {
 
 #define PLUGIN_LOCATION_END_ADDRESS 0x01000000
 
-class PluginLoader{
+class PluginLoader {
 
 public:
     static PluginLoader *getInstance() {
-        if(!instance){
+        if(!instance) {
             instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
         }
         return instance;
     }
 
     static void destroyInstance() {
-        if(instance){
+        if(instance) {
             delete instance;
             instance = NULL;
         }
@@ -95,27 +95,27 @@ public:
     **/
     void clearPluginInformation(std::vector<PluginInformation*> PluginInformation);
 
-    size_t getTotalSpace(){
+    size_t getTotalSpace() {
         return ((u32) this->endAddress - (u32) this->startAddress);
     }
 
-    size_t getAvailableSpace(){
+    size_t getAvailableSpace() {
         return ((u32) this->currentStoreAddress - (u32) this->startAddress);
     }
 
-    size_t getUsedSpace(){
+    size_t getUsedSpace() {
         return getTotalSpace() - getAvailableSpace();
     }
 
 private:
-    PluginLoader(void * startAddress, void * endAddress){
+    PluginLoader(void * startAddress, void * endAddress) {
         // TODO: Check if endAddress > startAddress.
         this->startAddress = startAddress;
         this->endAddress = endAddress;
         this->currentStoreAddress = endAddress;
     }
 
-    ~PluginLoader(){
+    ~PluginLoader() {
 
     }
 
@@ -147,19 +147,19 @@ private:
     **/
     bool loadAndLinkElf(PluginData * pluginData, Elf *elf, void * storeAddressEnd);
 
-     /**
-        \brief  Copies the needed information into a global, persistent struct. This struct holds information on which
-                function should be override in which order and which hook should be called.
-        \param plugins list of plugins that should be used.
+    /**
+       \brief  Copies the needed information into a global, persistent struct. This struct holds information on which
+               function should be override in which order and which hook should be called.
+       \param plugins list of plugins that should be used.
 
     **/
     void copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plugins);
 
-    void * getCurrentStoreAddress(){
+    void * getCurrentStoreAddress() {
         return this->currentStoreAddress;
     }
 
-    void setCurrentStoreAddress(void *  addr){
+    void setCurrentStoreAddress(void *  addr) {
         this->currentStoreAddress = addr;
     }
 

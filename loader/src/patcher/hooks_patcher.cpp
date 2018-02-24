@@ -5,7 +5,7 @@
 #include "myutils/overlay_helper.h"
 #include "main.h"
 
-DECL(void, __PPCExit, void){
+DECL(void, __PPCExit, void) {
     DEBUG_FUNCTION_LINE("__PPCExit\n");
 
     DeInit();
@@ -13,9 +13,9 @@ DECL(void, __PPCExit, void){
     real___PPCExit();
 }
 
-DECL(u32, ProcUIProcessMessages, u32 u){
+DECL(u32, ProcUIProcessMessages, u32 u) {
     u32 res = real_ProcUIProcessMessages(u);
-    if(res != gAppStatus){
+    if(res != gAppStatus) {
         DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
         gAppStatus = res;
     }
@@ -23,7 +23,7 @@ DECL(u32, ProcUIProcessMessages, u32 u){
     return res;
 }
 
-DECL(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s32 format, s32 buffering_mode){
+DECL(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s32 format, s32 buffering_mode) {
     tv_store.buffer = buffer;
     tv_store.buffer_size = buffer_size;
     tv_store.mode = tv_render_mode;
@@ -33,7 +33,7 @@ DECL(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s3
     return real_GX2SetTVBuffer(buffer,buffer_size,tv_render_mode,format,buffering_mode);
 }
 
-DECL(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 surface_format, s32 buffering_mode){
+DECL(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 surface_format, s32 buffering_mode) {
     drc_store.buffer = buffer;
     drc_store.buffer_size = buffer_size;
     drc_store.mode = drc_mode;
@@ -43,7 +43,7 @@ DECL(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 sur
     return real_GX2SetDRCBuffer(buffer,buffer_size,drc_mode,surface_format,buffering_mode);
 }
 
-DECL(void, GX2WaitForVsync, void){
+DECL(void, GX2WaitForVsync, void) {
     real_GX2WaitForVsync();
 }
 

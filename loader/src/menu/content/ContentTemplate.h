@@ -20,16 +20,25 @@
 #include "gui/Gui.h"
 #include "menu/MenuCommon.h"
 
-class ContentTemplate : public GuiFrame, public sigslot::has_slots<>{
+class ContentTemplate : public GuiFrame, public sigslot::has_slots<> {
 
 public:
     ContentTemplate() : GuiFrame(SCREEN_WIDTH, SCREEN_HEIGHT)
-    , bgImageColor(SCREEN_WIDTH, SCREEN_HEIGHT, (GX2Color){ 0, 0, 0, 0 })
-    {
-        bgImageColor.setImageColor((GX2Color){  42, 42, 42, 255 }, 0);
-        bgImageColor.setImageColor((GX2Color){  42, 42, 42, 255 }, 1);
-        bgImageColor.setImageColor((GX2Color){  42, 42, 42, 255 }, 2);
-        bgImageColor.setImageColor((GX2Color){  42, 42, 42, 255 }, 3);
+        , bgImageColor(SCREEN_WIDTH, SCREEN_HEIGHT, (GX2Color) {
+        0, 0, 0, 0
+    }) {
+        bgImageColor.setImageColor((GX2Color) {
+            42, 42, 42, 255
+        }, 0);
+        bgImageColor.setImageColor((GX2Color) {
+            42, 42, 42, 255
+        }, 1);
+        bgImageColor.setImageColor((GX2Color) {
+            42, 42, 42, 255
+        }, 2);
+        bgImageColor.setImageColor((GX2Color) {
+            42, 42, 42, 255
+        }, 3);
         append(&bgImageColor);
     }
 

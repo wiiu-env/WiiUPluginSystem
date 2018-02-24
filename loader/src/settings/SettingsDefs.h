@@ -19,19 +19,16 @@
 #ifndef __SETTINGS_DEFS_
 #define __SETTINGS_DEFS_
 
-typedef struct
-{
+typedef struct {
     int value;
     const char *name;
 } ValueString;
 
-typedef struct
-{
+typedef struct {
     const char *name;
     const ValueString *valueStrings;
     int type;
     int index;
 } SettingType;
-
 
 #endif // __SETTINGS_DEFS_

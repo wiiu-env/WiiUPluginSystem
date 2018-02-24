@@ -36,7 +36,7 @@ extern "C" {
 }
 #endif
 
-class ElfTools{
+class ElfTools {
 
 public:
     static bool elfLoadSection(const Elf *elf, Elf_Scn *scn, const Elf32_Shdr *shdr,void *destination);

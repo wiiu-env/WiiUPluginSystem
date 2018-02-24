@@ -34,8 +34,7 @@ Application::Application()
     , bgMusic(NULL)
     , video(NULL)
     , mainWindow(NULL)
-    , exitCode(EXIT_RELAUNCH_ON_LOAD)
-{
+    , exitCode(EXIT_RELAUNCH_ON_LOAD) {
     controller[0] = new VPadController(GuiTrigger::CHANNEL_1);
     controller[1] = new WPadController(GuiTrigger::CHANNEL_2);
     controller[2] = new WPadController(GuiTrigger::CHANNEL_3);
@@ -53,35 +52,35 @@ Application::Application()
     exitApplication = false;
 }
 
-Application::~Application(){
-    log_printf("Application::~Application(line %d): Destroy music\n",__LINE__);
+Application::~Application() {
+    DEBUG_FUNCTION_LINE("Destroy music\n");
     delete bgMusic;
 
-    log_printf("Application::~Application(line %d): Destroy controller\n",__LINE__);
+    DEBUG_FUNCTION_LINE("Destroy controller\n");
 
     for(s32 i = 0; i < 5; i++)
         delete controller[i];
 
     //We may have to handle Asyncdelete in the Destructors.
-    log_printf("Application::~Application(line %d): Destroy async deleter\n",__LINE__);
-    do{
-        log_printf("Application::~Application(line %d): Triggering AsyncDeleter\n",__LINE__);
+    DEBUG_FUNCTION_LINE("Destroy async deleter\n");
+    do {
+        DEBUG_FUNCTION_LINE("Triggering AsyncDeleter\n");
         AsyncDeleter::triggerDeleteProcess();
-        while(!AsyncDeleter::realListEmpty()){
+        while(!AsyncDeleter::realListEmpty()) {
             os_usleep(1000);
         }
-    }while(!AsyncDeleter::deleteListEmpty());
+    } while(!AsyncDeleter::deleteListEmpty());
     AsyncDeleter::destroyInstance();
 
-    log_printf("Application::~Application(line %d): Clear resources\n",__LINE__);
+    DEBUG_FUNCTION_LINE("Clear resources\n");
     Resources::Clear();
 
-    log_printf("Application::~Application(line %d): Stop sound handler\n",__LINE__);
+    DEBUG_FUNCTION_LINE("Stop sound handler\n");
     SoundHandler::DestroyInstance();
 
 }
 
-s32 Application::exec(){
+s32 Application::exec() {
     //! start main GX2 thread
     resumeThread();
     //! now wait for thread to finish
@@ -90,14 +89,15 @@ s32 Application::exec(){
     return exitCode;
 }
 
-void Application::reloadUI(){
+void Application::reloadUI() {
     reloadUIflag = true;
 }
-void Application::fadeOut(){
-    GuiImage fadeOut(video->getTvWidth(), video->getTvHeight(), (GX2Color){ 0, 0, 0, 255 });
+void Application::fadeOut() {
+    GuiImage fadeOut(video->getTvWidth(), video->getTvHeight(), (GX2Color) {
+        0, 0, 0, 255
+    });
 
-    for(s32 i = 0; i < 255; i += 10)
-    {
+    for(s32 i = 0; i < 255; i += 10) {
         if(i > 255)
             i = 255;
 
@@ -140,48 +140,47 @@ void Application::fadeOut(){
     video->drcEnable(false);
 }
 
-void Application::executeThread(void){
-    log_printf("Application::executeThread(line %d): Initialize video\n",__LINE__);
+void Application::executeThread(void) {
+    DEBUG_FUNCTION_LINE("Initialize video\n");
     video = new CVideo(GX2_TV_SCAN_MODE_720P, GX2_DRC_SINGLE);
 
-    log_printf("Application::executeThread(line %d): Video size %i x %i\n",__LINE__, video->getTvWidth(), video->getTvHeight());
+    DEBUG_FUNCTION_LINE("Video size %i x %i\n", video->getTvWidth(), video->getTvHeight());
 
     //! setup default Font
-    log_printf("Application::executeThread(line %d): Initialize main font system\n",__LINE__);
+    DEBUG_FUNCTION_LINE("Initialize main font system\n");
     FreeTypeGX *fontSystem = new FreeTypeGX(Resources::GetFile("font.ttf"), Resources::GetFileSize("font.ttf"), true);
     GuiText::setPresetFont(fontSystem);
 
     reloadUIflag = true;
-    if(bgMusic != NULL){
+    if(bgMusic != NULL) {
         bgMusic->SetLoop(true);
         bgMusic->SetVolume(50);
         bgMusic->Stop(); //CHANG MEEEEEEEEEEEEEEEEEEE
     }
 
-    while(reloadUIflag){
+    while(reloadUIflag) {
         reloadUIflag = false;
         exitCode = EXIT_RELAUNCH_ON_LOAD;
-        log_printf("Application::executeThread(line %d): Initialize the language\n",__LINE__);
+        DEBUG_FUNCTION_LINE("Initialize the language\n");
         loadLanguageFromConfig();
-        log_printf("Application::executeThread(line %d): Initialize main window\n",__LINE__);
+        DEBUG_FUNCTION_LINE("Initialize main window\n");
         mainWindow = MainWindow::getInstance(video->getTvWidth(), video->getTvHeight());
 
-        log_printf("Application::executeThread(line %d): Entering main loop\n",__LINE__);
+        DEBUG_FUNCTION_LINE("Entering main loop\n");
         exitApplication = false;
         //! main GX2 loop (60 Hz cycle with max priority on core 1)
-        while(!exitApplication && !reloadUIflag){
+        while(!exitApplication && !reloadUIflag) {
             //! Read out inputs
-            for(s32 i = 0; i < 5; i++)
-            {
+            for(s32 i = 0; i < 5; i++) {
                 if(controller[i]->update(video->getTvWidth(), video->getTvHeight()) == false)
                     continue;
 
-                if(controller[i]->data.buttons_d & VPAD_BUTTON_PLUS){
+                if(controller[i]->data.buttons_d & VPAD_BUTTON_PLUS) {
                     exitCode = APPLICATION_CLOSE_APPLY;
                     exitApplication = true;
                 }
 
-                if(controller[i]->data.buttons_d & VPAD_BUTTON_HOME){
+                if(controller[i]->data.buttons_d & VPAD_BUTTON_HOME) {
                     exitCode = APPLICATION_CLOSE_MIIMAKER;
                     exitApplication = true;
                 }
@@ -228,8 +227,8 @@ void Application::executeThread(void){
     delete video;
 }
 
-void Application::loadLanguageFromConfig(){
-    if(!CSettings::getValueAsString(CSettings::AppLanguage).empty()){
+void Application::loadLanguageFromConfig() {
+    if(!CSettings::getValueAsString(CSettings::AppLanguage).empty()) {
         std::string languagePath = std::string(DEFAULT_LANG_PATH) + "/" + CSettings::getValueAsString(CSettings::AppLanguage) + std::string(LANGUAGE_FILE_EXT);
         gettextLoadLanguage(languagePath.c_str());
     }

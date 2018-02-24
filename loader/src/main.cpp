@@ -58,8 +58,8 @@ static void RestorePatches();
 s32 isInMiiMakerHBL();
 
 /* Entry point */
-extern "C" int Menu_Main(int argc, char **argv){
-    if(gAppStatus == 2){
+extern "C" int Menu_Main(int argc, char **argv) {
+    if(gAppStatus == 2) {
         //"No, we don't want to patch stuff again.");
         return EXIT_RELAUNCH_ON_LOAD;
     }
@@ -87,7 +87,7 @@ extern "C" int Menu_Main(int argc, char **argv){
     s32 result = 0;
 
     //Reset everything when were going back to the Mii Maker
-    if(isInMiiMakerHBL()){
+    if(isInMiiMakerHBL()) {
         // Restore patches as the patched functions could change.
         RestorePatches();
 
@@ -115,12 +115,12 @@ extern "C" int Menu_Main(int argc, char **argv){
     DEBUG_FUNCTION_LINE("Apply patches.\n");
     ApplyPatches();
 
-    if(!isInMiiMakerHBL()){
+    if(!isInMiiMakerHBL()) {
         CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
-    if(result == APPLICATION_CLOSE_APPLY){
+    if(result == APPLICATION_CLOSE_APPLY) {
         DEBUG_FUNCTION_LINE("Loading the system menu.\n");
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
@@ -132,28 +132,28 @@ extern "C" int Menu_Main(int argc, char **argv){
     return EXIT_SUCCESS;
 }
 
-void ApplyPatches(){
+void ApplyPatches() {
     PatchInvidualMethodHooks(method_hooks_hooks, method_hooks_size_hooks, method_calls_hooks);
-    for(int plugin_index=0;plugin_index<gbl_replacement_data.number_used_plugins;plugin_index++){
+    for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
         new_PatchInvidualMethodHooks(&gbl_replacement_data.plugin_data[plugin_index]);
     }
 }
 
-void CallHook(wups_loader_hook_type_t hook_type){
-    for(int plugin_index=0;plugin_index<gbl_replacement_data.number_used_plugins;plugin_index++){
+void CallHook(wups_loader_hook_type_t hook_type) {
+    for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
         replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
         DEBUG_FUNCTION_LINE("Checking hook functions for %s.\n",plugin_data->plugin_name);
         DEBUG_FUNCTION_LINE("Found hooks: %d\n",plugin_data->number_used_hooks);
-        for(int j=0;j<plugin_data->number_used_hooks;j++){
+        for(int j=0; j<plugin_data->number_used_hooks; j++) {
             replacement_data_hook_t * hook_data = &plugin_data->hooks[j];
-            if(hook_data->type == hook_type){
+            if(hook_data->type == hook_type) {
                 DEBUG_FUNCTION_LINE("Calling hook of type %d\n",hook_data->type);
                 void * func_ptr = hook_data->func_pointer;
                 //TODO: Switch cases depending on arguments etc.
                 // Adding arguments!
 
-                if(func_ptr != NULL){
-                    if(hook_type == WUPS_LOADER_HOOK_INIT_FUNCTION){
+                if(func_ptr != NULL) {
+                    if(hook_type == WUPS_LOADER_HOOK_INIT_FUNCTION) {
                         DEBUG_FUNCTION_LINE("Calling it! %08X\n",func_ptr);
                         wups_loader_init_args_t args;
                         args.device_mounted = gSDInitDone;
@@ -171,7 +171,7 @@ void CallHook(wups_loader_hook_type_t hook_type){
 
                         ( (void (*)(wups_loader_init_args_t *))((unsigned int*)func_ptr) )(&args);
                     }
-                }else{
+                } else {
                     DEBUG_FUNCTION_LINE("Was not defined\n");
                 }
             }
@@ -179,31 +179,30 @@ void CallHook(wups_loader_hook_type_t hook_type){
     }
 }
 
-void DeInit(){
+void DeInit() {
     DeInit_SD_USB();
 }
 
-void RestorePatches(){
-    for(int plugin_index=gbl_replacement_data.number_used_plugins-1;plugin_index>=0;plugin_index--){
+void RestorePatches() {
+    for(int plugin_index=gbl_replacement_data.number_used_plugins-1; plugin_index>=0; plugin_index--) {
         DEBUG_FUNCTION_LINE("Restoring function for plugin: %d\n",plugin_index);
         new_RestoreInvidualInstructions(&gbl_replacement_data.plugin_data[plugin_index]);
     }
     RestoreInvidualInstructions(method_hooks_hooks, method_hooks_size_hooks);
 }
 
-s32 isInMiiMakerHBL(){
+s32 isInMiiMakerHBL() {
     if (OSGetTitleID != 0 && (
-            OSGetTitleID() == 0x000500101004A200 || // mii maker eur
-            OSGetTitleID() == 0x000500101004A100 || // mii maker usa
-            OSGetTitleID() == 0x000500101004A000 ||// mii maker jpn
-            OSGetTitleID() == 0x0005000013374842))
-        {
-            return 1;
+                OSGetTitleID() == 0x000500101004A200 || // mii maker eur
+                OSGetTitleID() == 0x000500101004A100 || // mii maker usa
+                OSGetTitleID() == 0x000500101004A000 ||// mii maker jpn
+                OSGetTitleID() == 0x0005000013374842)) {
+        return 1;
     }
     return 0;
 }
 
-void Init(){
+void Init() {
     memset(&tv_store,0,sizeof(tv_store));
     memset(&drc_store,0,sizeof(drc_store));
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
@@ -212,30 +211,30 @@ void Init(){
 
 void Init_SD_USB() {
     int res = IOSUHAX_Open(NULL);
-    if(res < 0){
+    if(res < 0) {
         ExecuteIOSExploitWithDefaultConfig();
     }
     deleteDevTabsNames();
     mount_fake();
     gSDInitDone |= WUPS_SDUSB_MOUNTED_FAKE;
 
-    if(res < 0){
+    if(res < 0) {
         DEBUG_FUNCTION_LINE("IOSUHAX_open failed\n");
-        if((res = mount_sd_fat("sd")) >= 0){
+        if((res = mount_sd_fat("sd")) >= 0) {
             DEBUG_FUNCTION_LINE("mount_sd_fat success\n");
             gSDInitDone |= WUPS_SDUSB_MOUNTED_OS_SD;
-        }else{
+        } else {
             DEBUG_FUNCTION_LINE("mount_sd_fat failed %d\n",res);
         }
-    }else{
+    } else {
         DEBUG_FUNCTION_LINE("Using IOSUHAX for SD/USB access\n");
         gSDInitDone |= WUPS_SDUSB_LIBIOSU_LOADED;
         int ntfs_mounts = mountAllNTFS();
-        if(ntfs_mounts > 0){
+        if(ntfs_mounts > 0) {
             gSDInitDone |= WUPS_USB_MOUNTED_LIBNTFS;
         }
 
-        if(mount_libfatAll() == 0){
+        if(mount_libfatAll() == 0) {
             gSDInitDone |= WUPS_SD_MOUNTED_LIBFAT;
             gSDInitDone |= WUPS_USB_MOUNTED_LIBFAT;
         }
@@ -243,46 +242,46 @@ void Init_SD_USB() {
     DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
 }
 
-void DeInit_SD_USB(){
+void DeInit_SD_USB() {
     DEBUG_FUNCTION_LINE("Called this function.\n");
 
-    if(gSDInitDone & WUPS_SDUSB_MOUNTED_FAKE){
-       DEBUG_FUNCTION_LINE("Unmounting fake\n");
-       unmount_fake();
-       gSDInitDone &= ~WUPS_SDUSB_MOUNTED_FAKE;
+    if(gSDInitDone & WUPS_SDUSB_MOUNTED_FAKE) {
+        DEBUG_FUNCTION_LINE("Unmounting fake\n");
+        unmount_fake();
+        gSDInitDone &= ~WUPS_SDUSB_MOUNTED_FAKE;
     }
-    if(gSDInitDone & WUPS_SDUSB_MOUNTED_OS_SD){
+    if(gSDInitDone & WUPS_SDUSB_MOUNTED_OS_SD) {
         DEBUG_FUNCTION_LINE("Unmounting OS SD\n");
         unmount_sd_fat("sd");
         gSDInitDone &= ~WUPS_SDUSB_MOUNTED_OS_SD;
     }
 
-    if(gSDInitDone & WUPS_SD_MOUNTED_LIBFAT){
+    if(gSDInitDone & WUPS_SD_MOUNTED_LIBFAT) {
         DEBUG_FUNCTION_LINE("Unmounting LIBFAT SD\n");
         unmount_libfat("sd");
         gSDInitDone &= ~WUPS_SD_MOUNTED_LIBFAT;
     }
 
-    if(gSDInitDone & WUPS_USB_MOUNTED_LIBFAT){
+    if(gSDInitDone & WUPS_USB_MOUNTED_LIBFAT) {
         DEBUG_FUNCTION_LINE("Unmounting LIBFAT USB\n");
         unmount_libfat("usb");
         gSDInitDone &= ~WUPS_USB_MOUNTED_LIBFAT;
     }
 
-    if(gSDInitDone & WUPS_USB_MOUNTED_LIBNTFS){
+    if(gSDInitDone & WUPS_USB_MOUNTED_LIBNTFS) {
         DEBUG_FUNCTION_LINE("Unmounting LIBNTFS USB\n");
         unmountAllNTFS();
         gSDInitDone &= ~WUPS_USB_MOUNTED_LIBNTFS;
     }
 
-    if(gSDInitDone & WUPS_SDUSB_LIBIOSU_LOADED){
+    if(gSDInitDone & WUPS_SDUSB_LIBIOSU_LOADED) {
         DEBUG_FUNCTION_LINE("Calling IOSUHAX_Close\n");
         IOSUHAX_Close();
         gSDInitDone &= ~WUPS_SDUSB_LIBIOSU_LOADED;
 
     }
     deleteDevTabsNames();
-    if(gSDInitDone != WUPS_SDUSB_MOUNTED_NONE){
+    if(gSDInitDone != WUPS_SDUSB_MOUNTED_NONE) {
         DEBUG_FUNCTION_LINE("WARNING. Some devices are still mounted.\n");
     }
     DEBUG_FUNCTION_LINE("Function end.\n");

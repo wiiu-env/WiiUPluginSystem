@@ -20,25 +20,34 @@ MainWindowContent::MainWindowContent(s32 w, s32 h)
     : GuiFrame(w, h)
     , width(w)
     , height(h)
-    , bgImageColor(w, h, (GX2Color){ 0, 0, 0, 0 })
-{
-    bgImageColor.setImageColor((GX2Color){  248, 249, 248, 255 }, 0);
-    bgImageColor.setImageColor((GX2Color){  248, 249, 248, 255 }, 1);
-    bgImageColor.setImageColor((GX2Color){  248, 249, 248, 255 }, 2);
-    bgImageColor.setImageColor((GX2Color){  248, 249, 248, 255 }, 3);
+    , bgImageColor(w, h, (GX2Color) {
+    0, 0, 0, 0
+}) {
+    bgImageColor.setImageColor((GX2Color) {
+        248, 249, 248, 255
+    }, 0);
+    bgImageColor.setImageColor((GX2Color) {
+        248, 249, 248, 255
+    }, 1);
+    bgImageColor.setImageColor((GX2Color) {
+        248, 249, 248, 255
+    }, 2);
+    bgImageColor.setImageColor((GX2Color) {
+        248, 249, 248, 255
+    }, 3);
 
     append(&bgImageColor);
 }
 
- ContentTemplate * MainWindowContent::getContent(){
+ContentTemplate * MainWindowContent::getContent() {
     return content;
- }
+}
 
 
 
-void MainWindowContent::SetScreen(ContentTemplate * new_content){
+void MainWindowContent::SetScreen(ContentTemplate * new_content) {
     RemoveScreen();
-    if(new_content){
+    if(new_content) {
         //while(content != NULL); //hopefully this shit don't kill us.
 
         content = new_content;
@@ -46,17 +55,17 @@ void MainWindowContent::SetScreen(ContentTemplate * new_content){
     }
 }
 
-void MainWindowContent::RemoveScreen(){
+void MainWindowContent::RemoveScreen() {
     remove(content);
     delete content;
     content = NULL;
 }
 
-void MainWindowContent::OnCloseEffectFinish(GuiElement *element){
+void MainWindowContent::OnCloseEffectFinish(GuiElement *element) {
 
 }
 
-MainWindowContent::~MainWindowContent(){
+MainWindowContent::~MainWindowContent() {
     remove(&bgImageColor);
     RemoveScreen();
 }

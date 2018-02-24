@@ -21,21 +21,21 @@ MainWindowGUI::MainWindowGUI(s32 w, s32 h)
     : GuiFrame(w, h)
     , width(w)
     , height(h)
-    , content(SCREEN_WIDTH,h){
+    , content(SCREEN_WIDTH,h) {
     ContentTemplate * curTemplate = content.createNewContent(MainWindowContent::CONTENT_HOME);
     content.SetScreen(curTemplate);
     append(&content);
 }
 
-void MainWindowGUI::setState(s32 i, s32 c){
+void MainWindowGUI::setState(s32 i, s32 c) {
     GuiFrame::setState(i,c);
 }
 
-void MainWindowGUI::process(){
+void MainWindowGUI::process() {
     GuiFrame::process();
 }
 
-MainWindowGUI::~MainWindowGUI(){
+MainWindowGUI::~MainWindowGUI() {
     content.RemoveScreen();
     remove(&content);
 }

@@ -35,52 +35,52 @@ extern "C" {
 }
 #endif
 
-class PluginData{
-    public:
-        PluginData(PluginInformation * pluginInformation){
-            this->pluginInformation = pluginInformation;
-        }
+class PluginData {
+public:
+    PluginData(PluginInformation * pluginInformation) {
+        this->pluginInformation = pluginInformation;
+    }
 
-        ~PluginData(){
-            for(size_t i = 0;i< function_data_list.size();i++){
-                if(function_data_list[i] != NULL){
-                    delete function_data_list[i];
-                }
-            }
-
-            for(size_t i = 0;i< hook_data_list.size();i++){
-                if(hook_data_list[i] != NULL){
-                    delete hook_data_list[i];
-                }
+    ~PluginData() {
+        for(size_t i = 0; i< function_data_list.size(); i++) {
+            if(function_data_list[i] != NULL) {
+                delete function_data_list[i];
             }
         }
 
-        void addFunctionData(FunctionData * function_data){
-            function_data_list.push_back(function_data);
+        for(size_t i = 0; i< hook_data_list.size(); i++) {
+            if(hook_data_list[i] != NULL) {
+                delete hook_data_list[i];
+            }
         }
+    }
 
-        std::vector<FunctionData *> getFunctionDataList(){
-            return function_data_list;
-        }
+    void addFunctionData(FunctionData * function_data) {
+        function_data_list.push_back(function_data);
+    }
 
-        void addHookData(HookData * hook_data){
-            hook_data_list.push_back(hook_data);
-        }
+    std::vector<FunctionData *> getFunctionDataList() {
+        return function_data_list;
+    }
 
-        std::vector<HookData *> getHookDataList(){
-            return hook_data_list;
-        }
+    void addHookData(HookData * hook_data) {
+        hook_data_list.push_back(hook_data);
+    }
 
-        PluginInformation * getPluginInformation(){
-            return pluginInformation;
-        }
+    std::vector<HookData *> getHookDataList() {
+        return hook_data_list;
+    }
 
-    private:
+    PluginInformation * getPluginInformation() {
+        return pluginInformation;
+    }
 
-        PluginInformation * pluginInformation;
+private:
 
-        std::vector<FunctionData *> function_data_list;
-        std::vector<HookData *> hook_data_list;
+    PluginInformation * pluginInformation;
+
+    std::vector<FunctionData *> function_data_list;
+    std::vector<HookData *> hook_data_list;
 };
 
 

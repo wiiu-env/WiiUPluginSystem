@@ -7,28 +7,28 @@
 #include <ntfs.h>
 #include "common/retain_vars.h"
 
-int mountAllNTFS(){
+int mountAllNTFS() {
     int i;
     // Mount all NTFS volumes on all inserted block devices
     ntfs_mount_count = ntfsMountAll((ntfs_md **) &ntfs_mounts, NTFS_DEFAULT | NTFS_RECOVER);
-    if (ntfs_mount_count == -1){
+    if (ntfs_mount_count == -1) {
         DEBUG_FUNCTION_LINE("Error whilst mounting devices.\n");
-    }else if (ntfs_mount_count == 0){
+    } else if (ntfs_mount_count == 0) {
         DEBUG_FUNCTION_LINE("No NTFS volumes were found and/or mounted.\n");
-    }else{
+    } else {
         DEBUG_FUNCTION_LINE("%i NTFS volumes(s) mounted!\n", ntfs_mount_count);
     }
     // List all mounted NTFS volumes
-    for (i = 0; i < ntfs_mount_count; i++){
+    for (i = 0; i < ntfs_mount_count; i++) {
         DEBUG_FUNCTION_LINE("%i - %s:/ (%s)\n", i + 1, ((ntfs_md *)ntfs_mounts)[i].name, ntfsGetVolumeName(((ntfs_md *)ntfs_mounts)[i].name));
     }
     return ntfs_mount_count;
 }
 
-int unmountAllNTFS(void){
+int unmountAllNTFS(void) {
     if (ntfs_mounts) {
         int i = 0;
-        for (i = 0; i < ntfs_mount_count; i++){
+        for (i = 0; i < ntfs_mount_count; i++) {
             ntfsUnmount(((ntfs_md *)ntfs_mounts)[i].name, true);
         }
         free(ntfs_mounts);

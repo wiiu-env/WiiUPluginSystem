@@ -42,109 +42,109 @@ extern "C" {
 }
 #endif
 
-class PluginInformation{
-    public:
-        /**
+class PluginInformation {
+public:
+    /**
 
-        returns PluginInformation* if a valid plugin was found at the given path. Otherwise returns NULL
-        **/
-        static PluginInformation * loadPluginInformation(std::string path){
-            if(PluginInformation::checkFileExtenstion(path.c_str())){
-                DEBUG_FUNCTION_LINE("Checkfile successfully, loading now Plugin Information\n");
-                PluginInformation * pluginInformation = new PluginInformation(path);
-                if(pluginInformation->openAndParseElf()){
-                    return pluginInformation;
-                }else{
-                    delete pluginInformation;
-                    return NULL;
-                }
+    returns PluginInformation* if a valid plugin was found at the given path. Otherwise returns NULL
+    **/
+    static PluginInformation * loadPluginInformation(std::string path) {
+        if(PluginInformation::checkFileExtenstion(path.c_str())) {
+            DEBUG_FUNCTION_LINE("Checkfile successfully, loading now Plugin Information\n");
+            PluginInformation * pluginInformation = new PluginInformation(path);
+            if(pluginInformation->openAndParseElf()) {
+                return pluginInformation;
             } else {
+                delete pluginInformation;
                 return NULL;
             }
+        } else {
+            return NULL;
         }
+    }
 
-        std::string getName(){
-            return this->name;
-        }
+    std::string getName() {
+        return this->name;
+    }
 
-        std::string getAuthor(){
-            return this->author;
-        }
+    std::string getAuthor() {
+        return this->author;
+    }
 
-        std::string getVersion(){
-            return this->version;
-        }
+    std::string getVersion() {
+        return this->version;
+    }
 
-        std::string getLicense(){
-            return this->license;
-        }
+    std::string getLicense() {
+        return this->license;
+    }
 
-        std::string getBuildTimestamp(){
-            return this->buildtimestamp;
-        }
+    std::string getBuildTimestamp() {
+        return this->buildtimestamp;
+    }
 
-        std::string getDescription(){
-            return this->description;
-        }
+    std::string getDescription() {
+        return this->description;
+    }
 
-        std::string getPath(){
-            return path;
-        }
+    std::string getPath() {
+        return path;
+    }
 
-        size_t getSize(){
-            return this->size;
-        }
-    private:
-        PluginInformation(std::string path){
-            this->path = path;
-        }
+    size_t getSize() {
+        return this->size;
+    }
+private:
+    PluginInformation(std::string path) {
+        this->path = path;
+    }
 
-        void setName(const char * name){
-            this->name = name;
-        }
+    void setName(const char * name) {
+        this->name = name;
+    }
 
-        void setAuthor(const char * author){
-            this->author = author;
-        }
+    void setAuthor(const char * author) {
+        this->author = author;
+    }
 
-        void setVersion(const char * version){
-            this->version = version;
-        }
+    void setVersion(const char * version) {
+        this->version = version;
+    }
 
-        void setLicense(const char * license){
-            this->license = license;
-        }
+    void setLicense(const char * license) {
+        this->license = license;
+    }
 
-        void setBuildTimestamp(const char * buildtimestamp){
-            this->buildtimestamp = buildtimestamp;
-        }
+    void setBuildTimestamp(const char * buildtimestamp) {
+        this->buildtimestamp = buildtimestamp;
+    }
 
-        void setDescription(const char * description){
-            this->description = description;
-        }
+    void setDescription(const char * description) {
+        this->description = description;
+    }
 
-        void setSize(size_t size){
-            this->size = size;
-        }
+    void setSize(size_t size) {
+        this->size = size;
+    }
 
-        static bool checkFileExtenstion(const char * path);
+    static bool checkFileExtenstion(const char * path);
 
-        bool openAndParseElf();
+    bool openAndParseElf();
 
-        bool parseElf(Elf *elf);
+    bool parseElf(Elf *elf);
 
-        bool metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
+    bool metadataRead(Elf *elf, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx);
 
-        bool loadedSuccessfully = false;
+    bool loadedSuccessfully = false;
 
-        std::string path;
-        std::string name;
-        std::string author;
-        std::string version;
-        std::string license;
-        std::string buildtimestamp;
-        std::string description;
-        size_t size;
+    std::string path;
+    std::string name;
+    std::string author;
+    std::string version;
+    std::string license;
+    std::string buildtimestamp;
+    std::string description;
+    size_t size;
 };
 
 

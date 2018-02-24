@@ -29,8 +29,7 @@ ContentHome::ContentHome():ContentTemplate()
     , exitHome(gettext("Exit to HBL  "))
     , plusbutton_imgdata(Resources::GetImageData("PlusButtonIcon.png"))
     , plusbutton_img(plusbutton_imgdata)
-    , exitPlus(gettext("Apply Patches"))
-{
+    , exitPlus(gettext("Apply Patches")) {
     glm::vec4 textColor = glm::vec4(1.0f,1.0f,1.0f,1.0f);
 
     homebutton_img.setAlignment(ALIGN_LEFT);
@@ -82,7 +81,7 @@ ContentHome::ContentHome():ContentTemplate()
     append(&exitPlusFrame);
 }
 
-ContentHome::~ContentHome(){
+ContentHome::~ContentHome() {
     //Resources::RemoveImageData(logoImageData);  <-- will reduce lag. Will be deleted at the end anyway
     remove(&bgImageColor);
     remove(&welcomeHeadLineLabel);

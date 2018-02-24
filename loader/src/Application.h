@@ -26,8 +26,7 @@
 #define APPLICATION_CLOSE_APPLY    1
 #define APPLICATION_CLOSE_MIIMAKER 2
 
-class Application : public CThread
-{
+class Application : public CThread {
 public:
     static Application * instance() {
         if(!applicationInstance)

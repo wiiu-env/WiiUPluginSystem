@@ -21,28 +21,28 @@
 #include <wups.h>
 #include <string>
 
-class HookData{
+class HookData {
 
 public:
-    HookData(void * function_pointer, wups_loader_hook_type_t type){
+    HookData(void * function_pointer, wups_loader_hook_type_t type) {
         this->function_pointer = function_pointer;
         this->type = type;
     }
 
-    ~HookData(){
+    ~HookData() {
 
     }
 
-    void * getFunctionPointer(){
+    void * getFunctionPointer() {
         return function_pointer;
     }
 
-    wups_loader_hook_type_t getType(){
+    wups_loader_hook_type_t getType() {
         return this->type;
     }
 private:
-     void * function_pointer;
-     wups_loader_hook_type_t type;
+    void * function_pointer;
+    wups_loader_hook_type_t type;
 };
 
 
