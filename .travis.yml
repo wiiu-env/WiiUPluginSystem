@@ -21,8 +21,8 @@ addons:
 
 before_install:
   - mkdir -p "${DEVKITPRO}"
-  - wget http://download.sourceforge.net/devkitpro/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
-  - wget https://download.sourceforge.net/devkitpro/devkitARM_r47-x86_64-linux.tar.bz2 -O devkitARM-linux.tar.bz2
+  - wget https://downloads.devkitpro.org/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
+  - wget https://downloads.devkitpro.org/devkitARM_r47-x86_64-linux.tar.bz2 -O devkitARM-linux.tar.bz2
   - wget https://github.com/Maschell/dynamic_libs/archive/lib.tar.gz -O dynamic_libs.tar.gz
   - wget https://github.com/Maschell/libutils/archive/master.tar.gz -O libutils.tar.gz
   - wget https://github.com/Maschell/libgui/archive/master.tar.gz -O libgui.tar.gz
