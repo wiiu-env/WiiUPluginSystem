@@ -13,28 +13,10 @@
 #include "common/common.h"
 #include "main.h"
 
-#define DEBUG_LOG  1
-
-DECL_FUNCTION(void, __PPCExit, void){
-    DEBUG_FUNCTION_LINE("__PPCExit\n");
-
-    deInitApplication();
-
-    real___PPCExit();
-}
-
-DECL_FUNCTION(u32, ProcUIProcessMessages, u32 u){
-    u32 res = real_ProcUIProcessMessages(u);
-    if(res != gAppStatus){
-        //DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
-        gAppStatus = res;
-    }
-
-    return res;
-}
+#define	DEBUG_LOG		0
 
 DECL_FUNCTION(int, FSCloseFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSCloseFile(pClient, pCmd, fd, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSCloseFile(pClient, pCmd, fd, error); }
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSCloseFile(fd)) != USE_OS_FS_FUNCTION){
@@ -45,7 +27,7 @@ DECL_FUNCTION(int, FSCloseFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, int
 }
 
 DECL_FUNCTION(int, FSGetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, int *pos, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetPosFile(pClient, pCmd, fd, pos, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSGetPosFile(pClient, pCmd, fd, pos, error); }
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSGetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
@@ -56,7 +38,7 @@ DECL_FUNCTION(int, FSGetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, in
 }
 
 DECL_FUNCTION(int, FSGetStat, FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetStat(pClient, pCmd, path, stats, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSGetStat(pClient, pCmd, path, stats, error); }
 
     int result = USE_OS_FS_FUNCTION;
 
@@ -74,7 +56,7 @@ DECL_FUNCTION(int, FSGetStat, FSClient *pClient, FSCmdBlock *pCmd, const char *p
 }
 
 DECL_FUNCTION(int, FSGetStatFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, FSStat * stats, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetStatFile(pClient, pCmd, fd, stats, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSGetStatFile(pClient, pCmd, fd, stats, error); }
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSGetStatFile(fd,stats)) != USE_OS_FS_FUNCTION){
@@ -85,7 +67,7 @@ DECL_FUNCTION(int, FSGetStatFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, F
 }
 
 DECL_FUNCTION(int, FSIsEof, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE) return real_FSIsEof(pClient, pCmd, fd, error);
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)) return real_FSIsEof(pClient, pCmd, fd, error);
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSIsEof(fd)) != USE_OS_FS_FUNCTION){
@@ -96,7 +78,7 @@ DECL_FUNCTION(int, FSIsEof, FSClient *pClient, FSCmdBlock *pCmd, int fd, int err
 }
 
 DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSOpenFile(pClient, pCmd, path, mode, handle, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSOpenFile(pClient, pCmd, path, mode, handle, error); }
 
     /*if(endsWith(path,BOOT_TV_TEX_TGA,-1,-1)){ //Mario Party 10 crashes when pressing the home button.
         if(startsWith("/vol/storage_mlc01/usr/title/",path)){
@@ -129,7 +111,7 @@ DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *
 }
 
 DECL_FUNCTION(int, FSReadFile, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, int handle, int flag, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSReadFile(pClient, pCmd, buffer, size, count, handle, flag, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSReadFile(pClient, pCmd, buffer, size, count, handle, flag, error); }
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSReadFile(handle,buffer,size,count)) != USE_OS_FS_FUNCTION){
@@ -140,7 +122,7 @@ DECL_FUNCTION(int, FSReadFile, FSClient *pClient, FSCmdBlock *pCmd, void *buffer
 }
 
 DECL_FUNCTION(int, FSSetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, u32 pos, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE) return real_FSSetPosFile(pClient, pCmd, fd, pos, error);
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)) return real_FSSetPosFile(pClient, pCmd, fd, pos, error);
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSSetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
@@ -151,7 +133,7 @@ DECL_FUNCTION(int, FSSetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, u3
 }
 
 DECL_FUNCTION(int, FSReadFileWithPos, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, u32 pos, int fd, int flag, int error) {
-    if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSReadFileWithPos(pClient, pCmd, buffer, size, count, pos, fd, flag, error); }
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || !(gUSBInitDone || gSDInitDone)){ return real_FSReadFileWithPos(pClient, pCmd, buffer, size, count, pos, fd, flag, error); }
 
     int result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSReadFileWithPos(buffer,size,count,pos,fd)) != USE_OS_FS_FUNCTION){
@@ -169,7 +151,7 @@ However this my be a bit faster/robust, when we handle the async functions async
 **/
 
 DECL_FUNCTION(int, FSCloseFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams * asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSCloseFileAsync(pClient, pCmd, fd, error, asyncParams);
     }
 
@@ -177,7 +159,7 @@ DECL_FUNCTION(int, FSCloseFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd
 }
 
 DECL_FUNCTION(int, FSGetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int *pos, int error, FSAsyncParams * asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSGetPosFileAsync(pClient, pCmd, fd, pos, error, asyncParams);
     }
 
@@ -185,7 +167,7 @@ DECL_FUNCTION(int, FSGetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int f
 }
 
 DECL_FUNCTION(int, FSGetStatAsync, FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int error, FSAsyncParams * asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSGetStatAsync(pClient, pCmd, path, stats, error, asyncParams);
     }
 
@@ -193,7 +175,7 @@ DECL_FUNCTION(int, FSGetStatAsync, FSClient *pClient, FSCmdBlock *pCmd, const ch
 }
 
 DECL_FUNCTION(int, FSGetStatFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, FSStat * stats, int error, FSAsyncParams * asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSGetStatFileAsync(pClient, pCmd, fd, stats, error, asyncParams);
     }
 
@@ -201,7 +183,7 @@ DECL_FUNCTION(int, FSGetStatFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int 
 }
 
 DECL_FUNCTION(int, FSIsEofAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams *asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSIsEofAsync(pClient, pCmd, fd, error,asyncParams);
     }
 
@@ -224,7 +206,7 @@ u64 getTitleIDFromPath(const char * path){
 }*/
 
 DECL_FUNCTION(int, FSOpenFileAsync, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error, FSAsyncParams *asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSOpenFileAsync(pClient, pCmd, path, mode, handle,error, asyncParams);
     }
 
@@ -232,7 +214,7 @@ DECL_FUNCTION(int, FSOpenFileAsync, FSClient *pClient, FSCmdBlock *pCmd, const c
 }
 
 DECL_FUNCTION(int, FSReadFileAsync, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, int fd, int flag, int error, FSAsyncParams *asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSReadFileAsync(pClient, pCmd, buffer, size, count, fd, flag, error, asyncParams);
     }
 
@@ -240,7 +222,7 @@ DECL_FUNCTION(int, FSReadFileAsync, FSClient *pClient, FSCmdBlock *pCmd, void *b
 }
 
 DECL_FUNCTION(int, FSReadFileWithPosAsync, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, u32 pos, int fd, int flag, int error, FSAsyncParams *asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSReadFileWithPosAsync(pClient, pCmd, buffer, size, count, pos, fd, flag, error, asyncParams);
     }
 
@@ -248,7 +230,7 @@ DECL_FUNCTION(int, FSReadFileWithPosAsync, FSClient *pClient, FSCmdBlock *pCmd, 
 }
 
 DECL_FUNCTION(int, FSSetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int handle, u32 pos, int error, FSAsyncParams *asyncParams) {
-    if(gAppStatus == 2 || checkErrorFlag(&error) || gSDInitDone <= SDUSB_MOUNTED_FAKE){ // Use the real implementation if the app is not in foreground or we already checked it.
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND || checkErrorFlag(&error) || !(gUSBInitDone || gSDInitDone)){ // Use the real implementation if the app is not in foreground or we already checked it.
         return real_FSSetPosFileAsync(pClient, pCmd, handle, pos, error,asyncParams);
     }
 
@@ -257,12 +239,12 @@ DECL_FUNCTION(int, FSSetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int h
 
 /*
 DECL_FUNCTION(int, FSBindMount, void *pClient, void *pCmd, char *source, char *target, int error){
-    if(gAppStatus == 2) return real_FSBindMount(pClient,pCmd,source,target,error);
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND) return real_FSBindMount(pClient,pCmd,source,target,error);
     memcpy(gLastMetaPath,source,strlen(source) + 1);
     return real_FSBindMount(pClient,pCmd,source,target,error);
 }
 DECL_FUNCTION(int, FSBindUnmount, void *pClient, void *pCmd, char *target, int error){
-    if(gAppStatus == 2) real_FSBindUnmount(pClient,pCmd,target,error);
+    if(gAppStatus == WUPS_APP_STATUS_BACKGROUND) real_FSBindUnmount(pClient,pCmd,target,error);
     gLastMetaPath[0] = 0;
     return real_FSBindUnmount(pClient,pCmd,target,error);
 }*/
@@ -287,7 +269,3 @@ WUPS_MUST_REPLACE(FSOpenFileAsync,             WUPS_LOADER_LIBRARY_COREINIT,  FS
 WUPS_MUST_REPLACE(FSReadFileAsync,             WUPS_LOADER_LIBRARY_COREINIT,  FSReadFileAsync);
 WUPS_MUST_REPLACE(FSReadFileWithPosAsync,      WUPS_LOADER_LIBRARY_COREINIT,  FSReadFileWithPosAsync);
 WUPS_MUST_REPLACE(FSSetPosFileAsync,           WUPS_LOADER_LIBRARY_COREINIT,  FSSetPosFileAsync);
-
-
-WUPS_MUST_REPLACE(__PPCExit,               WUPS_LOADER_LIBRARY_COREINIT,      __PPCExit);
-WUPS_MUST_REPLACE(ProcUIProcessMessages,   WUPS_LOADER_LIBRARY_PROC_UI,       ProcUIProcessMessages);

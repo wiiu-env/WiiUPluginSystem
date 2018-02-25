@@ -4,9 +4,12 @@
 #include "hooks_patcher.h"
 #include "myutils/overlay_helper.h"
 #include "main.h"
+#include "utils.h"
 
 DECL(void, __PPCExit, void) {
     DEBUG_FUNCTION_LINE("__PPCExit\n");
+
+    CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
 
     DeInit();
 
@@ -18,6 +21,7 @@ DECL(u32, ProcUIProcessMessages, u32 u) {
     if(res != gAppStatus) {
         DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
         gAppStatus = res;
+        CallHook(WUPS_LOADER_HOOK_APP_STATUS_CHANGED);
     }
 
     return res;
@@ -44,6 +48,7 @@ DECL(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 sur
 }
 
 DECL(void, GX2WaitForVsync, void) {
+    CallHook(WUPS_LOADER_HOOK_VSYNC);
     real_GX2WaitForVsync();
 }
 
@@ -52,7 +57,7 @@ hooks_magic_t method_hooks_hooks[] __attribute__((section(".data"))) = {
     MAKE_MAGIC(ProcUIProcessMessages,   LIB_PROC_UI,    DYNAMIC_FUNCTION),
     MAKE_MAGIC(GX2SetTVBuffer,          LIB_GX2,        STATIC_FUNCTION),
     MAKE_MAGIC(GX2SetDRCBuffer,         LIB_GX2,        STATIC_FUNCTION),
-    //MAKE_MAGIC(GX2WaitForVsync,         LIB_GX2,        STATIC_FUNCTION),
+    MAKE_MAGIC(GX2WaitForVsync,         LIB_GX2,        STATIC_FUNCTION),
 };
 
 

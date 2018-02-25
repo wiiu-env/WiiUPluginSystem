@@ -96,8 +96,8 @@ DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *e
 
     if(result > 0 && ((buffer[0].btns_h & gButtonCombo) == gButtonCombo) && gCallbackCooldown == 0 ){
         gCallbackCooldown = 0x3C;
-        gSwap = !gSwap;
-        if(!gAppStatus){
+        if(gAppStatus == WUPS_APP_STATUS_FOREGROUND){
+			gSwap = !gSwap;
             swapVoices();
         }
     }
@@ -106,17 +106,7 @@ DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *e
     return result;
 }
 
-DECL_FUNCTION(u32, ProcUIProcessMessages, u32 u){
-    u32 res = real_ProcUIProcessMessages(u);
-    if(res != gAppStatus){
-        log_printf("App status changed from %d to %d \n",gAppStatus,res);
-        gAppStatus = res;
-    }
 
-    return res;
-}
-
-WUPS_MUST_REPLACE(ProcUIProcessMessages,            WUPS_LOADER_LIBRARY_PROC_UI,    ProcUIProcessMessages);
 WUPS_MUST_REPLACE(GX2CopyColorBufferToScanBuffer,   WUPS_LOADER_LIBRARY_GX2,        GX2CopyColorBufferToScanBuffer);
 WUPS_MUST_REPLACE(VPADRead,                         WUPS_LOADER_LIBRARY_VPAD,       VPADRead);
 WUPS_MUST_REPLACE(AXAcquireVoiceExOld,              WUPS_LOADER_LIBRARY_SND_CORE,   AXAcquireVoiceEx);

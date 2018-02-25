@@ -21,7 +21,7 @@ static void * new_readdir_ptr __attribute__((section(".data"))) = NULL;
 #ifdef __cplusplus
     extern "C" {
 #endif    
-    void WUPS_InitFS(wups_loader_init_args_t* args){
+    void WUPS_InitFS(wups_loader_init_plugin_args_t* args){
         if(args != NULL){
             new_open_ptr =      (void*) args->fs_wrapper.open_repl;
             new_close_ptr =     (void*) args->fs_wrapper.close_repl;

@@ -52,7 +52,7 @@
 #include "version.h"
 #include "settings/CSettings.h"
 
-static void ApplyPatches();
+static void ApplyPatchesAndCallHookStartingApp();
 void CallHook(wups_loader_hook_type_t hook_type);
 static void RestorePatches();
 s32 isInMiiMakerHBL();
@@ -80,7 +80,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
-    setup_os_exceptions();
+    //setup_os_exceptions();
 
     Init();
 
@@ -88,6 +88,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     //Reset everything when were going back to the Mii Maker
     if(isInMiiMakerHBL()) {
+        CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
         // Restore patches as the patched functions could change.
         RestorePatches();
 
@@ -112,70 +113,33 @@ extern "C" int Menu_Main(int argc, char **argv) {
         PluginLoader::destroyInstance();
     }
 
-    DEBUG_FUNCTION_LINE("Apply patches.\n");
-    ApplyPatches();
-
     if(!isInMiiMakerHBL()) {
-        CallHook(WUPS_LOADER_HOOK_INIT_FUNCTION);
+        //CallHook(WUPS_LOADER_HOOK_STARTING_APPLICATION);
+        DEBUG_FUNCTION_LINE("Apply patches.\n");
+        ApplyPatchesAndCallHookStartingApp();
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
     if(result == APPLICATION_CLOSE_APPLY) {
+        CallHook(WUPS_LOADER_HOOK_INIT_PLUGIN);
         DEBUG_FUNCTION_LINE("Loading the system menu.\n");
+        DeInit();
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
     DEBUG_FUNCTION_LINE("Going back to the Homebrew Launcher\n");
     RestorePatches();
+    CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
     DeInit();
     return EXIT_SUCCESS;
 }
 
-void ApplyPatches() {
+void ApplyPatchesAndCallHookStartingApp() {
     PatchInvidualMethodHooks(method_hooks_hooks, method_hooks_size_hooks, method_calls_hooks);
     for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
+        CallHookEx(WUPS_LOADER_HOOK_STARTING_APPLICATION,plugin_index);
         new_PatchInvidualMethodHooks(&gbl_replacement_data.plugin_data[plugin_index]);
-    }
-}
-
-void CallHook(wups_loader_hook_type_t hook_type) {
-    for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
-        replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
-        DEBUG_FUNCTION_LINE("Checking hook functions for %s.\n",plugin_data->plugin_name);
-        DEBUG_FUNCTION_LINE("Found hooks: %d\n",plugin_data->number_used_hooks);
-        for(int j=0; j<plugin_data->number_used_hooks; j++) {
-            replacement_data_hook_t * hook_data = &plugin_data->hooks[j];
-            if(hook_data->type == hook_type) {
-                DEBUG_FUNCTION_LINE("Calling hook of type %d\n",hook_data->type);
-                void * func_ptr = hook_data->func_pointer;
-                //TODO: Switch cases depending on arguments etc.
-                // Adding arguments!
-
-                if(func_ptr != NULL) {
-                    if(hook_type == WUPS_LOADER_HOOK_INIT_FUNCTION) {
-                        DEBUG_FUNCTION_LINE("Calling it! %08X\n",func_ptr);
-                        wups_loader_init_args_t args;
-                        args.device_mounted = gSDInitDone;
-                        args.fs_wrapper.open_repl = (const void*)&open;
-                        args.fs_wrapper.close_repl = (const void*)&close;
-                        args.fs_wrapper.write_repl = (const void*)&write;
-                        args.fs_wrapper.read_repl = (const void*)&read;
-                        args.fs_wrapper.lseek_repl = (const void*)&lseek;
-                        args.fs_wrapper.stat_repl = (const void*)&stat;
-                        args.fs_wrapper.fstat_repl = (const void*)&fstat;
-                        args.fs_wrapper.opendir_repl = (const void*)&opendir;
-                        args.fs_wrapper.closedir_repl = (const void*)&closedir;
-                        args.fs_wrapper.readdir_repl = (const void*)&readdir;
-                        args.overlayfunction_ptr = (const void*)&overlay_helper;
-
-                        ( (void (*)(wups_loader_init_args_t *))((unsigned int*)func_ptr) )(&args);
-                    }
-                } else {
-                    DEBUG_FUNCTION_LINE("Was not defined\n");
-                }
-            }
-        }
     }
 }
 
@@ -239,7 +203,6 @@ void Init_SD_USB() {
             gSDInitDone |= WUPS_USB_MOUNTED_LIBFAT;
         }
     }
-    DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
 }
 
 void DeInit_SD_USB() {

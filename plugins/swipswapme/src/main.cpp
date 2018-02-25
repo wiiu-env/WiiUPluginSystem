@@ -21,6 +21,9 @@
 #include <malloc.h>
 #include <wups.h>
 
+#include <vector>
+#include <string>
+
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/gx2_functions.h>
 #include <dynamic_libs/gx2_types.h>
@@ -40,47 +43,56 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
-u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 u32 SplashScreen(s32 time,s32 combotime);
 
 /* Entry point */
-INITIALIZE(args){
-    gAppStatus = 0;
-
+ON_APPLICATION_START(args){
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
 
-
     InitSysFunctionPointers(); // For SYSLaunchMenu()
-    InitProcUIFunctionPointers();
 
     //For patching
     InitVPadFunctionPointers();
     InitPadScoreFunctionPointers();
     InitAXFunctionPointers();
-    InitGX2FunctionPointers();
 
     memset(gVoiceInfos,0,sizeof(gVoiceInfos));
+}
 
-    if(isFirstBoot){ // First boot back to SysMenu
-        u32 res = SplashScreen(10,2);
-        gButtonCombo = res;
-        isFirstBoot = 0;
-    }
+ON_APP_STATUS_CHANGED(status) {
+	gAppStatus = status;
+}
+
+INITIALIZE_PLUGIN(){
+	InitOSFunctionPointers();
+	InitVPadFunctionPointers();
+	u32 res = SplashScreen(10,2);
+	gButtonCombo = res;
 }
 
 #define FPS 60
 u32 SplashScreen(s32 time,s32 combotime){
     u32 result = VPAD_BUTTON_TV;
-    // Prepare screen
-    s32 screen_buf0_size = 0;
-
-    // Init screen and screen buffers
+    
+    // Init screen
     OSScreenInit();
-    screen_buf0_size = OSScreenGetBufferSizeEx(0);
-    OSScreenSetBufferEx(0, (void *)0xF4000000);
-    OSScreenSetBufferEx(1, (void *)(0xF4000000 + screen_buf0_size));
+       
+    u32 screen_buf0_size = OSScreenGetBufferSizeEx(0);
+    u32 screen_buf1_size = OSScreenGetBufferSizeEx(1);
+    
+    u32 * screenbuffer0 = (u32*)memalign(0x100, screen_buf0_size);
+    u32 * screenbuffer1 = (u32*)memalign(0x100, screen_buf1_size);
+    
+    if(screenbuffer0 == NULL || screenbuffer1 == NULL){
+        if(screenbuffer0 != NULL){ free(screenbuffer0); }
+        if(screenbuffer1 != NULL){ free(screenbuffer1); }
+        return result;
+    }    
+ 
+    OSScreenSetBufferEx(0, (void *)screenbuffer0);
+    OSScreenSetBufferEx(1, (void *)screenbuffer1);
 
     OSScreenEnableEx(0, 1);
     OSScreenEnableEx(1, 1);
@@ -92,22 +104,24 @@ u32 SplashScreen(s32 time,s32 combotime){
     // Flip buffers
     OSScreenFlipBuffersEx(0);
     OSScreenFlipBuffersEx(1);
+    
+    OSScreenClearBufferEx(0, 0);
+    OSScreenClearBufferEx(1, 0);
 
+	std::vector<std::string> strings;
+    strings.push_back("SwipSwapMe 0.2 - by Maschell.");
+    strings.push_back("");
+    strings.push_back("");
+    strings.push_back("Press the combo you want to use for swapping now for 2 seconds.");
+    strings.push_back("Pressing the TV button will return directly.");
+    strings.push_back("");
+    strings.push_back("Otherwise the default combo (TV button) will be used in 10 seconds.");
     u8 pos = 0;
-    OSScreenPutFontEx(0, 0, pos++,"SwipSwapMe 0.2 - by Maschell.");
-    OSScreenPutFontEx(1, 0, pos,"SwipSwapMe 0.2 - by Maschell.");
-    OSScreenPutFontEx(0, 0, pos,"");
-    OSScreenPutFontEx(1, 0, pos++,"");
-    OSScreenPutFontEx(0, 0, pos,"");
-    OSScreenPutFontEx(1, 0, pos++,"");
-    OSScreenPutFontEx(0, 0, pos,"Press the combo you want to use for swapping now for 2 seconds.");
-    OSScreenPutFontEx(1, 0, pos++,"Press the combo you want to use for swapping now for 2 seconds.");
-    OSScreenPutFontEx(0, 0, pos,"Pressing the TV button will return directly.");
-    OSScreenPutFontEx(1, 0, pos++,"Pressing the TV button will return directly.");
-    OSScreenPutFontEx(0, 0, pos,"");
-    OSScreenPutFontEx(1, 0, pos++,"");
-    OSScreenPutFontEx(0, 0, pos,"Otherwise the default combo (TV button) will be used in 10 seconds.");
-    OSScreenPutFontEx(1, 0, pos++,"Otherwise the default combo (TV button) will be used in 10 seconds.");
+    for (std::vector<std::string>::iterator it = strings.begin() ; it != strings.end(); ++it){
+        OSScreenPutFontEx(0, 0, pos, (*it).c_str());
+        OSScreenPutFontEx(1, 0, pos, (*it).c_str());
+        pos++;
+	}
 
     OSScreenFlipBuffersEx(0);
     OSScreenFlipBuffersEx(1);
@@ -138,5 +152,9 @@ u32 SplashScreen(s32 time,s32 combotime){
         i++;
         os_usleep(sleepingtime*1000);
     }
+    
+    if(screenbuffer0 != NULL){ free(screenbuffer0); }
+    if(screenbuffer1 != NULL){ free(screenbuffer1); }
+        
     return result;
 }

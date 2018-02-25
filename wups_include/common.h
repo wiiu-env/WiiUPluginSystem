@@ -23,12 +23,35 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_H_
-#define WUPS_H_
+#ifndef WUPS_COMMON_DEF_H_
+#define WUPS_COMMON_DEF_H_
 
-#include "common.h"
-#include "function_patching.h"
-#include "hooks.h"
-#include "utils.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <dirent.h>
 
-#endif /* WUPS_WUPS_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define WUPS_SECTION(x) __attribute__((__section__ (".wups." x)))
+
+#define WUPS_META(id, value) \
+    extern const char wups_meta_ ## id [] WUPS_SECTION("meta"); \
+    const char wups_meta_ ## id [] = #id "=" value
+
+#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.1"); WUPS_META(buildtimestamp, __DATE__ " " __TIME__)
+#define WUPS_PLUGIN_AUTHOR(x)  WUPS_META(author, x)
+#define WUPS_PLUGIN_VERSION(x) WUPS_META(version, x)
+#define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)
+#define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* WUPS_COMMON_DEF_H_ */

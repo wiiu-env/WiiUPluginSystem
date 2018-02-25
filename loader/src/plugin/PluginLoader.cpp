@@ -185,8 +185,6 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
         return false;
     }
 
-    DEBUG_FUNCTION_LINE("\n");
-
     u32 curAddress = (u32) endAddress;
 
     Elf_Scn *scn;

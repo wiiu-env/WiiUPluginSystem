@@ -16,10 +16,20 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
 #define SD_PATH                     "sd:"
-#define WIIU_PATH "/wiiu"
-#define DEFAULT_HID_TO_VPAD_PATH SD_PATH WIIU_PATH "/apps/hidtovpad"
+#define WIIU_PATH 					"/wiiu"
+#define DEFAULT_HID_TO_VPAD_PATH 	SD_PATH WIIU_PATH "/apps/hidtovpad"
 
-INITIALIZE(args){
+INITIALIZE_PLUGIN(){
+	// Needed for SD access
+}
+
+DEINITIALIZE_PLUGIN(){
+    //CursorDrawer::destroyInstance();
+    ControllerPatcher::DeInit();
+	ControllerPatcher::stopNetworkServer();
+}
+
+ON_APPLICATION_START(args){
     InitOSFunctionPointers();
     InitSocketFunctionPointers();
     InitVPadFunctionPointers();
@@ -27,29 +37,21 @@ INITIALIZE(args){
     InitPadScoreFunctionPointers();
 
     log_init();
-    log_print("Init of hid_to_vpad!\n");    
-    if(args != NULL && (args->device_mounted & WUPS_SD_MOUNTED) > 0){
-        DEBUG_FUNCTION_LINE("Loading with SD Access\n");
-        ControllerPatcher::Init(CONTROLLER_PATCHER_PATH);
-    } else {
-        DEBUG_FUNCTION_LINE("Loading without SD Access\n");
-        ControllerPatcher::Init(NULL);
-    }
-    
+
+	DEBUG_FUNCTION_LINE("Initializing the controller data\n");	
+	ControllerPatcher::Init(CONTROLLER_PATCHER_PATH);    
     ControllerPatcher::disableControllerMapping();
-    
-    log_print("Start network server\n");
+    log_print("Starting HID to VPAD network server\n");
     ControllerPatcher::startNetworkServer();
-    //TODO: ControllerPatcher::DeInit() on restore.
-} 
+}
 
-
-DECL_FUNCTION(void, __PPCExit, void){    
-    ControllerPatcher::resetCallbackData();
+ON_APPLICATION_ENDING(){    
+    //CursorDrawer::destroyInstance();
 
     ControllerPatcher::destroyConfigHelper();
     ControllerPatcher::stopNetworkServer();
-    real___PPCExit();
+
+	ControllerPatcher::resetCallbackData();
 }
 
 DECL_FUNCTION(s32, VPADRead, s32 chan, VPADData *buffer, u32 buffer_size, s32 *error) {
@@ -85,5 +87,4 @@ DECL_FUNCTION(s32, VPADRead, s32 chan, VPADData *buffer, u32 buffer_size, s32 *e
     return result;
 }
 
-WUPS_MUST_REPLACE(VPADRead,                            WUPS_LOADER_LIBRARY_VPAD,      VPADRead);
-WUPS_MUST_REPLACE(__PPCExit,                           WUPS_LOADER_LIBRARY_COREINIT,  __PPCExit);
+WUPS_MUST_REPLACE(VPADRead,		WUPS_LOADER_LIBRARY_VPAD,      VPADRead);

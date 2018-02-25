@@ -29,6 +29,17 @@ extern "C" {
 #define DEFAULT_LANG_PATH           DEFAULT_WUPSLOADER_PATH "/languages"
 #define LANGUAGE_FILE_EXT           ".lang"
 
+#define WUPS_SDUSB_MOUNTED_NONE     0
+#define WUPS_SDUSB_MOUNTED_FAKE          (1<<0)
+#define WUPS_SDUSB_MOUNTED_OS_SD         (1<<1)
+#define WUPS_SDUSB_LIBIOSU_LOADED        (1<<2)
+#define WUPS_SD_MOUNTED_LIBFAT           (1<<3)
+#define WUPS_USB_MOUNTED_LIBFAT          (1<<4)
+#define WUPS_USB_MOUNTED_LIBNTFS         (1<<5)
+
+#define WUPS_SD_MOUNTED                  (WUPS_SDUSB_MOUNTED_OS_SD | WUPS_SD_MOUNTED_LIBFAT)
+#define WUPS_USB_MOUNTED                 (WUPS_USB_MOUNTED_LIBFAT)
+
 #ifdef __cplusplus
 }
 #endif

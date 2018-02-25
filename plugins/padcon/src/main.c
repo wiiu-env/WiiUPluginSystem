@@ -11,19 +11,15 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
-
-INITIALIZE(args){
+ON_APPLICATION_START(args){
    InitOSFunctionPointers();
    InitSocketFunctionPointers();
    InitVPadFunctionPointers();
    
    log_init();
 
-   log_print("Init of padcon!\n");
+   DEBUG_FUNCTION_LINE("Init of padcon!\n");
 } 
-
-// Both would be possible.
-//WUPS_HOOK_INIT(init);
 
 DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
     int result = real_VPADRead(chan, buffer, buffer_size, error);

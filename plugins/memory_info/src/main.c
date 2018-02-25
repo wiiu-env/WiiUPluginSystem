@@ -12,7 +12,7 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
 
-INITIALIZE(args) {
+ON_APPLICATION_START(args) {
     InitOSFunctionPointers();
     InitSocketFunctionPointers();
     log_init();

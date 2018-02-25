@@ -7,7 +7,8 @@
 #define FS_QUEUE_MESSAGE_COUNT      5
 
 extern u8 gAppStatus;
-extern volatile u8 gSDInitDone;
+extern volatile bool gSDInitDone;
+extern volatile bool gUSBInitDone;
 
 extern char gModFolder[FS_MAX_ENTNAME_SIZE];
 

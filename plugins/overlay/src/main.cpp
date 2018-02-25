@@ -37,8 +37,12 @@ WUPS_PLUGIN_VERSION("v0.1");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
+INITIALIZE_PLUGIN(){
+    // To init the overlay and FS
+}
+
 /* Entry point */
-INITIALIZE(args){
+ON_APPLICATION_START(args){
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitVPadFunctionPointers(); 

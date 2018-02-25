@@ -41,14 +41,15 @@ u8 gCallbackCooldown __attribute__((section(".data"))) = 0;
 
 DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
     int result = real_VPADRead(chan, buffer, buffer_size, error);
-    int btns = VPAD_BUTTON_Y | VPAD_BUTTON_X | VPAD_BUTTON_A | VPAD_BUTTON_B;
+    u32 btns = VPAD_BUTTON_Y | VPAD_BUTTON_X | VPAD_BUTTON_A | VPAD_BUTTON_B;
     if(result > 0 && ((buffer[0].btns_h & (btns)) == btns) && gCallbackCooldown == 0 ){
         gCallbackCooldown = 0x3C;
         
-        WUPS_OpenOverlay(WUPS_OVERLAY_DRC_ONLY                  ,SplashScreen_callback);
-        WUPS_OpenOverlay(WUPS_OVERLAY_TV_ONLY                   ,SplashScreen_callback);
+        //WUPS_OpenOverlay(WUPS_OVERLAY_DRC_ONLY                  ,SplashScreen_callback);
+        //WUPS_OpenOverlay(WUPS_OVERLAY_DRC_ONLY                  ,SplashScreen_callback);
+        //WUPS_OpenOverlay(WUPS_OVERLAY_TV_ONLY                   ,SplashScreen_callback);
         WUPS_OpenOverlay(WUPS_OVERLAY_DRC_AND_TV                ,SplashScreen_callback);
-        WUPS_OpenOverlay(WUPS_OVERLAY_DRC_AND_TV_WITH_DRC_PRIO  ,SplashScreen_callback);
+        //WUPS_OpenOverlay(WUPS_OVERLAY_DRC_AND_TV_WITH_DRC_PRIO  ,SplashScreen_callback);
     }
     if(gCallbackCooldown > 0){
         gCallbackCooldown--;
