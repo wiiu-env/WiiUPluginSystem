@@ -20,9 +20,7 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
-INITIALIZE_PLUGIN(){
-    // Initializes overlay and fs features in the background.
-}
+WUPS_FS_ACCESS()
 
 ON_APPLICATION_START(args) {
     InitOSFunctionPointers();

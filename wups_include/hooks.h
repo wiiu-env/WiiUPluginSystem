@@ -18,24 +18,26 @@
 #ifndef WUPS_HOOKS_DEF_H_
 #define WUPS_HOOKS_DEF_H_
 
-#include "common.h"
 #include <dynamic_libs/os_types.h>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define WUPS_HOOK_EX(type_def,original_func) \
-    extern const wups_loader_hook_t wups_hooks_ ## original_func \
-        WUPS_SECTION("hooks"); \
+    extern const wups_loader_hook_t wups_hooks_ ## original_func WUPS_SECTION("hooks"); \
     const wups_loader_hook_t wups_hooks_ ## original_func = { \
         .type = type_def, \
         .target = (const void*)&(original_func) \
     }
     
 typedef enum wups_loader_hook_type_t {
+    WUPS_LOADER_HOOK_INIT_FS,               /* Only for internal usage */
+	WUPS_LOADER_HOOK_INIT_OVERLAY,          /* Only for internal usage */
+    
     WUPS_LOADER_HOOK_INIT_PLUGIN,           /* Called when exiting the plugin loader */
-	WUPS_LOADER_HOOK_DEINIT_PLUGIN,           /* Called when re-entering the plugin loader */
+	WUPS_LOADER_HOOK_DEINIT_PLUGIN,         /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_STARTING_APPLICATION,  /* Called when an application gets started */
     WUPS_LOADER_HOOK_ENDING_APPLICATION,    /* Called when an application ends */
     WUPS_LOADER_HOOK_VSYNC,                 /* Called when an application calls GX2WaitForVsync (most times each frame) */
@@ -54,21 +56,23 @@ typedef enum wups_loader_app_status_t {
     WUPS_APP_STATUS_UNKNOWN,            /* Unknown status _should_ never happen.*/
 } wups_loader_app_status_t;
  
-typedef struct wups_loader_init_plugin_args_t {
-    struct {		        
-		const void * open_repl;
-		const void * close_repl;
-		const void * write_repl;
-		const void * read_repl;
-		const void * lseek_repl;
-		const void * stat_repl;
-		const void * fstat_repl;
-		const void * opendir_repl;
-		const void * closedir_repl;
-		const void * readdir_repl;
-	} fs_wrapper;
+typedef struct wups_loader_init_overlay_args_t {
     const void * overlayfunction_ptr;
-} wups_loader_init_plugin_args_t;
+} wups_loader_init_overlay_args_t;
+
+typedef struct wups_loader_init_fs_args_t {
+    const void * open_repl;
+    const void * close_repl;
+    const void * write_repl;
+    const void * read_repl;
+    const void * lseek_repl;
+    const void * stat_repl;
+    const void * fstat_repl;
+    const void * opendir_repl;
+    const void * closedir_repl;
+    const void * readdir_repl;
+} wups_loader_init_fs_args_t;
+
 
 typedef struct wups_loader_app_started_args_t {
      bool sd_mounted;
@@ -76,19 +80,24 @@ typedef struct wups_loader_app_started_args_t {
 } wups_loader_app_started_args_t;
 
 
+#define WUPS_FS_ACCESS() \
+    void init_fs(wups_loader_init_fs_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_FS,init_fs); \
+    void init_fs(wups_loader_init_fs_args_t args){ \
+        WUPS_InitFS(args);\
+    }
+    
+#define WUPS_ALLOW_OVERLAY() \
+    void init_overlay(wups_loader_init_overlay_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_OVERLAY,init_overlay); \
+    void init_overlay(wups_loader_init_overlay_args_t args){ \
+        WUPS_InitOverlay(args);\
+    }
+
 #define INITIALIZE_PLUGIN() \
-    void init_plugin(wups_loader_init_plugin_args_t*);\
-    void myInit_plugin(void);\
+    void init_plugin(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN,init_plugin); \
-    void init_plugin(wups_loader_init_plugin_args_t* args){ \
-        if(args != NULL){\
-            WUPS_InitFS(args);\
-            WUPS_InitOverlay(args);\
-        \
-        }\
-        myInit_plugin();\
-    } \
-    void myInit_plugin()
+    void init_plugin()
     
 #define DEINITIALIZE_PLUGIN() \
     void deinit_plugin(void);\

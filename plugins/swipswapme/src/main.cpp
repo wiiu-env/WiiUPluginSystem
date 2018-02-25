@@ -43,6 +43,7 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
+WUPS_FS_ACCESS()
 
 u32 SplashScreen(s32 time,s32 combotime);
 

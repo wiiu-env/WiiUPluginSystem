@@ -17,6 +17,15 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("BSD");
 
 /**
+    Add this to one of your projects file to have access to SD/USB.
+**/
+WUPS_FS_ACCESS()
+/**
+    Add this to one of your projects file to be able to create overlays.
+**/
+WUPS_ALLOW_OVERLAY()
+
+/**
     All of this defines can be used in ANY file.
     It's possible to split it up into multiple files.
 
@@ -26,7 +35,6 @@ WUPS_PLUGIN_LICENSE("BSD");
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
 INITIALIZE_PLUGIN(){
-    // Initializes overlay and fs features in the background.
 	InitOSFunctionPointers();
 	InitSocketFunctionPointers();
 

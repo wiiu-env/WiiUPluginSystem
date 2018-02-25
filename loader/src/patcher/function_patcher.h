@@ -31,9 +31,6 @@ struct rpl_handling {
     const char rplname[15];
     u32 handle;
 };
-
-#define FUNCTION_PATCHER_METHOD_STORE_SIZE  7
-
 #define STATIC_FUNCTION          0
 #define DYNAMIC_FUNCTION         1
 

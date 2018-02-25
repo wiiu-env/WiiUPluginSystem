@@ -121,6 +121,8 @@ extern "C" int Menu_Main(int argc, char **argv) {
     }
 
     if(result == APPLICATION_CLOSE_APPLY) {
+        CallHook(WUPS_LOADER_HOOK_INIT_FS);
+        CallHook(WUPS_LOADER_HOOK_INIT_OVERLAY);
         CallHook(WUPS_LOADER_HOOK_INIT_PLUGIN);
         DEBUG_FUNCTION_LINE("Loading the system menu.\n");
         DeInit();

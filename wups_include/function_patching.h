@@ -101,7 +101,6 @@ typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_ZLIB125,
 } wups_loader_library_type_t;
 
-
 typedef enum wups_loader_entry_type_t {
     WUPS_LOADER_ENTRY_FUNCTION,
     WUPS_LOADER_ENTRY_FUNCTION_MANDATORY,

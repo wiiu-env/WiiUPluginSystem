@@ -21,19 +21,17 @@ static void * new_readdir_ptr __attribute__((section(".data"))) = NULL;
 #ifdef __cplusplus
     extern "C" {
 #endif    
-    void WUPS_InitFS(wups_loader_init_plugin_args_t* args){
-        if(args != NULL){
-            new_open_ptr =      (void*) args->fs_wrapper.open_repl;
-            new_close_ptr =     (void*) args->fs_wrapper.close_repl;
-            new_write_ptr =     (void*) args->fs_wrapper.write_repl;
-            new_read_ptr =      (void*) args->fs_wrapper.read_repl;
-            new_lseek_ptr =     (void*) args->fs_wrapper.lseek_repl;
-            new_stat_ptr =      (void*) args->fs_wrapper.stat_repl;
-            new_fstat_ptr =     (void*) args->fs_wrapper.fstat_repl;
-            new_opendir_ptr =   (void*) args->fs_wrapper.opendir_repl;
-            new_closedir_ptr =  (void*) args->fs_wrapper.closedir_repl;
-            new_readdir_ptr =   (void*) args->fs_wrapper.readdir_repl;
-        }
+    void WUPS_InitFS(wups_loader_init_fs_args_t args){        
+        new_open_ptr =      (void*) args.open_repl;
+        new_close_ptr =     (void*) args.close_repl;
+        new_write_ptr =     (void*) args.write_repl;
+        new_read_ptr =      (void*) args.read_repl;
+        new_lseek_ptr =     (void*) args.lseek_repl;
+        new_stat_ptr =      (void*) args.stat_repl;
+        new_fstat_ptr =     (void*) args.fstat_repl;
+        new_opendir_ptr =   (void*) args.opendir_repl;
+        new_closedir_ptr =  (void*) args.closedir_repl;
+        new_readdir_ptr =   (void*) args.readdir_repl;        
     } 
 
     int __real_open(const char *pathname, int flags);

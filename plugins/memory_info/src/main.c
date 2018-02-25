@@ -11,7 +11,6 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
-
 ON_APPLICATION_START(args) {
     InitOSFunctionPointers();
     InitSocketFunctionPointers();

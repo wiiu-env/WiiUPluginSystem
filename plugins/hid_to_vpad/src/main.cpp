@@ -15,13 +15,12 @@ WUPS_PLUGIN_VERSION("v1.0");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
+// We want access to the SDCard!
+WUPS_FS_ACCESS()
+
 #define SD_PATH                     "sd:"
 #define WIIU_PATH 					"/wiiu"
 #define DEFAULT_HID_TO_VPAD_PATH 	SD_PATH WIIU_PATH "/apps/hidtovpad"
-
-INITIALIZE_PLUGIN(){
-	// Needed for SD access
-}
 
 DEINITIALIZE_PLUGIN(){
     //CursorDrawer::destroyInstance();

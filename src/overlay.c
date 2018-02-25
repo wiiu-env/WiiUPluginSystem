@@ -17,11 +17,9 @@ static void * overlayfunction_ptr __attribute__((section(".data"))) = NULL;
 #ifdef __cplusplus
     extern "C" {
 #endif    
-    void WUPS_InitOverlay(wups_loader_init_plugin_args_t* args){
-        if(args != NULL){
-            InitOSFunctionPointers();
-            overlayfunction_ptr = (void*) args->overlayfunction_ptr;
-        }
+    void WUPS_InitOverlay(wups_loader_init_overlay_args_t args){        
+        InitOSFunctionPointers();
+        overlayfunction_ptr = (void*) args.overlayfunction_ptr;
     } 
     
     void WUPS_Overlay_PrintTextOnScreen(wups_overlay_options_type_t screen, int x,int y, const char * msg, ...){

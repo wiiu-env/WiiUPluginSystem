@@ -37,9 +37,10 @@ WUPS_PLUGIN_VERSION("v0.1");
 WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("GPL");
 
-INITIALIZE_PLUGIN(){
-    // To init the overlay and FS
-}
+/*
+    To be able to create overlays
+*/
+WUPS_ALLOW_OVERLAY()
 
 /* Entry point */
 ON_APPLICATION_START(args){
@@ -52,5 +53,5 @@ ON_APPLICATION_START(args){
     
     log_init();
     
-    DEBUG_FUNCTION_LINE("OVERLAY TEST INIT DONE.\n");
+    DEBUG_FUNCTION_LINE("OVERLAYTEST INIT DONE.\n");
 }

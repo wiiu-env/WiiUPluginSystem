@@ -37,8 +37,8 @@ typedef void (*overlay_callback)(wups_overlay_options_type_t);
 /*
     Gets called by the framework
 */
-void WUPS_InitFS(wups_loader_init_plugin_args_t* args);
-void WUPS_InitOverlay(wups_loader_init_plugin_args_t* args);
+void WUPS_InitFS(wups_loader_init_fs_args_t args);
+void WUPS_InitOverlay(wups_loader_init_overlay_args_t args);
 
 /*
     Can be called by the user.
