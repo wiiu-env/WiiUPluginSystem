@@ -6,13 +6,12 @@ example_plugin/build/*
 example_plugin_pic/*
 plugins/*/bin/*
 plugins/*/build/*
+plugins/*/*.cbp
 loader/WiiUPluginLoader.cscope_file_list
 loader/WiiUPluginLoader.layout
 loader/screenshots/*
 release/*
-
 *.mod
-*.cbp
 *.id*
 *.nam
 *.til
