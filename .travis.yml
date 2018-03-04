@@ -32,6 +32,7 @@ before_install:
   - mkdir -p "${DEVKITPRO}"
   - mkdir -p "${PORTLIBREPOS}"
   - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
+  - main_cwd=$(pwd)
   - cd $DEVKITPRO
   - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
   - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitARMupdate.pl -O devkitARMupdate.pl
@@ -41,22 +42,23 @@ install:
   - perl devkitPPCupdate.pl
   - perl devkitARMupdate.pl
   - cd $PORTLIBREPOS
-  - (git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull && make -j8 && make install) 
-  - git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull && make -j8 && make install) 
-  - git clone https://github.com/aliaspider/libfat.git || (cd libfat && git pull && make wiiu-release && make wiiu-install)
-  - git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs && git pull && make wiiu-install)
-  - git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull && make -j8 && make install)
-  - (git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull && make -j8 && make install)
-  - git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull && make install)
-  - git clone https://github.com/Maschell/controller_patcher.git || (cd controller_patcher && git pull && make -j8 && make install)
+  - ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull) && (cd dynamic_libs && make -j8 && make install) 
+  - (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull ) && (cd dynamic_libs && make -j8 && make install) 
+  - (git clone https://github.com/aliaspider/libfat.git || (cd libfat && git pull ) && (cd dynamic_libs &&make wiiu-release && make wiiu-install)
+  - (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs && git pull ) && (cd dynamic_libs && make wiiu-install)
+  - (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull ) && (cd dynamic_libs && make -j8 && make install)
+  - ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull ) && (cd dynamic_libs && make -j8 && make install)
+  - (git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull ) && (cd dynamic_libs && make install)
+  - (git clone https://github.com/Maschell/controller_patcher.git || (cd controller_patcher && git pull ) && (cd dynamic_libs && make -j8 && make install)
 
 script:
-- cd $HOME
+- cd $main_cwd
 - make && make install
 - (cd loader && make)
 - (cd plugins && make)
 
 before_deploy:
+- cd $main_cwd
 - mkdir -p "wiiu/apps/wiiupluginloader"
 - mkdir -p "wiiu/plugins"
 - commit="$(git rev-parse --short=7 HEAD)"
