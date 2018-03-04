@@ -1,6 +1,8 @@
 #include <string>
+#include <vector>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <malloc.h>
@@ -10,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "dynamic_libs/os_functions.h"
+#include <dynamic_libs/os_functions.h>
 #include "dynamic_libs/gx2_functions.h"
 #include "dynamic_libs/ax_functions.h"
 #include "dynamic_libs/socket_functions.h"
@@ -19,7 +21,7 @@
 #include "dynamic_libs/nn_nim_functions.h"
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/padscore_functions.h"
-#include "dynamic_libs/proc_ui_functions.h"
+#include <dynamic_libs/proc_ui_functions.h>
 
 #include <utils/logger.h>
 #include <fs/FSUtils.h>
@@ -80,7 +82,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
-    //setup_os_exceptions();
+    setup_os_exceptions();
 
     Init();
 

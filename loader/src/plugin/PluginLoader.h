@@ -107,6 +107,10 @@ public:
         return getTotalSpace() - getAvailableSpace();
     }
 
+    void resetPluginLoader() {
+        this->currentStoreAddress = endAddress;
+    }
+
 private:
     PluginLoader(void * startAddress, void * endAddress) {
         // TODO: Check if endAddress > startAddress.

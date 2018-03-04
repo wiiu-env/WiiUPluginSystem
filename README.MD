@@ -47,11 +47,23 @@ For building the loader you need:
 - [libutils](https://github.com/Maschell/libutils) for common functions.  
 - [libgui](https://github.com/Maschell/libgui) for the gui elements.
 
+Install the according to their readmes. Don't forget to install their dependencies.
+
+**Dependencies**
+
+All needed dependencies are in the "libs" folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
+The archive includes:
+
+- zlib
+
+**Compiling**
+
 Then call the following command in the "loader" directory.
 
 ```
 make
 ```
+
 This should create an "wiiupluginloader.elf" which can be loaded with the Homebrew Launcher.
 
 ### Plugins
@@ -70,6 +82,12 @@ You can also check out the travis script for needed dependencies of the library,
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
 This has been created by @dimok789 and can be found in the tools folder.
 
+# Load plugin via network
+While the loader is running, it's possible to load a single plugin via wiiload.  
+When using this feature, **only** this plugin will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
+A windows executable can be found in `tools/wiiload.exe`  
+More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
+
 # Future
 Checkout the PLANS.MD for goals, issues and future plans.
 
@@ -77,4 +95,6 @@ Checkout the PLANS.MD for goals, issues and future plans.
 Some files are based on brainslug by Chadderz:  
 https://github.com/Chadderz121/brainslug-wii  
 Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff in based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
-Also thanks to everyone who made actual exploits.
+Also thanks to everyone who made actual exploits.  
+Thanks to dhewg for wiiload:  
+http://wiibrew.org/wiki/Wiiload

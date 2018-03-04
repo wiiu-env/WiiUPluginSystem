@@ -105,6 +105,9 @@ void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInf
 
     copyPluginDataIntoGlobalStruct(loadedPlugins);
     clearPluginData(loadedPlugins);
+
+    DCFlushRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
+    ICInvalidateRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
 }
 
 void PluginLoader::clearPluginData(std::vector<PluginData *> pluginData) {
@@ -392,11 +395,17 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
 
         for(size_t j = 0; j < function_data_list.size(); j++) {
             replacement_data_function_t * function_data = &plugin_data->functions[j];
-
             FunctionData * cur_function = function_data_list[j];
+
+            if(strlen(cur_function->getName().c_str()) > MAXIMUM_FUNCTION_NAME_LENGTH-1){
+                DEBUG_FUNCTION_LINE("Couldn not add function \"%s\" for plugin \"%s\" function name is too long.\n",cur_function->getName().c_str(),plugin_data->plugin_name);
+                continue;
+            }
+
             DEBUG_FUNCTION_LINE("Adding function \"%s\" for plugin \"%s\"\n",cur_function->getName().c_str(),plugin_data->plugin_name);
 
             //TODO: Warning/Error if string is too long.
+
             strncpy(function_data->function_name,cur_function->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
 
             function_data->library = cur_function->getLibrary();
@@ -424,4 +433,6 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
         plugin_index++;
         gbl_replacement_data.number_used_plugins++;
     }
+    DCFlushRange((void*)&gbl_replacement_data,sizeof(gbl_replacement_data));
+    ICInvalidateRange((void*)&gbl_replacement_data,sizeof(gbl_replacement_data));
 }

@@ -25,6 +25,7 @@
 #include <sounds/SoundHandler.hpp>
 #include <utils/logger.h>
 #include "settings/CSettings.h"
+#include "myutils/TcpReceiver.h"
 
 Application *Application::applicationInstance = NULL;
 bool Application::exitApplication = false;
@@ -169,6 +170,8 @@ void Application::executeThread(void) {
         DEBUG_FUNCTION_LINE("Entering main loop\n");
         exitApplication = false;
         //! main GX2 loop (60 Hz cycle with max priority on core 1)
+
+        TcpReceiver pluginReceiver(4299);
         while(!exitApplication && !reloadUIflag) {
             //! Read out inputs
             for(s32 i = 0; i < 5; i++) {
