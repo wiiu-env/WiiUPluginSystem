@@ -31,11 +31,12 @@ addons:
 before_install:
   - mkdir -p "${DEVKITPRO}"
   - mkdir -p "${PORTLIBREPOS}"
+  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
+  - cd $DEVKITPRO
   - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
   - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitARMupdate.pl -O devkitARMupdate.pl
 
-install:
-  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
+install:  
   - cd $DEVKITPRO
   - perl devkitPPCupdate.pl
   - perl devkitARMupdate.pl
