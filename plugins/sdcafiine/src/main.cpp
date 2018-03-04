@@ -2,6 +2,7 @@
 #include <string.h>
 #include <dynamic_libs/os_functions.h>
 #include <dynamic_libs/vpad_functions.h>
+#include <dynamic_libs/padscore_functions.h>
 #include <dynamic_libs/sys_functions.h>
 #include <dynamic_libs/fs_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
@@ -26,18 +27,19 @@ ON_APPLICATION_START(args) {
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitVPadFunctionPointers(); //For logging
+    InitPadScoreFunctionPointers();
 
     log_init();
 
     if(FileReplacerUtils::setGroupAndOwnerID()) {
         //DEBUG_FUNCTION_LINE("SUCCESS\n");
     }
-	
+
     DEBUG_FUNCTION_LINE("SD mounted? %d\n",args.sd_mounted);
     DEBUG_FUNCTION_LINE("USB mounted? %d\n",args.usb_mounted);
-    
+
 	gSDInitDone = args.sd_mounted;
-	gUSBInitDone = args.usb_mounted;   
+	gUSBInitDone = args.usb_mounted;
 
     HandleMultiModPacks(OSGetTitleID());
 

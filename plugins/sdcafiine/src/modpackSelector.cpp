@@ -8,9 +8,9 @@
 #include <malloc.h>
 #include "modpackSelector.h"
 #include "common/common.h"
+#include "controllers.h"
 
 #include <dynamic_libs/os_functions.h>
-#include <dynamic_libs/vpad_functions.h>
 #include <utils/logger.h>
 #include <utils/StringTools.h>
 #include <fs/FSUtils.h>
@@ -83,8 +83,7 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
     int initScreen = 1;
     int x_offset = -2;
 
-    VPADData vpad;
-    s32 vpadError;
+    initControllers();
 
     OSScreenInit();
     u32 screen_buf0_size = OSScreenGetBufferSizeEx(0);
@@ -111,30 +110,32 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
 
     while(1){
 
-        vpadError = -1;
-        VPADRead(0, &vpad, 1, &vpadError);
+        pollControllers();
 
-        if(vpadError == 0) {
-            if(vpad.btns_d & VPAD_BUTTON_A) {
-                wantToExit = 1;
-                initScreen = 1;
-            } else if(vpad.btns_d & VPAD_BUTTON_DOWN) {
-                selected++;
-                initScreen = 1;
-            } else if(vpad.btns_d & VPAD_BUTTON_UP) {
-                selected--;
-                initScreen = 1;
-            } else if(vpad.btns_d & VPAD_BUTTON_L) {
-                selected -= per_page;
-                initScreen = 1;
-            } else if(vpad.btns_d & VPAD_BUTTON_R) {
-                selected += per_page;
-                initScreen = 1;
-            }
-            if(selected < 0) selected = 0;
-            if(selected >= modPackListSize) selected = modPackListSize-1;
-            page = selected / per_page;
-        }
+		if (isButtonPressed(PAD_BTN_A)) {
+			wantToExit = 1;
+			initScreen = 1;
+		}
+		else if (isButtonPressed(PAD_BTN_DOWN)) {
+			selected++;
+			initScreen = 1;
+		}
+		else if (isButtonPressed(PAD_BTN_UP)) {
+			selected--;
+			initScreen = 1;
+		}
+		else if (isButtonPressed(PAD_BTN_L)) {
+			selected -= per_page;
+			initScreen = 1;
+		}
+		else if (isButtonPressed(PAD_BTN_R)) {
+			selected += per_page;
+			initScreen = 1;
+		}
+
+		if (selected < 0) selected = 0;
+		if (selected >= modPackListSize) selected = modPackListSize - 1;
+		page = selected / per_page;
 
         if(initScreen) {
             OSScreenClearBufferEx(0, 0);
@@ -182,6 +183,8 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
     // Flip buffers
     OSScreenFlipBuffersEx(0);
     OSScreenFlipBuffersEx(1);
+
+    releaseControllers();
 
     free(screenbuffers);
 
