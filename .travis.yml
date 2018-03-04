@@ -44,7 +44,7 @@ install:
   - tar -xzvf libiosuhax.tar.gz
   - tar -xzvf fs_wrapper.tar.gz
   - tar -xzvf controller_patcher.tar.gz
-  - 7z x -y ./libs/portlibs.zip -o${DEVKITPRO}
+  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}
   - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
   - 7z x -y ./libgui-master/libs/portlibs.zip -o${DEVKITPRO}
   - (cd libiosuhax-master && make -j8 && make install)

@@ -51,7 +51,7 @@ Install the according to their readmes. Don't forget to install their dependenci
 
 **Dependencies**
 
-All needed dependencies are in the "libs" folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
+All needed dependencies are in the "loader/libs" folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
 The archive includes:
 
 - zlib
