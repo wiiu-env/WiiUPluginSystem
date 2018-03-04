@@ -47,7 +47,7 @@ install:
   - (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs && git pull)) && (cd libntfs-wiiu && make wiiu-install)
   - (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull)) && (cd libutils && make -j8 && make install)
   - ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull)) && (cd libgui && make -j8 && make install)
-  - (git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull)) && (cd fs_wrapper && make install)
+  - (git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull)) && (cd fs_wrapper && make -j8 && make install)
   - (git clone https://github.com/Maschell/controller_patcher.git || (cd controller_patcher && git pull)) && (cd controller_patcher && make -j8 && make install)
 
 script:
