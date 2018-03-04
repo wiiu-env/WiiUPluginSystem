@@ -7,8 +7,21 @@ os:
 env:
   global:
     - DEVKITPRO=$HOME/devkitPro
+    - PORTLIBREPOS=$HOME/portlibrepos
     - DEVKITPPC=${DEVKITPRO}/devkitPPC
     - DEVKITARM=${DEVKITPRO}/devkitARM
+    
+cache:
+  apt: true
+  directories:
+  - "/home/travis/devkitPro"
+  - "/home/travis/portlibrepos"
+
+before_cache:
+- rm -rf $DEVKITPRO/*.7z
+- rm -rf $DEVKITPRO/*.bz2
+- rm -rf $DEVKITPRO/examples
+- rm -rf $DEVKITPRO/portlibs
 
 addons:
   apt:
@@ -17,42 +30,27 @@ addons:
 
 before_install:
   - mkdir -p "${DEVKITPRO}"
-  - wget https://downloads.devkitpro.org/devkitPPC_r29-1-x86_64-linux.tar.bz2 -O devkitPPC-linux.tar.bz2
-  - wget https://downloads.devkitpro.org/devkitARM_r47-x86_64-linux.tar.bz2 -O devkitARM-linux.tar.bz2
-  - wget https://github.com/Maschell/dynamic_libs/archive/lib.tar.gz -O dynamic_libs.tar.gz
-  - wget https://github.com/Maschell/libutils/archive/master.tar.gz -O libutils.tar.gz
-  - wget https://github.com/Maschell/libgui/archive/master.tar.gz -O libgui.tar.gz
-  - wget https://github.com/aliaspider/libfat/archive/master.tar.gz -O libfat.tar.gz
-  - wget https://github.com/dimok789/libiosuhax/archive/master.tar.gz -O libiosuhax.tar.gz
-  - wget https://github.com/Maschell/libntfs-wiiu/archive/master.tar.gz -O libntfs.tar.gz
-  - wget https://github.com/Maschell/controller_patcher/archive/master.tar.gz -O controller_patcher.tar.gz
-  - wget https://github.com/Maschell/fs_wrapper/archive/master.tar.gz -O fs_wrapper.tar.gz
+  - mkdir -p "${PORTLIBREPOS}"
+  - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
+  - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitARMupdate.pl -O devkitARMupdate.pl
 
 install:
-  - tar -xjf devkitPPC-linux.tar.bz2 -C ${DEVKITPRO}/
-  - tar -xjf devkitARM-linux.tar.bz2 -C ${DEVKITPRO}/
-  - tar -xzvf dynamic_libs.tar.gz
-  - tar -xzvf libutils.tar.gz
-  - tar -xzvf libgui.tar.gz
-  - tar -xzvf libfat.tar.gz
-  - tar -xzvf libiosuhax.tar.gz
-  - tar -xzvf libntfs.tar.gz
-  - tar -xzvf libiosuhax.tar.gz
-  - tar -xzvf fs_wrapper.tar.gz
-  - tar -xzvf controller_patcher.tar.gz
-  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}
-  - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
-  - 7z x -y ./libgui-master/libs/portlibs.zip -o${DEVKITPRO}
-  - (cd libiosuhax-master && make -j8 && make install)
-  - (cd libfat-master && make wiiu-release && make wiiu-install)
-  - (cd libntfs-wiiu-master && make wiiu-install)
-  - (cd dynamic_libs-lib && make -j8 && make install)
-  - (cd libutils-master && make -j8 && make install)
-  - (cd libgui-master && make -j8 && make install)
-  - (cd fs_wrapper-master && make -j8 && make install)
-  - (cd controller_patcher-master && make -j8 && make install)
+  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
+  - cd $DEVKITPRO
+  - perl devkitPPCupdate.pl
+  - perl devkitARMupdate.pl
+  - cd $PORTLIBREPOS
+  - (git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull && make -j8 && make install) 
+  - git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull && make -j8 && make install) 
+  - git clone https://github.com/aliaspider/libfat.git || (cd libfat && git pull && make wiiu-release && make wiiu-install)
+  - git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs && git pull && make wiiu-install)
+  - git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull && make -j8 && make install)
+  - (git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull && make -j8 && make install)
+  - git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull && make install)
+  - git clone https://github.com/Maschell/controller_patcher.git || (cd controller_patcher && git pull && make -j8 && make install)
 
 script:
+- cd $HOME
 - make && make install
 - (cd loader && make)
 - (cd plugins && make)
