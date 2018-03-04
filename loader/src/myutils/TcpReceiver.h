@@ -7,7 +7,7 @@
 
 #include <system/CThread.h>
 #include <gui/sigslot.h>
-#include <gui/gui.h>
+#include <gui/Gui.h>
 
 class TcpReceiver : public CThread
 {

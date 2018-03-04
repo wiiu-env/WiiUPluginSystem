@@ -10,10 +10,6 @@ env:
     - DEVKITPPC=${DEVKITPRO}/devkitPPC
     - DEVKITARM=${DEVKITPRO}/devkitARM
 
-cache:
-  directories:
-    - ${DEVKITPRO}
-
 addons:
   apt:
     packages:
