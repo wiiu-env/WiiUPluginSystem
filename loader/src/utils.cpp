@@ -59,7 +59,7 @@ void CallHookEx(wups_loader_hook_type_t hook_type, s32 plugin_index_needed) {
                         ((void (*)(void))((unsigned int*)func_ptr) )();
                     } else if(hook_type == WUPS_LOADER_HOOK_DEINIT_PLUGIN) {
                         ((void (*)(void))((unsigned int*)func_ptr) )();
-                    }  else if(hook_type == WUPS_LOADER_HOOK_STARTING_APPLICATION) {
+                    } else if(hook_type == WUPS_LOADER_HOOK_STARTING_APPLICATION) {
                         wups_loader_app_started_args_t args;
                         memset(&args,0,sizeof(args));
                         if(gSDInitDone & WUPS_SD_MOUNTED) {
@@ -69,6 +69,8 @@ void CallHookEx(wups_loader_hook_type_t hook_type, s32 plugin_index_needed) {
                             args.usb_mounted = true;
                         }
                         ((void (*)(wups_loader_app_started_args_t))((unsigned int*)func_ptr) )(args);
+                    } else if(hook_type == WUPS_LOADER_HOOK_FUNCTIONS_PATCHED) {
+                        ((void (*)(void))((unsigned int*)func_ptr))();
                     } else if(hook_type == WUPS_LOADER_HOOK_ENDING_APPLICATION) {
                         ((void (*)(void))((unsigned int*)func_ptr))();
                     } else if(hook_type == WUPS_LOADER_HOOK_VSYNC) {

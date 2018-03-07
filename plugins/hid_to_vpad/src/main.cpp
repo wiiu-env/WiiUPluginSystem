@@ -40,17 +40,20 @@ ON_APPLICATION_START(args){
 	DEBUG_FUNCTION_LINE("Initializing the controller data\n");	
 	ControllerPatcher::Init(CONTROLLER_PATCHER_PATH);    
     ControllerPatcher::disableControllerMapping();
-    log_print("Starting HID to VPAD network server\n");
+    DEBUG_FUNCTION_LINE("Starting HID to VPAD network server\n");
     ControllerPatcher::startNetworkServer();
 }
 
-ON_APPLICATION_ENDING(){    
-    //CursorDrawer::destroyInstance();
-
-    ControllerPatcher::destroyConfigHelper();
-    ControllerPatcher::stopNetworkServer();
-
-	ControllerPatcher::resetCallbackData();
+ON_APP_STATUS_CHANGED(status){
+    if(status == WUPS_APP_STATUS_CLOSED){
+         //CursorDrawer::destroyInstance();
+        DEBUG_FUNCTION_LINE("ON_APPLICATION_ENDING\n");
+        ControllerPatcher::destroyConfigHelper();
+        DEBUG_FUNCTION_LINE("Calling stopNetworkServer\n");
+        ControllerPatcher::stopNetworkServer();
+        DEBUG_FUNCTION_LINE("Calling resetCallbackData\n");
+        ControllerPatcher::resetCallbackData();
+    }
 }
 
 DECL_FUNCTION(s32, VPADRead, s32 chan, VPADData *buffer, u32 buffer_size, s32 *error) {

@@ -39,9 +39,11 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_PLUGIN,           /* Called when exiting the plugin loader */
 	WUPS_LOADER_HOOK_DEINIT_PLUGIN,         /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_STARTING_APPLICATION,  /* Called when an application gets started */
+    WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,     /* Called when the functions where patched */
     WUPS_LOADER_HOOK_ENDING_APPLICATION,    /* Called when an application ends */
     WUPS_LOADER_HOOK_VSYNC,                 /* Called when an application calls GX2WaitForVsync (most times each frame) */
     WUPS_LOADER_HOOK_APP_STATUS_CHANGED,    /* Called when the app status changes (foreground, background, closing) */
+    
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -107,7 +109,12 @@ typedef struct wups_loader_app_started_args_t {
 #define ON_APPLICATION_START(myargs) \
     void on_app_starting(wups_loader_app_started_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_STARTING_APPLICATION,on_app_starting); \
-    void on_app_starting(wups_loader_app_started_args_t myargs)
+    void on_app_starting(wups_loader_app_started_args_t myargs)	
+    
+#define ON_FUNCTIONS_PATCHED() \
+    void on_functions_patched();\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,on_functions_patched); \
+    void on_functions_patched()
 
 #define ON_APPLICATION_ENDING() \
     void on_app_ending(void);\

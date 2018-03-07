@@ -82,7 +82,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
 
-    setup_os_exceptions();
+    //setup_os_exceptions();
 
     Init();
 
@@ -144,6 +144,7 @@ void ApplyPatchesAndCallHookStartingApp() {
     for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
         CallHookEx(WUPS_LOADER_HOOK_STARTING_APPLICATION,plugin_index);
         new_PatchInvidualMethodHooks(&gbl_replacement_data.plugin_data[plugin_index]);
+        CallHookEx(WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,plugin_index);
     }
 }
 
