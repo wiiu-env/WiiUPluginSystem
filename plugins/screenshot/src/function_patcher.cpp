@@ -42,7 +42,7 @@ DECL_FUNCTION(void, GX2CopyColorBufferToScanBuffer, const GX2ColorBuffer *colorB
 
         FSUtils::CreateSubfolder(buffer);
 
-        snprintf(buffer,254,"%s%04i-%02i-%02i/%04i-%02i.%02i_%02i.%02i.%02i_",
+        snprintf(buffer,254,"%s%04i-%02i-%02i/%04i-%02i-%02i_%02i.%02i.%02i_",
                  WIIU_SCREENSHOT_PATH,output.year,output.mon,output.mday,output.year,output.mon,output.mday,output.hour,output.min,output.sec);
 
         if(scan_target == 1 && colorBuffer != NULL && takeScreenshotTV && gAppStatus == WUPS_APP_STATUS_FOREGROUND) {

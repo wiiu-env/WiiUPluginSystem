@@ -7,6 +7,7 @@ example_plugin_pic/*
 plugins/*/bin/*
 plugins/*/build/*
 plugins/*/*.cbp
+plugins/screenshot/screenshots/*
 loader/WiiUPluginLoader.cscope_file_list
 loader/WiiUPluginLoader.layout
 loader/screenshots/*
