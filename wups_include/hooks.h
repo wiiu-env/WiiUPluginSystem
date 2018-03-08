@@ -73,6 +73,7 @@ typedef struct wups_loader_init_fs_args_t {
     const void * opendir_repl;
     const void * closedir_repl;
     const void * readdir_repl;
+    const void * mkdir_repl;
 } wups_loader_init_fs_args_t;
 
 

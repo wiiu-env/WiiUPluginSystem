@@ -48,6 +48,7 @@ void CallHookEx(wups_loader_hook_type_t hook_type, s32 plugin_index_needed) {
                         args.opendir_repl = (const void*)&opendir;
                         args.closedir_repl = (const void*)&closedir;
                         args.readdir_repl = (const void*)&readdir;
+                        args.mkdir_repl = (const void*)&mkdir;
 
                         ((void (*)(wups_loader_init_fs_args_t))((unsigned int*)func_ptr) )(args);
                     } else if(hook_type == WUPS_LOADER_HOOK_INIT_OVERLAY) {

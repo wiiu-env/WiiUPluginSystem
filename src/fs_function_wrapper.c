@@ -17,6 +17,7 @@ static void * new_fstat_ptr __attribute__((section(".data"))) = NULL;
 static void * new_opendir_ptr __attribute__((section(".data"))) = NULL; 
 static void * new_closedir_ptr __attribute__((section(".data"))) = NULL; 
 static void * new_readdir_ptr __attribute__((section(".data"))) = NULL; 
+static void * new_mkdir_ptr __attribute__((section(".data"))) = NULL; 
 
 #ifdef __cplusplus
     extern "C" {
@@ -32,6 +33,7 @@ static void * new_readdir_ptr __attribute__((section(".data"))) = NULL;
         new_opendir_ptr =   (void*) args.opendir_repl;
         new_closedir_ptr =  (void*) args.closedir_repl;
         new_readdir_ptr =   (void*) args.readdir_repl;        
+        new_mkdir_ptr =   (void*) args.mkdir_repl;        
     } 
 
     int __real_open(const char *pathname, int flags);
@@ -83,6 +85,11 @@ static void * new_readdir_ptr __attribute__((section(".data"))) = NULL;
     struct dirent * __wrap_readdir(DIR *dirp){
         if(new_readdir_ptr == NULL) return __real_readdir(dirp); 
         return ( (struct dirent * (*)(DIR *))((unsigned int*)new_readdir_ptr) )(dirp);
+    }
+	int __real_mkdir(const char *path, mode_t mode);
+    int __wrap_mkdir(const char *path, mode_t mode){
+        if(new_mkdir_ptr == NULL) return __real_mkdir(path, mode); 
+        return ( (int (*)(const char *, mode_t))((unsigned int*) new_mkdir_ptr) )(path, mode);
     }
     
 #ifdef __cplusplus
