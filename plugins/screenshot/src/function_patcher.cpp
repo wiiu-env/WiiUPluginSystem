@@ -11,15 +11,15 @@
 #include "screenshot_utils.h"
 #include "retain_vars.hpp"
 
-static bool takeScreenshotTV = false;
-static bool takeScreenshotDRC = false;
-static u8 screenshotCooldown = 0;
-static u32 counter = 0;
+static bool takeScreenshotTV __attribute__((section(".data"))) = false;
+static bool takeScreenshotDRC __attribute__((section(".data"))) = false;
+static u8 screenshotCooldown __attribute__((section(".data"))) = 0;
+static u32 counter __attribute__((section(".data"))) = 0;
 
 DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
     int result = real_VPADRead(chan, buffer, buffer_size, error);
-    u32 btns = gButtonCombo;
-    if(result > 0 && (buffer[0].btns_h == btns) && screenshotCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
+
+    if(result > 0 && (buffer[0].btns_h == gButtonCombo) && screenshotCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
         counter++;
         takeScreenshotTV = true;
         takeScreenshotDRC = true;
@@ -34,7 +34,7 @@ DECL_FUNCTION(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *e
 }
 
 DECL_FUNCTION(void, GX2CopyColorBufferToScanBuffer, const GX2ColorBuffer *colorBuffer, s32 scan_target) {
-    if(takeScreenshotTV || takeScreenshotDRC) {
+    if((takeScreenshotTV || takeScreenshotDRC) && gAppStatus == WUPS_APP_STATUS_FOREGROUND) {
         OSCalendarTime output;
         OSTicksToCalendarTime(OSGetTime(), &output);
         char buffer[255] = {0};

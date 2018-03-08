@@ -36,8 +36,10 @@ INITIALIZE_PLUGIN() {
     InitOSFunctionPointers();
     InitVPadFunctionPointers();
     u32 res = SplashScreen(10,2);
-    gButtonCombo = res;
 
+    gButtonCombo = res;
+    ICInvalidateRange((void*)(&gButtonCombo), 4);
+    DCFlushRange((void*)(&gButtonCombo), 4);
 }
 
 // Called whenever an application was started.
@@ -45,6 +47,8 @@ ON_APPLICATION_START(my_args) {
     InitOSFunctionPointers();
     InitSocketFunctionPointers();
     InitFSFunctionPointers();
+
+    gAppStatus = WUPS_APP_STATUS_FOREGROUND;
 
     log_init();
 }
