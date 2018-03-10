@@ -107,6 +107,7 @@ install :  wups.ld  wups_elf.ld
 	$Qcp -r wups_include $(WUPSDIR)/include
 	$Qcp -r wups.ld $(WUPSDIR)
 	$Qcp -r wups_elf.ld $(WUPSDIR)
+	$Qcp -r plugin_makefile.mk $(WUPSDIR)
 	@cp $(BUILD)/lib/libwups.a $(WUPSDIR)/lib/
 
 #---------------------------------------------------------------------------------
