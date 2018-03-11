@@ -13,22 +13,23 @@
 #include <unistd.h>
 
 #include <dynamic_libs/os_functions.h>
-#include "dynamic_libs/gx2_functions.h"
-#include "dynamic_libs/ax_functions.h"
-#include "dynamic_libs/socket_functions.h"
-#include "dynamic_libs/sys_functions.h"
-#include "dynamic_libs/fs_functions.h"
-#include "dynamic_libs/nn_nim_functions.h"
-#include "dynamic_libs/vpad_functions.h"
-#include "dynamic_libs/padscore_functions.h"
+#include <dynamic_libs/gx2_functions.h>
+#include <dynamic_libs/ax_functions.h>
+#include <dynamic_libs/socket_functions.h>
+#include <dynamic_libs/sys_functions.h>
+#include <dynamic_libs/fs_functions.h>
+#include <dynamic_libs/nn_nim_functions.h>
+#include <dynamic_libs/vpad_functions.h>
+#include <dynamic_libs/padscore_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
-
 #include <utils/logger.h>
 #include <fs/FSUtils.h>
 #include <fs/sd_fat_devoptab.h>
 #include <utils/utils.h>
 #include <system/exception_handler.h>
 #include <system/memory.h>
+#include <kernel/kernel_utils.h>
+
 
 #include "common/retain_vars.h"
 #include "common/common.h"
@@ -128,6 +129,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
         CallHook(WUPS_LOADER_HOOK_INIT_PLUGIN);
         DEBUG_FUNCTION_LINE("Loading the system menu.\n");
         DeInit();
+        init_kernel_syscalls();
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
