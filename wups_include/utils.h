@@ -30,7 +30,8 @@ typedef enum wups_overlay_options_type_t {
     WUPS_OVERLAY_TV_ONLY,                           /* Tries to display only on tv screen */
     WUPS_OVERLAY_DRC_AND_TV,                        /* Tries to display on both screens. Prioritizes the TV screen if memory is low. */
     WUPS_OVERLAY_DRC_AND_TV_WITH_DRC_PRIO           /* Tries to display on both screens. But if memory is low, prioritize the DRC screen.*/
-} wups_overlay_options_type_t;
+}
+wups_overlay_options_type_t;
 
 typedef void (*overlay_callback)(wups_overlay_options_type_t);
 

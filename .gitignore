@@ -4,6 +4,7 @@ loader/*.elf
 example_plugin/bin/*
 example_plugin/build/*
 example_plugin_pic/*
+portlib_repos/*
 plugins/*/bin/*
 plugins/*/build/*
 plugins/*/*.cbp
@@ -17,3 +18,4 @@ release/*
 *.nam
 *.til
 *.layout
+wups.cbp

@@ -21,33 +21,33 @@
 #include <wups.h>
 #include <string>
 
-class FunctionData{
+class FunctionData {
 
 public:
-    FunctionData(const char * name, wups_loader_library_type_t library, void * target, void * call_addr){
+    FunctionData(const char * name, wups_loader_library_type_t library, void * target, void * call_addr) {
         this->name = name;
         this->library = library;
         this->replaceAddr = target;
         this->replaceCall = call_addr;
     }
 
-    ~FunctionData(){
+    ~FunctionData() {
 
     }
 
-    std::string getName(){
+    std::string getName() {
         return this->name;
     }
 
-    wups_loader_library_type_t getLibrary(){
+    wups_loader_library_type_t getLibrary() {
         return this->library;
     }
 
-    void * getReplaceAddress(){
+    void * getReplaceAddress() {
         return replaceAddr;
     }
 
-    void * getReplaceCall(){
+    void * getReplaceCall() {
         return replaceCall;
     }
 

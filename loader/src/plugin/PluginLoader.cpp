@@ -397,7 +397,7 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
             replacement_data_function_t * function_data = &plugin_data->functions[j];
             FunctionData * cur_function = function_data_list[j];
 
-            if(strlen(cur_function->getName().c_str()) > MAXIMUM_FUNCTION_NAME_LENGTH-1){
+            if(strlen(cur_function->getName().c_str()) > MAXIMUM_FUNCTION_NAME_LENGTH-1) {
                 DEBUG_FUNCTION_LINE("Couldn not add function \"%s\" for plugin \"%s\" function name is too long.\n",cur_function->getName().c_str(),plugin_data->plugin_name);
                 continue;
             }

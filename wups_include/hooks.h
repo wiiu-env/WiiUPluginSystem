@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
- 
+
 #ifndef WUPS_HOOKS_DEF_H_
 #define WUPS_HOOKS_DEF_H_
 
@@ -31,19 +31,19 @@ extern "C" {
         .type = type_def, \
         .target = (const void*)&(original_func) \
     }
-    
+
 typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_FS,               /* Only for internal usage */
-	WUPS_LOADER_HOOK_INIT_OVERLAY,          /* Only for internal usage */
-    
+    WUPS_LOADER_HOOK_INIT_OVERLAY,          /* Only for internal usage */
+
     WUPS_LOADER_HOOK_INIT_PLUGIN,           /* Called when exiting the plugin loader */
-	WUPS_LOADER_HOOK_DEINIT_PLUGIN,         /* Called when re-entering the plugin loader */
+    WUPS_LOADER_HOOK_DEINIT_PLUGIN,         /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_STARTING_APPLICATION,  /* Called when an application gets started */
     WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,     /* Called when the functions where patched */
     WUPS_LOADER_HOOK_ENDING_APPLICATION,    /* Called when an application ends */
     WUPS_LOADER_HOOK_VSYNC,                 /* Called when an application calls GX2WaitForVsync (most times each frame) */
     WUPS_LOADER_HOOK_APP_STATUS_CHANGED,    /* Called when the app status changes (foreground, background, closing) */
-    
+
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -57,7 +57,7 @@ typedef enum wups_loader_app_status_t {
     WUPS_APP_STATUS_CLOSED,             /* App is going to be closed */
     WUPS_APP_STATUS_UNKNOWN,            /* Unknown status _should_ never happen.*/
 } wups_loader_app_status_t;
- 
+
 typedef struct wups_loader_init_overlay_args_t {
     const void * overlayfunction_ptr;
 } wups_loader_init_overlay_args_t;
@@ -78,8 +78,8 @@ typedef struct wups_loader_init_fs_args_t {
 
 
 typedef struct wups_loader_app_started_args_t {
-     bool sd_mounted;
-     bool usb_mounted;
+    bool sd_mounted;
+    bool usb_mounted;
 } wups_loader_app_started_args_t;
 
 
@@ -89,7 +89,7 @@ typedef struct wups_loader_app_started_args_t {
     void init_fs(wups_loader_init_fs_args_t args){ \
         WUPS_InitFS(args);\
     }
-    
+
 #define WUPS_ALLOW_OVERLAY() \
     void init_overlay(wups_loader_init_overlay_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_OVERLAY,init_overlay); \
@@ -101,17 +101,17 @@ typedef struct wups_loader_app_started_args_t {
     void init_plugin(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN,init_plugin); \
     void init_plugin()
-    
+
 #define DEINITIALIZE_PLUGIN() \
     void deinit_plugin(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_DEINIT_PLUGIN,deinit_plugin); \
     void deinit_plugin()
-	
+
 #define ON_APPLICATION_START(myargs) \
     void on_app_starting(wups_loader_app_started_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_STARTING_APPLICATION,on_app_starting); \
-    void on_app_starting(wups_loader_app_started_args_t myargs)	
-    
+    void on_app_starting(wups_loader_app_started_args_t myargs)
+
 #define ON_FUNCTIONS_PATCHED() \
     void on_functions_patched();\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,on_functions_patched); \
@@ -126,7 +126,7 @@ typedef struct wups_loader_app_started_args_t {
     void on_vsync(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_VSYNC,on_vsync); \
     void on_vsync(void)
-    
+
 #define ON_APP_STATUS_CHANGED(status) \
     void on_app_status_changed(wups_loader_app_status_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APP_STATUS_CHANGED,on_app_status_changed); \

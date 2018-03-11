@@ -7,7 +7,7 @@ extern "C" {
 
 #include <wups.h>
 
-struct buffer_store{
+struct buffer_store {
     void * buffer;
     s32 buffer_size;
     s32 mode;

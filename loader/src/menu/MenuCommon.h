@@ -20,12 +20,4 @@
 #define SCREEN_WIDTH                            1280
 #define SCREEN_HEIGHT                           720
 
-#define CONTENT_WIDTH                           (1280 - 260)
-
-#define CONTENT_EXPANDABLE_FRAME_HEADER_HEIGHT  60
-
-
-#define MENU_LIST_WIDTH                         260
-#define MENU_LIST_ELEMENT_HEIGHT                70
-
 #endif

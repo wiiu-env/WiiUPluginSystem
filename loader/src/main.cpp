@@ -22,21 +22,21 @@
 #include <dynamic_libs/vpad_functions.h>
 #include <dynamic_libs/padscore_functions.h>
 #include <dynamic_libs/proc_ui_functions.h>
-#include <utils/logger.h>
+
 #include <fs/FSUtils.h>
 #include <fs/sd_fat_devoptab.h>
+#include <utils/logger.h>
 #include <utils/utils.h>
+#include <utils/function_patcher.h>
 #include <system/exception_handler.h>
 #include <system/memory.h>
 #include <kernel/kernel_utils.h>
-
 
 #include "common/retain_vars.h"
 #include "common/common.h"
 #include "plugin/PluginLoader.h"
 #include "plugin/PluginInformation.h"
 
-#include <utils/function_patcher.h>
 
 #include <wups.h>
 #include <iosuhax.h>

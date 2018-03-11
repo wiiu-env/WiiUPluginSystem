@@ -9,11 +9,9 @@
 #include <gui/sigslot.h>
 #include <gui/Gui.h>
 
-class TcpReceiver : public CThread
-{
+class TcpReceiver : public CThread {
 public:
-    enum eLoadResults
-    {
+    enum eLoadResults {
         SUCCESS = 0,
         INVALID_INPUT = -1,
         FILE_OPEN_FAILURE = -2,

@@ -1,6 +1,6 @@
 /* based on blsug.h
  *   by Alex Chadwick
- * 
+ *
  * Copyright (C) 2014, Alex Chadwick
  * Modified by Maschell, 2018
  *
@@ -99,7 +99,8 @@ typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_VPAD,
     WUPS_LOADER_LIBRARY_VPADBASE,
     WUPS_LOADER_LIBRARY_ZLIB125,
-} wups_loader_library_type_t;
+}
+wups_loader_library_type_t;
 
 typedef enum wups_loader_entry_type_t {
     WUPS_LOADER_ENTRY_FUNCTION,
@@ -109,13 +110,13 @@ typedef enum wups_loader_entry_type_t {
 
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
-	struct {
-		const char *name;                           /* Name of the function that will be replaced */
-		const wups_loader_library_type_t library;   /**/
-		const char *my_function_name;               /* Function name of your own, new function (my_XXX) */
-		const void *target;                         /* Address of our own, new function (my_XXX)*/
-		const void *call_addr;                      /* Address for calling the real function.(real_XXX) */
-	} _function;
+    struct {
+        const char *name;                           /* Name of the function that will be replaced */
+        const wups_loader_library_type_t library;   /**/
+        const char *my_function_name;               /* Function name of your own, new function (my_XXX) */
+        const void *target;                         /* Address of our own, new function (my_XXX)*/
+        const void *call_addr;                      /* Address for calling the real function.(real_XXX) */
+    } _function;
 } wups_loader_entry_t;
 
 #define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_EX(real_ ## x, lib, my_ ## x,  function_name);
@@ -133,7 +134,7 @@ typedef struct wups_loader_entry_t {
                 .call_addr = (const void*)&(original_func) \
             } \
     }
-        
+
 #define DECL_FUNCTION(res, name, ...) \
         res (* real_ ## name)(__VA_ARGS__) __attribute__((section(".data"))); \
         res my_ ## name(__VA_ARGS__)
