@@ -14,12 +14,19 @@ DATA                :=
 INCLUDES            := src
 
 #---------------------------------------------------------------------------------
-# options for code generation
+# options for code generation and linking
 #---------------------------------------------------------------------------------
 # Extra C compiler flags
 CFLAGS              := 
 # Extra C++ compiler flags
 CXXFLAGS            := 
+# Extra linking flags for all linking steps
+LD_FLAGS            := 
+# extra linking flags for linking the temporarily elf file (using ld)
+LD_FLAGS_ELF        := 
+# extra linking flags for linking the final mod file (using gcc/g++)
+LD_FLAGS_MOD        := 
+
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -43,5 +50,4 @@ EXTERNAL_LIBPATHS   :=
 # Will be added to the final include paths
 # -IC:/library1/include
 #---------------------------------------------------------------------------------
-EXTERNAL_INCLUDE    :=  -I$(PORTLIBS)/include/libutils \
-                        -I$(WUPSDIR)/include
+EXTERNAL_INCLUDE    :=  -I$(PORTLIBS)/include/libutils

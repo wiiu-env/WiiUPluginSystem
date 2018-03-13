@@ -7,7 +7,7 @@ TARGET              := $(notdir $(CURDIR)).mod
 # Source directories
 SOURCES             :=  src \
                         src/common \
-                        src/myfs \
+                        src/myfs
 
 # Data directories
 DATA                :=	
@@ -16,12 +16,18 @@ DATA                :=
 INCLUDES            := src
 
 #---------------------------------------------------------------------------------
-# options for code generation
+# options for code generation and linking
 #---------------------------------------------------------------------------------
 # Extra C compiler flags
 CFLAGS              := 
 # Extra C++ compiler flags
 CXXFLAGS            := -D_GNU_SOURCE
+# Extra linking flags for all linking steps
+LD_FLAGS            := 
+# extra linking flags for linking the temporarily elf file (using ld)
+LD_FLAGS_ELF        := 
+# extra linking flags for linking the final mod file (using gcc/g++)
+LD_FLAGS_MOD        := 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -46,5 +52,4 @@ EXTERNAL_LIBPATHS   :=
 # -IC:/library1/include
 #---------------------------------------------------------------------------------
 EXTERNAL_INCLUDE    :=  -I$(PORTLIBS)/include/libutils \
-                        -I$(PORTLIBS)/include/libfswrapper \
-                        -I$(WUPSDIR)/include
+                        -I$(PORTLIBS)/include/libfswrapper

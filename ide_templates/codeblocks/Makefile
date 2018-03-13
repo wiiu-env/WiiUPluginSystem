@@ -1,4 +1,5 @@
-
+#   You probably never need to adjust this Makefile.
+#   All changes can be done in the makefile.mk
 
 #---------------------------------------------------------------------------------
 # Clear the implicit built in rules
@@ -81,8 +82,8 @@ endif
 ASFLAGS	+= 
 
 LDFLAG_COMMON   += 
-LDFLAGS_MOD     += 
-LDFLAGS_ELF     += 
+LDFLAGS_MOD     += $(LD_FLAGS_MOD)
+LDFLAGS_ELF     += $(LD_FLAGS_ELF)
 
 #---------------------------------------------------------------------------------
 Q := @
@@ -180,7 +181,7 @@ all : $(OUTPUT)
 # Rule to make the module file.
 $(OUTPUT) : output.elf
 	@echo "checking for missing symbols ..."
-	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(ALL_LIBS) $(LIBPATHS_FULL) -o check_linking.elf	
+	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LD_FLAGS_MOD)  $(ALL_LIBS) $(LIBPATHS_FULL) -o check_linking.elf	
 	@echo "linking ..." $@
 	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAGS_MOD) $(ALL_LIBS) $(LIBPATHS_FULL) -o $@ 
 
@@ -206,7 +207,7 @@ output.elf : $(OFILES)
 #---------------------------------------------------------------------------------
 %.o: %.c
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) $(INCLUDE_FULL)  -c $< -o $@ $(ERROR_FILTER)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) $(INCLUDE_FULL)  -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.o: %.S
