@@ -38,6 +38,7 @@
 		</Compiler>
 		<Unit filename="Makefile" />
 		<Unit filename="README.md" />
+		<Unit filename="makefile.mk" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion>
