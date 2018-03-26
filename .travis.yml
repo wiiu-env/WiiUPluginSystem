@@ -33,8 +33,8 @@ before_install:
   - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
   - main_cwd=$(pwd)
   - cd $DEVKITPRO
-  - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
-  - wget https://github.com/devkitPro/installer/releases/download/v2.1.0/devkitARMupdate.pl -O devkitARMupdate.pl
+  - wget https://github.com/devkitPro/installer/releases/download/v2.2.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
+  - wget https://github.com/devkitPro/installer/releases/download/v2.2.0/devkitARMupdate.pl -O devkitARMupdate.pl
 
 install:  
   - cd $DEVKITPRO
