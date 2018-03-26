@@ -59,7 +59,7 @@ bool saveAsJPEG(const char * path, u8 * sourceBuffer, u32 width, u32 height, u32
 bool copyBuffer(GX2ColorBuffer * sourceBuffer, GX2ColorBuffer * targetBuffer, u32 targetWidth, u32 targetHeight) {
     // Making sure the buffers are not NULL
     if (sourceBuffer != NULL && targetBuffer != NULL) {
-        GX2InitColorBuffer(targetBuffer, GX2_SURFACE_DIM_2D, targetWidth, targetHeight, 1, GX2_SURFACE_FORMAT_TCS_R8_G8_B8_A8_SRGB, GX2_AA_MODE_1X);
+        GX2InitColorBuffer(targetBuffer, GX2_SURFACE_DIM_2D, targetWidth, targetHeight, 1, GX2_SURFACE_FORMAT_TCS_R8_G8_B8_A8_UNORM, GX2_AA_MODE_1X);
 
         // We need to override some values.
         targetBuffer->surface.tile =      GX2_TILE_MODE_LINEAR_ALIGNED;
