@@ -68,6 +68,7 @@ Application::~Application() {
         DEBUG_FUNCTION_LINE("Triggering AsyncDeleter\n");
         AsyncDeleter::triggerDeleteProcess();
         while(!AsyncDeleter::realListEmpty()) {
+            DEBUG_FUNCTION_LINE("Waiting...\n");
             os_usleep(1000);
         }
     } while(!AsyncDeleter::deleteListEmpty());
@@ -78,7 +79,6 @@ Application::~Application() {
 
     DEBUG_FUNCTION_LINE("Stop sound handler\n");
     SoundHandler::DestroyInstance();
-
 }
 
 s32 Application::exec() {
@@ -159,6 +159,7 @@ void Application::executeThread(void) {
         bgMusic->Stop(); //CHANG MEEEEEEEEEEEEEEEEEEE
     }
 
+
     while(reloadUIflag) {
         reloadUIflag = false;
         exitCode = EXIT_RELAUNCH_ON_LOAD;
@@ -167,11 +168,12 @@ void Application::executeThread(void) {
         DEBUG_FUNCTION_LINE("Initialize main window\n");
         mainWindow = MainWindow::getInstance(video->getTvWidth(), video->getTvHeight());
 
-        DEBUG_FUNCTION_LINE("Entering main loop\n");
         exitApplication = false;
         //! main GX2 loop (60 Hz cycle with max priority on core 1)
 
+        DEBUG_FUNCTION_LINE("Starting TcpReceiver\n");
         TcpReceiver pluginReceiver(4299);
+        DEBUG_FUNCTION_LINE("Entering main loop\n");
         while(!exitApplication && !reloadUIflag) {
             //! Read out inputs
             for(s32 i = 0; i < 5; i++) {
@@ -209,6 +211,7 @@ void Application::executeThread(void) {
                 video->drcEnable(true);
             }
 
+
             //! as last point update the effects as it can drop elements
             mainWindow->updateEffects();
 
@@ -219,9 +222,9 @@ void Application::executeThread(void) {
             //! and avoid blocking the GUI thread
             AsyncDeleter::triggerDeleteProcess();
         }
-        DEBUG_FUNCTION_LINE("fadeOut\n");
+        DEBUG_FUNCTION_LINE("Fading out\n");
         fadeOut();
-        DEBUG_FUNCTION_LINE("MainWindow::destroyInstance();\n");
+        DEBUG_FUNCTION_LINE("Destroying the MainWindow\n");
         MainWindow::destroyInstance();
     }
     DEBUG_FUNCTION_LINE("Delete fontSystem\n");

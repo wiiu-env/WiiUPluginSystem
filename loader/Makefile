@@ -55,7 +55,7 @@ INCLUDES  :=  src/libelf \
 # options for code generation
 #---------------------------------------------------------------------------------
 CFLAGS	:=  -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
-		    -O0 -D__wiiu__ -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(INCLUDE)
+		    -O0 -D__wiiu__ -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -D_GNU_SOURCE $(INCLUDE)
 CXXFLAGS := -std=gnu++11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
 		    -O0 -D__wiiu__ -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -D_GNU_SOURCE $(INCLUDE)
 

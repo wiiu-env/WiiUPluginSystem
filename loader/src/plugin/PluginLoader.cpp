@@ -42,12 +42,12 @@ std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char *
     DIR *dfd = NULL;
 
     if(path == NULL) {
-        DEBUG_FUNCTION_LINE("Path was NULL");
+        DEBUG_FUNCTION_LINE("Path was NULL\n");
         return result;
     }
 
     if ((dfd = opendir(path)) == NULL) {
-        DEBUG_FUNCTION_LINE("Couldn't open dir %s",path);
+        DEBUG_FUNCTION_LINE("Couldn't open dir %s\n",path);
         return result;
     }
 

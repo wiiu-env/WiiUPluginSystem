@@ -49,7 +49,7 @@ class PluginLoader {
 public:
     static PluginLoader *getInstance() {
         if(!instance) {
-            instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
+             instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
         }
         return instance;
     }

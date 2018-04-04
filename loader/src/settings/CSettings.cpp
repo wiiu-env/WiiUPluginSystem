@@ -71,7 +71,7 @@ bool CSettings::Load() {
     std::string filepath = configPath;
     filepath += CONFIG_FILENAME;
 
-    log_printf("CSettings::Load(line %d): Loading Configuration from %s\n",__LINE__,filepath.c_str());
+    DEBUG_FUNCTION_LINE("Loading Configuration from %s\n",filepath.c_str());
 
     CFile file(filepath, CFile::ReadOnly);
     if (!file.isOpen())
