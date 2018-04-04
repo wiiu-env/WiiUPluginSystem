@@ -34,7 +34,7 @@ struct rpl_handling {
 #define STATIC_FUNCTION          0
 #define DYNAMIC_FUNCTION         1
 
-#define FUNCTION_PATCHER_METHOD_STORE_SIZE                  7
+#define FUNCTION_PATCHER_METHOD_STORE_SIZE                  13
 #define MAXIMUM_PLUGIN_PATH_NAME_LENGTH                     256
 #define MAXIMUM_PLUGIN_NAME_LENGTH                          51
 #define MAXIMUM_FUNCTION_NAME_LENGTH                        61

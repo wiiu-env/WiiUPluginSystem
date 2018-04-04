@@ -109,7 +109,7 @@ void new_PatchInvidualMethodHooks(replacement_data_plugin_t * plugin_data) {
 
     u32 skip_instr = 1;
     u32 my_instr_len = 6;
-    u32 instr_len = my_instr_len + skip_instr;
+    u32 instr_len = my_instr_len + skip_instr + 6;
     u32 flush_len = 4*instr_len;
     for(s32 i = 0; i < method_hooks_count; i++) {
         replacement_data_function_t * function_data = &plugin_data->functions[i];
@@ -194,11 +194,26 @@ void new_PatchInvidualMethodHooks(replacement_data_plugin_t * plugin_data) {
         space++;
         *space = 0x4E800420; // bctr
         space++;
+
+
+        u32 repl_addr_test = (u32) space;
+        *space = 0x9061FFE0;
+        space++;
+        *space = 0x3C600000 | (((repl_addr) >> 16) & 0x0000FFFF); // lis r3, repl_addr@h
+        space++;
+        *space = 0x60630000 |  ((repl_addr) & 0x0000ffff); // ori r3, r3, repl_addr@l
+        space++;
+        *space = 0x7C6903A6; // mtctr   r3
+        space++;
+        *space = 0x8061FFE0; // lwz     r3,-32(r1)
+        space++;
+        *space = 0x4E800420; // bctr
+        space++;
         DCFlushRange((void*)(space - instr_len), flush_len);
         ICInvalidateRange((unsigned char*)(space - instr_len), flush_len);
 
         //setting jump back
-        u32 replace_instr = 0x48000002 | (repl_addr & 0x03fffffc);
+        u32 replace_instr = 0x48000002 | (repl_addr_test & 0x03fffffc);
         ICInvalidateRange(&replace_instr, 4);
         DCFlushRange(&replace_instr, 4);
 
