@@ -4,6 +4,7 @@
 
 extern replacement_data_t gbl_replacement_data;
 extern u8 gAppStatus;
+extern u64 gGameTitleID;
 extern volatile u8 gSDInitDone;
 
 

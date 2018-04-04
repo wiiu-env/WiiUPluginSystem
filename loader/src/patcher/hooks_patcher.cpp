@@ -7,18 +7,20 @@
 #include "utils.h"
 
 DECL(void, __PPCExit, void) {
-    DEBUG_FUNCTION_LINE("__PPCExit\n");
-
-    CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
-
-    DeInit();
+    // Only continue if we are in the "right" application.
+    if(OSGetTitleID() == gGameTitleID) {
+        DEBUG_FUNCTION_LINE("__PPCExit\n");
+        CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
+        DeInit();
+    }
 
     real___PPCExit();
 }
 
 DECL(u32, ProcUIProcessMessages, u32 u) {
     u32 res = real_ProcUIProcessMessages(u);
-    if(res != gAppStatus) {
+    // Only continue if we are in the "right" application.
+    if(res != gAppStatus && OSGetTitleID() == gGameTitleID) {
         DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
         gAppStatus = res;
         CallHook(WUPS_LOADER_HOOK_APP_STATUS_CHANGED);

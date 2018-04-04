@@ -86,6 +86,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
     //setup_os_exceptions();
 
     Init();
+    gGameTitleID = OSGetTitleID();
 
     s32 result = 0;
 
