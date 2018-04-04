@@ -37,6 +37,8 @@ SOURCES   :=  src/common \
               src/libelf \
               src/menu/content \
               src/menu \
+              src/mymemory \
+              src/mykernel \
               src/myutils \
               src/patcher \
               src/plugin \

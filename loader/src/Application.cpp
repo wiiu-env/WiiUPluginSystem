@@ -26,6 +26,7 @@
 #include <utils/logger.h>
 #include "settings/CSettings.h"
 #include "myutils/TcpReceiver.h"
+#include "mymemory/memory_mapping.h"
 
 Application *Application::applicationInstance = NULL;
 bool Application::exitApplication = false;
@@ -182,6 +183,11 @@ void Application::executeThread(void) {
 
                 if(controller[i]->data.buttons_d & VPAD_BUTTON_PLUS) {
                     exitCode = APPLICATION_CLOSE_APPLY;
+                    exitApplication = true;
+                }
+
+                if(controller[i]->data.buttons_d & VPAD_BUTTON_MINUS) {
+                    exitCode = APPLICATION_CLOSE_APPLY_MEMORY;
                     exitApplication = true;
                 }
 

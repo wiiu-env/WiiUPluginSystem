@@ -24,6 +24,7 @@
 #include <language/gettext.h>
 
 #define APPLICATION_CLOSE_APPLY             1
+#define APPLICATION_CLOSE_APPLY_MEMORY      3
 #define APPLICATION_CLOSE_MIIMAKER          2
 
 class Application : public CThread {

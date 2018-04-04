@@ -30,13 +30,16 @@
 #include <utils/function_patcher.h>
 #include <system/exception_handler.h>
 #include <system/memory.h>
+
 #include <kernel/kernel_utils.h>
+#include <mykernel/kernel_utils.h>
+
+#include "mymemory/memory_mapping.h"
 
 #include "common/retain_vars.h"
 #include "common/common.h"
 #include "plugin/PluginLoader.h"
 #include "plugin/PluginInformation.h"
-
 
 #include <wups.h>
 #include <iosuhax.h>
@@ -56,16 +59,15 @@
 #include "settings/CSettings.h"
 
 static void ApplyPatchesAndCallHookStartingApp();
-void CallHook(wups_loader_hook_type_t hook_type);
 static void RestorePatches();
 s32 isInMiiMakerHBL();
 
-/* Entry point */
 extern "C" int Menu_Main(int argc, char **argv) {
     if(gAppStatus == 2) {
         //"No, we don't want to patch stuff again.");
         return EXIT_RELAUNCH_ON_LOAD;
     }
+
     InitOSFunctionPointers();
     InitSocketFunctionPointers(); //For logging
     InitSysFunctionPointers();
@@ -80,13 +82,20 @@ extern "C" int Menu_Main(int argc, char **argv) {
     log_init();
 
     DEBUG_FUNCTION_LINE("We have %d kb for plugins.\n",(PLUGIN_LOCATION_END_ADDRESS-getApplicationEndAddr())/1024);
+    setup_os_exceptions();
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
-
-    //setup_os_exceptions();
-
     Init();
+
+    init_kernel_syscalls();
+    wups_init_kernel_syscalls();
+
     gGameTitleID = OSGetTitleID();
+
+    if(MemoryMapping::isMemoryMapped()) {
+        DEBUG_FUNCTION_LINE("Mapping was already done.\n");
+        MemoryMapping::readTestValuesFromMemory();
+    }
 
     s32 result = 0;
 
@@ -95,7 +104,6 @@ extern "C" int Menu_Main(int argc, char **argv) {
         CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
         // Restore patches as the patched functions could change.
         RestorePatches();
-
         PluginLoader * pluginLoader  = PluginLoader::getInstance();
         std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
         pluginLoader->loadAndLinkPlugins(pluginList);
@@ -109,6 +117,8 @@ extern "C" int Menu_Main(int argc, char **argv) {
         DEBUG_FUNCTION_LINE("Start main application\n");
         result = Application::instance()->exec();
         DEBUG_FUNCTION_LINE("Main application stopped result: %d\n",result);
+
+        DEBUG_FUNCTION_LINE("Application::destroyInstance\n");
         Application::destroyInstance();
 
         DEBUG_FUNCTION_LINE("Release memory\n");
@@ -117,28 +127,38 @@ extern "C" int Menu_Main(int argc, char **argv) {
         PluginLoader::destroyInstance();
     }
 
+    if(result == APPLICATION_CLOSE_APPLY_MEMORY){
+        if(!MemoryMapping::isMemoryMapped()) {
+            MemoryMapping::setupMemoryMapping();
+        }
+    }
+
+
     if(!isInMiiMakerHBL()) {
-        //CallHook(WUPS_LOADER_HOOK_STARTING_APPLICATION);
         DEBUG_FUNCTION_LINE("Apply patches.\n");
         ApplyPatchesAndCallHookStartingApp();
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
-    if(result == APPLICATION_CLOSE_APPLY) {
+
+    if(result == APPLICATION_CLOSE_APPLY || result == APPLICATION_CLOSE_APPLY_MEMORY) {
         CallHook(WUPS_LOADER_HOOK_INIT_FS);
         CallHook(WUPS_LOADER_HOOK_INIT_OVERLAY);
         CallHook(WUPS_LOADER_HOOK_INIT_PLUGIN);
         DEBUG_FUNCTION_LINE("Loading the system menu.\n");
         DeInit();
-        init_kernel_syscalls();
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
-    DEBUG_FUNCTION_LINE("Going back to the Homebrew Launcher\n");
+    DEBUG_FUNCTION_LINE("Let's go to back to the Homebrew Launcher\n");
+    DEBUG_FUNCTION_LINE("Restoring the patched functions\n");
     RestorePatches();
+    DEBUG_FUNCTION_LINE("Calling the plugin deinit hook\n");
     CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
+    DEBUG_FUNCTION_LINE("Unmounting SD/USB devices\n");
     DeInit();
+    DEBUG_FUNCTION_LINE("Bye bye!\n");
     return EXIT_SUCCESS;
 }
 

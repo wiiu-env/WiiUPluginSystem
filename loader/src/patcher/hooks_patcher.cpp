@@ -1,10 +1,12 @@
 #include <utils/logger.h>
 #include <utils/function_patcher.h>
+#include <dynamic_libs/vpad_functions.h>
 #include "common/retain_vars.h"
 #include "hooks_patcher.h"
 #include "myutils/overlay_helper.h"
 #include "main.h"
 #include "utils.h"
+#include "mymemory/memory_mapping.h"
 
 DECL(void, __PPCExit, void) {
     // Only continue if we are in the "right" application.
@@ -54,12 +56,32 @@ DECL(void, GX2WaitForVsync, void) {
     real_GX2WaitForVsync();
 }
 
+u8 vpadPressCooldown = 0xFF;
+DECL(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
+    int result = real_VPADRead(chan, buffer, buffer_size, error);
+
+    if(result > 0 && (buffer[0].btns_h == (VPAD_BUTTON_PLUS | VPAD_BUTTON_R | VPAD_BUTTON_L)) && vpadPressCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
+        if(MemoryMapping::isMemoryMapped()) {
+            MemoryMapping::readTestValuesFromMemory();
+        }else{
+            DEBUG_FUNCTION_LINE("Memory was not mapped. To test the memory please exit the plugin loader by pressing MINUS\n");
+        }
+        vpadPressCooldown = 0x3C;
+    }
+    if(vpadPressCooldown > 0) {
+        vpadPressCooldown--;
+    }
+    return result;
+}
+
+
 hooks_magic_t method_hooks_hooks[] __attribute__((section(".data"))) = {
     MAKE_MAGIC(__PPCExit,               LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(ProcUIProcessMessages,   LIB_PROC_UI,    DYNAMIC_FUNCTION),
     MAKE_MAGIC(GX2SetTVBuffer,          LIB_GX2,        STATIC_FUNCTION),
     MAKE_MAGIC(GX2SetDRCBuffer,         LIB_GX2,        STATIC_FUNCTION),
     MAKE_MAGIC(GX2WaitForVsync,         LIB_GX2,        STATIC_FUNCTION),
+    MAKE_MAGIC(VPADRead,                LIB_VPAD,       STATIC_FUNCTION),
 };
 
 
