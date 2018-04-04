@@ -1,4 +1,5 @@
 #include "screenshot_utils.h"
+#include <dynamic_libs/os_functions.h>
 #include <fs/FSUtils.h>
 #include <malloc.h>
 
@@ -45,6 +46,7 @@ bool saveAsJPEG(const char * path, u8 * sourceBuffer, u32 width, u32 height, u32
     void *data = gdImageJpegPtr(gdImagePtr, &imd_size, 95);
     if (data) {
         DEBUG_FUNCTION_LINE("Encoded file as JPEG. size = %d.\n",imd_size);
+        DCFlushRange(data,imd_size);
         //FSUtils::CreateSubfolder("sd:/screenshots);
         result = FSUtils::saveBufferToFile(path,data,imd_size);
         if(!result){
