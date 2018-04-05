@@ -61,6 +61,8 @@
 static void ApplyPatchesAndCallHookStartingApp();
 static void RestorePatches();
 s32 isInMiiMakerHBL();
+void readAndPrintSegmentRegister(CThread *thread, void *arg);
+
 
 extern "C" int Menu_Main(int argc, char **argv) {
     if(gAppStatus == 2) {
@@ -92,11 +94,6 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     gGameTitleID = OSGetTitleID();
 
-    if(MemoryMapping::isMemoryMapped()) {
-        DEBUG_FUNCTION_LINE("Mapping was already done.\n");
-        MemoryMapping::readTestValuesFromMemory();
-    }
-
     s32 result = 0;
 
     //Reset everything when were going back to the Mii Maker
@@ -127,7 +124,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
         PluginLoader::destroyInstance();
     }
 
-    if(result == APPLICATION_CLOSE_APPLY_MEMORY){
+    if(result == APPLICATION_CLOSE_APPLY_MEMORY) {
         if(!MemoryMapping::isMemoryMapped()) {
             MemoryMapping::setupMemoryMapping();
         }
@@ -137,6 +134,23 @@ extern "C" int Menu_Main(int argc, char **argv) {
     if(!isInMiiMakerHBL()) {
         DEBUG_FUNCTION_LINE("Apply patches.\n");
         ApplyPatchesAndCallHookStartingApp();
+
+        if(MemoryMapping::isMemoryMapped()) {
+            DEBUG_FUNCTION_LINE("Mapping was already done. Running %016llX\n",gGameTitleID);
+            readAndPrintSegmentRegister(NULL,NULL);
+            MemoryMapping::readTestValuesFromMemory();
+        } else {
+            DEBUG_FUNCTION_LINE("<-----------------------------------------------------> \n");
+            DEBUG_FUNCTION_LINE("<---------------- COPY PASTE ME START-----------------> \n");
+            DEBUG_FUNCTION_LINE("<-----------------------------------------------------> \n");
+            DEBUG_FUNCTION_LINE("Mapping was't done. Running %016llX\n",gGameTitleID);
+            readAndPrintSegmentRegister(NULL,NULL);
+            DEBUG_FUNCTION_LINE("<-----------------------------------------------------> \n");
+            DEBUG_FUNCTION_LINE("<----------------- COPY PASTE ME END -----------------> \n");
+            DEBUG_FUNCTION_LINE("<-----------------------------------------------------> \n");
+        }
+
+
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
