@@ -55,7 +55,7 @@ const memory_values_t mem_vals_heap[] = {
     {0x28000000 + 0x00E40000, 0x28000000 + 0x00EC0000}, // size: 512 kB
     {0x28000000 + 0x00EE0000, 0x28000000 + 0x00F60000}, // size: 512 kB
     {0x28000000 + 0x00FA0000, 0x28000000 + 0x01020000}, // size: 512 kB
-    {0x28000000 + 0x01040000, 0x28000000 + 0x013C0000}, // size: 3584 kB
+    {0x28000000 + 0x01040000, 0x28000000 + 0x013A0000}, // size: 3456 kB
     {0x28000000 + 0x02060000, 0x28000000 + 0x021A0000}, // size: 1280 kB
     {0x28000000 + 0x02BC0000, 0x28000000 + 0x02CA0000}, // size: 896 kB
     {0x28000000 + 0x04B60000, 0x28000000 + 0x04B80000}, // size: 128 kB
@@ -75,6 +75,8 @@ const memory_values_t mem_vals_heap[] = {
     //                       {0x28000000 + 0x03920000, 0x28000000 + 0x039A0000}, // size: 512 kB
     // Used in notifications {0x28000000 + 0x04B80000, 0x28000000 + 0x051E0000}, // size: 6528 kB
     //                       {0x28000000 + 0x08F20000, 0x28000000 + 0x09000000}, // size: 896 kB
+
+    //                       {0x28000000 + 0x013A0000, 0x28000000 + 0x013C0000}, // size: 128 kB
 
     // Porting to other/newer firmware:
     // Map this to check for free regions.
