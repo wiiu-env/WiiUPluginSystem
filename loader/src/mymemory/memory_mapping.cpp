@@ -73,17 +73,7 @@ u32 MemoryMapping::getHeapAddress() {
 }
 
 u32 MemoryMapping::getHeapSize() {
-    const memory_values_t * mem_vals = mem_mapping[2].physical_addresses;
-    u32 ea_size = 0;
-    for(u32 j = 0;; j++) {
-        u32 pa_start_address    = mem_vals[j].start_address;
-        u32 pa_end_address      = mem_vals[j].end_address;
-        if(pa_end_address == 0 && pa_start_address == 0) {
-            break;
-        }
-        ea_size             += pa_end_address - pa_start_address;
-    }
-    return ea_size;
+    return getAreaSizeFromPageTable(MEMORY_START_PLUGIN_HEAP,MEMORY_START_PLUGIN_HEAP_END - MEMORY_START_PLUGIN_HEAP);
 }
 
 void MemoryMapping::searchEmptyMemoryRegions() {
@@ -365,25 +355,136 @@ void MemoryMapping::setupMemoryMapping() {
     readTestValuesFromMemory();
 }
 
+
+u32 MemoryMapping::getAreaSizeFromPageTable(u32 start, u32 maxSize) {
+    sr_table_t srTable;
+    u32 pageTable[0x8000];
+
+    SC0x36_KernelReadSRs(&srTable);
+    SC0x37_KernelReadPTE(pageTable,sizeof(pageTable));
+
+    u32 sr_start = start >> 28;
+    u32 sr_end = (start + maxSize) >> 28;
+
+    if(sr_end < sr_start) {
+        return 0;
+    }
+
+    u32 cur_address = start;
+    u32 end_address = start + maxSize;
+
+    u32 memSize = 0;
+
+    for(u32 segment = sr_start; segment <= sr_end ; segment++) {
+        u32 sr = srTable.value[segment];
+        if(sr >> 31) {
+            DEBUG_FUNCTION_LINE("Direct access not supported\n");
+        } else {
+            u32 vsid = sr & 0xFFFFFF;
+
+            u32 pageSize = 1 << PAGE_INDEX_SHIFT;
+            u32 cur_end_addr = 0;
+            if(segment == sr_end) {
+                cur_end_addr = end_address;
+            } else {
+                cur_end_addr = (segment + 1) * 0x10000000;
+            }
+            if(segment != sr_start) {
+                cur_address = (segment) * 0x10000000;
+            }
+            bool success = true;
+            for(u32 addr = cur_address; addr < cur_end_addr; addr += pageSize) {
+                u32 PTEH = 0;
+                u32 PTEL = 0;
+                if(getPageEntryForAddress(srTable.sdr1, addr, vsid, pageTable, &PTEH, &PTEL, false)) {
+                    memSize += pageSize;
+                } else {
+                    success = false;
+                    break;
+                }
+            }
+            if(!success) {
+                break;
+            }
+        }
+    }
+    return memSize;
+}
+
+bool MemoryMapping::getPageEntryForAddress(u32 SDR1,u32 addr, u32 vsid, u32 * translation_table,u32* oPTEH, u32* oPTEL, bool checkSecondHash) {
+    u32 pageMask = SDR1 & 0x1FF;
+    u32 pageIndex = (addr >> PAGE_INDEX_SHIFT) & PAGE_INDEX_MASK;
+    u32 primaryHash = (vsid & 0x7FFFF) ^ pageIndex;
+
+    if(getPageEntryForAddressEx(SDR1, addr, vsid,  primaryHash, translation_table, oPTEH, oPTEL, 0)) {
+        return true;
+    }
+
+    if(checkSecondHash) {
+        if(getPageEntryForAddressEx(pageMask, addr, vsid, ~primaryHash, translation_table, oPTEH, oPTEL, 1)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool MemoryMapping::getPageEntryForAddressEx(u32 pageMask, u32 addr, u32 vsid, u32 primaryHash, u32 * translation_table,u32* oPTEH, u32* oPTEL,u32 H) {
+    uint32_t maskedHash = primaryHash & ((pageMask << 10) | 0x3FF);
+    uint32_t api = (addr >> 22) & 0x3F;
+
+    uint32_t pteAddrOffset = (maskedHash << 6);
+
+    for (int j = 0; j < 8; j++, pteAddrOffset += 8) {
+        uint32_t PTEH = 0;
+        uint32_t PTEL = 0;
+
+        u32 pteh_index = pteAddrOffset / 4;
+        u32 ptel_index = pteh_index + 1;
+
+        PTEH = translation_table[pteh_index];
+        PTEL = translation_table[ptel_index];
+
+        //Check validity
+        if (!(PTEH >> 31)) {
+            //printf("PTE is not valid \n");
+            continue;
+        }
+        //DEBUG_FUNCTION_LINE("in\n");
+        // the H bit indicated if the PTE was found using the second hash.
+        if (((PTEH >> 6) & 1) != H) {
+            //DEBUG_FUNCTION_LINE("Secondary hash is used\n",((PTEH >> 6) & 1));
+            continue;
+        }
+
+        // Check if the VSID matches, otherwise this is a PTE for another SR
+        // This is the place where collision could happen.
+        // Hopefully no collision happen and only the PTEs of the SR will match.
+        if (((PTEH >> 7) & 0xFFFFFF) != vsid) {
+            //DEBUG_FUNCTION_LINE("VSID mismatch\n");
+            continue;
+        }
+
+        // Check the API (Abbreviated Page Index)
+        if ((PTEH & 0x3F) != api) {
+            //DEBUG_FUNCTION_LINE("API mismatch\n");
+            continue;
+        }
+        *oPTEH = PTEH;
+        *oPTEL = PTEL;
+
+        return true;
+    }
+    return false;
+}
+
 void MemoryMapping::printPageTableTranslation(sr_table_t srTable, u32 * translation_table) {
     u32 SDR1 = srTable.sdr1;
-    //u32 pagemask = SDR1 & 0x1FF;
-    //u32 hashmask = (pagemask << 10) | 0x3FF;
-    uint32_t pagetbl = SDR1 & 0xFFFF0000;
-
-    u32 pageIndexShift = 32 - 15;
-    u32 pageIndexMask = (1 << (28 - pageIndexShift)) - 1;
-    //u32 byteOffsetMask = (1 << pageIndexShift) - 1;
-    //u32 apiShift = 22 - pageIndexShift;
-
-    //FSUtils::saveBufferToFile("sd:/table.bin", pteTable,sizeof(pteTable));
 
     pageInformation current;
     memset(&current,0,sizeof(current));
 
     std::vector<pageInformation> pageInfos;
-
-    DEBUG_FUNCTION_LINE("Page table (%08X):\n",pagetbl);
 
     for(u32 segment = 0; segment < 16 ; segment++) {
         u32 sr = srTable.value[segment];
@@ -396,67 +497,14 @@ void MemoryMapping::printPageTableTranslation(sr_table_t srTable, u32 * translat
             u32 vsid = sr & 0xFFFFFF;
 
             DEBUG_FUNCTION_LINE("ks   %08X kp   %08X nx   %08X vsid %08X\n",ks,kp,nx,vsid);
-            u32 pageSize = 1 << pageIndexShift;
+            u32 pageSize = 1 << PAGE_INDEX_SHIFT;
             for(u32 addr = segment * 0x10000000; addr < (segment + 1) * 0x10000000; addr += pageSize) {
-                uint32_t pageIndex = (addr >> pageIndexShift) & pageIndexMask;
-                uint32_t primaryHash = (vsid & 0x7FFFF) ^ pageIndex;
-
-                uint32_t pageTable = SDR1 & 0xFFFF0000;
-                uint32_t pageMask = SDR1 & 0x1FF;
-                uint32_t maskedHash = primaryHash & ((pageMask << 10) | 0x3FF);
-                uint32_t api = (addr >> 22) & 0x3F;
-
-                uint32_t pteaddr = pageTable | (maskedHash << 6);
-
-                //DEBUG_FUNCTION_LINE("pteAddr %08X\n",pteAddr);
-
-                bool found = false;
-                for (int j = 0; j < 8; j++, pteaddr += 8) {
-                    uint32_t PTEH = 0;
-                    uint32_t PTEL = 0;
-
-                    u32 pteh_index = (pteaddr-pagetbl) / 4;
-                    u32 ptel_index = pteh_index + 1;
-                    //DEBUG_FUNCTION_LINE("pteh_index %08X\n",pteh_index);
-                    //DEBUG_FUNCTION_LINE("ptel_index %08X\n",ptel_index);
-
-                    PTEH = translation_table[pteh_index];
-                    PTEL = translation_table[ptel_index];
-
-                    //if(!readPTE(pteaddr,&PTEH)) continue;
-                    //if(!readPTE(pteaddr+4,&PTEL)) continue;
-
-                    //Check validity
-
-                    if (!(PTEH >> 31)) {
-                        //printf("PTE is not valid \n");
-                        continue;
-                    }
-                    //DEBUG_FUNCTION_LINE("in\n");
-                    // the H bit indicated if the PTE was found using the second hash.
-                    if (((PTEH >> 6) & 1)) {
-                        //DEBUG_FUNCTION_LINE("Secondary hash is used\n",((PTEH >> 6) & 1));
-                        continue;
-                    }
-
-                    // Check if the VSID matches, otherwise this is a PTE for another SR
-                    // This is the place where collision could happen.
-                    // Hopefully no collision happen and only the PTEs of the SR will match.
-                    if (((PTEH >> 7) & 0xFFFFFF) != vsid) {
-                        //DEBUG_FUNCTION_LINE("VSID mismatch\n");
-                        continue;
-                    }
-
-                    // Check the API (Abbreviated Page Index)
-                    if ((PTEH & 0x3F) != api) {
-                        //DEBUG_FUNCTION_LINE("API mismatch\n");
-                        continue;
-                    }
-
+                u32 PTEH = 0;
+                u32 PTEL = 0;
+                if(getPageEntryForAddress(SDR1, addr, vsid, translation_table, &PTEH, &PTEL, false)) {
                     uint32_t pp = PTEL & 3;
                     uint32_t phys = PTEL & 0xFFFFF000;
 
-                    //DEBUG_FUNCTION_LINE("%08X: %08X %08X \n",pteaddr-pagetbl,PTEH,PTEL);
                     //DEBUG_FUNCTION_LINE("current.phys == phys - current.size ( %08X %08X)\n",current.phys, phys - current.size);
 
                     if( current.ks == ks &&
@@ -486,11 +534,7 @@ void MemoryMapping::printPageTableTranslation(sr_table_t srTable, u32 * translat
                         current.pp = pp;
                         current.phys = phys;
                     }
-                    found = true;
-                    break;
-
-                }
-                if(!found) {
+                } else {
                     if(current.addr != 0 && current.size != 0) {
                         pageInfos.push_back(current);
                         memset(&current,0,sizeof(current));
@@ -515,19 +559,17 @@ void MemoryMapping::printPageTableTranslation(sr_table_t srTable, u32 * translat
 bool MemoryMapping::mapMemory(uint32_t pa_start_address,uint32_t pa_end_address,uint32_t ea_start_address, sr_table_t SRTable, u32 * translation_table) {
     // Based on code from dimok. Thanks!
 
-    u32 pageIndexShift = 32 - 15;
-    u32 pageIndexMask = (1 << (28 - pageIndexShift)) - 1;
-    //u32 byteOffsetMask = (1 << pageIndexShift) - 1;
-    //u32 apiShift = 22 - pageIndexShift;
+    //u32 byteOffsetMask = (1 << PAGE_INDEX_SHIFT) - 1;
+    //u32 apiShift = 22 - PAGE_INDEX_SHIFT;
 
     // Information on page 5.
     // https://www.nxp.com/docs/en/application-note/AN2794.pdf
     uint32_t HTABORG = SRTable.sdr1 >> 16;
     uint32_t HTABMASK = SRTable.sdr1 & 0x1FF;
 
-    // Iterate to all possible pages. Each page is 1<<(pageIndexShift) big.
+    // Iterate to all possible pages. Each page is 1<<(PAGE_INDEX_SHIFT) big.
 
-    uint32_t pageSize = 1<<(pageIndexShift);
+    uint32_t pageSize = 1<<(PAGE_INDEX_SHIFT);
     for(u32 i = 0; i < pa_end_address - pa_start_address; i += pageSize) {
         // Calculate the current effective address.
         uint32_t ea_addr = ea_start_address + i;
@@ -550,14 +592,13 @@ bool MemoryMapping::mapMemory(uint32_t pa_start_address,uint32_t pa_end_address,
         uint32_t WIMG = 0x02;
         uint32_t PP = 0x02;
 
-        uint32_t page_index = (ea_addr >> pageIndexShift) & pageIndexMask;
+        uint32_t page_index = (ea_addr >> PAGE_INDEX_SHIFT) & PAGE_INDEX_MASK;
         uint32_t API = (ea_addr >> 22) & 0x3F;
 
         uint32_t PTEH = (V << 31) | (VSID << 7) | (H << 6) | API;
         uint32_t PTEL = (RPN << 12) | (RC << 7) | (WIMG << 3) | PP;
 
-
-        //unsigned long long virtual_address = ((unsigned long long)VSID << 28UL) | (page_index << pageIndexShift) | (ea_addr & 0xFFF);
+        //unsigned long long virtual_address = ((unsigned long long)VSID << 28UL) | (page_index << PAGE_INDEX_SHIFT) | (ea_addr & 0xFFF);
 
         uint32_t primary_hash = (VSID & 0x7FFFF);
 

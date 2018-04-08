@@ -28,13 +28,24 @@ typedef struct _memory_mapping_t {
     const memory_values_t* physical_addresses;
 } memory_mapping_t;
 
-
 #define SEGMENT_UNIQUE_ID           0x00AABBCC // Unique ID. Chosen arbitrary.
+#define PAGE_INDEX_SHIFT            (32-15)
+#define PAGE_INDEX_MASK             ((1 << (28 - PAGE_INDEX_SHIFT)) - 1)
 
-#define MEMORY_START_BASE           0x80000000 // At most: 128MB for plugins heap.
-#define MEMORY_START_PLUGIN_HEAP    MEMORY_START_BASE + 0x08000000 // At most: 128MB for plugins heap.
-#define MEMORY_START_PLUGIN_SPACE   MEMORY_START_BASE + 0x00800000 // At most: 120MB for plugins.
-#define MEMORY_START_PLUGIN_LOADER  MEMORY_START_BASE + 0x00000000 // At most: 8MB for the plugin loader.
+#define MEMORY_START_BASE               0x80000000
+
+#define MEMORY_LOADER_SPACE_SIZE        0x00800000      // At most: 8MB for the plugin loader.
+#define MEMORY_PLUGIN_SPACE_SIZE        0x07800000      // At most: 120MB for plugins.
+#define MEMORY_PLUGIN_HEAP_SIZE         0x08000000      // At most: 128MB for plugins heap.
+
+#define MEMORY_START_PLUGIN_LOADER      MEMORY_START_BASE
+#define MEMORY_START_PLUGIN_LOADER_END  MEMORY_START_PLUGIN_LOADER + MEMORY_LOADER_SPACE_SIZE
+
+#define MEMORY_START_PLUGIN_SPACE       MEMORY_START_PLUGIN_LOADER_END
+#define MEMORY_START_PLUGIN_SPACE_END   MEMORY_START_PLUGIN_SPACE + MEMORY_PLUGIN_SPACE_SIZE
+
+#define MEMORY_START_PLUGIN_HEAP        MEMORY_START_PLUGIN_SPACE_END
+#define MEMORY_START_PLUGIN_HEAP_END    MEMORY_START_PLUGIN_HEAP + MEMORY_PLUGIN_HEAP_SIZE
 
 const memory_values_t mem_vals_loader[] = {
     {0x28000000 + 0x06620000          , 0x28000000 + 0x06E20000},               // 8MB          0x80000000 0x80800000 -> 0x2E700000 0x2EF00000
@@ -116,11 +127,18 @@ public:
 
     static u32 getHeapSize();
 
+    static u32 getAreaSizeFromPageTable(u32 start, u32 maxSize);
+
 private:
 
     static void memoryMappingForRegions(const memory_mapping_t * memory_mapping, sr_table_t SRTable, u32 * translation_table);
 
     static bool mapMemory(u32 pa_start_address,u32 pa_end_address,u32 ea_start_address, sr_table_t SRTable, u32 * translation_table);
+
+
+    static bool getPageEntryForAddress(u32 SDR1, u32 addr, u32 vsid, u32 * translation_table,u32* oPTEH, u32* oPTEL, bool checkSecondHash);
+
+    static bool getPageEntryForAddressEx(u32 pageMask, u32 addr, u32 vsid, u32 primaryHash, u32 * translation_table,u32* oPTEH, u32* oPTEL,u32 H) ;
 };
 
 

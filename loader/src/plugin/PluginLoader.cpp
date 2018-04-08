@@ -302,7 +302,6 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                     goto exit_error;
                 }
 
-                //DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,curAddress);
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, (void*) curAddress)) {
                     goto exit_error;
                 }
@@ -345,6 +344,8 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     }
 
     this->setCurrentStoreAddress((void *) curAddress);
+
+    DEBUG_FUNCTION_LINE("Copied plugin %s to %08X\n",pluginData->getPluginInformation()->getName().c_str(),curAddress);
 
     result = true;
 exit_error:
