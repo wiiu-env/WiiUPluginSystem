@@ -30,6 +30,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
   - yes | sudo dkp-pacman -Syu devkitPPC
   - yes | sudo dkp-pacman -Syu devkitARM
+  - yes | sudo dkp-pacman -Syu general-tools
 
 install:
   - cd $PORTLIBREPOS
