@@ -11,7 +11,7 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
-export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH):$(DEVKITPPC)/tools/bin
+export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH):$(DEVKITPRO)/tools/bin
 export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
 
 PREFIX	:=	powerpc-eabi-
