@@ -7,7 +7,18 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC)
 endif
 
-include $(DEVKITPPC)/wii_rules
+export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
+export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
+
+PREFIX	:=	powerpc-eabi-
+
+export AS	:=	$(PREFIX)as
+export CC	:=	$(PREFIX)gcc
+export CXX	:=	$(PREFIX)g++
+export AR	:=	$(PREFIX)ar
+export OBJCOPY	:=	$(PREFIX)objcopy
+
+include $(DEVKITPPC)/base_rules
 
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
@@ -123,7 +134,6 @@ $(WIIUBIN)	:	$(OFILES) $(LIB)
 	@$(AR) rcs "$(WIIUBIN)" $(OFILES) 
 	@echo built ... $(notdir $@)
 	
-
 $(LIB):
 	mkdir $(LIB)
 

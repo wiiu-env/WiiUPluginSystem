@@ -1,26 +1,21 @@
-language: c
-sudo: false
+language: cpp
 
-os:
-  - linux
+os: linux
+sudo: false
+dist: trusty
 
 env:
   global:
-    - DEVKITPRO=$HOME/devkitPro
+    - DEVKITPRO=/opt/devkitpro    
+    - DEVKITPPC=/opt/devkitpro/devkitPPC
+    - DEVKITARM=/opt/devkitpro/devkitARM
     - PORTLIBREPOS=$HOME/portlibrepos
-    - DEVKITPPC=${DEVKITPRO}/devkitPPC
-    - DEVKITARM=${DEVKITPRO}/devkitARM
-    
-cache:
-  apt: true
-  directories:
-  - "/home/travis/devkitPro"
-  - "/home/travis/portlibrepos"
 
-before_cache:
-- rm -rf $DEVKITPRO/*.7z
-- rm -rf $DEVKITPRO/*.bz2
-- rm -rf $DEVKITPRO/examples
+cache:
+  directories:
+    - "$HOME/.local"
+    - "$PORTLIBREPOS"
+    - "$DEVKITPRO"
 
 addons:
   apt:
@@ -28,22 +23,18 @@ addons:
     - p7zip-full
 
 before_install:
-  - mkdir -p "${DEVKITPRO}"
   - mkdir -p "${PORTLIBREPOS}"
-  - 7z x -y ./loader/libs/portlibs.zip -o${DEVKITPRO}  
-  - main_cwd=$(pwd)
-  - cd $DEVKITPRO
-  - wget https://github.com/devkitPro/installer/releases/download/v2.2.0/devkitPPCupdate.pl -O devkitPPCupdate.pl
-  - wget https://github.com/devkitPro/installer/releases/download/v2.2.0/devkitARMupdate.pl -O devkitARMupdate.pl
+  - mkdir -p "${DEVKITPRO}"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -O /tmp/devkitpro-pacman.deb; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
+  - yes | sudo dkp-pacman -Syu devkitPPC
+  - yes | sudo dkp-pacman -Syu devkitARM
 
-install:  
-  - cd $DEVKITPRO
-  - perl devkitPPCupdate.pl
-  - perl devkitARMupdate.pl
+install:
   - cd $PORTLIBREPOS
   - ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull))
   - (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull))
-  - (git clone https://github.com/aliaspider/libfat.git || (cd libfat && git pull))   
+  - (git clone https://github.com/Maschell/libfat.git || (cd libfat && git pull))   
   - (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs-wiiu && git pull))   
   - (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull))   
   - ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull))   
@@ -58,14 +49,16 @@ install:
   - (cd fs_wrapper && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
   - (cd controller_patcher && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
 
+before_script:
+  - cd $TRAVIS_BUILD_DIR/
+  
 script:
-- cd $main_cwd
 - make && make install
 - (cd loader && make)
 - (cd plugins && make)
 
 before_deploy:
-- cd $main_cwd
+- cd $TRAVIS_BUILD_DIR/
 - mkdir -p "wiiu/apps/wiiupluginloader"
 - mkdir -p "wiiu/plugins"
 - commit="$(git rev-parse --short=7 HEAD)"
