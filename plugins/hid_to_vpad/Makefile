@@ -67,8 +67,8 @@ COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-fl
 
 
 # -x c: compile as c code
-# -std=c11: use the c11 standard
-CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=c11
+# -std=gnu11: use the gnu11 standard
+CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=gnu11
 
 # -x c: compile as c++ code
 # -std=gnu++11: use the c++11 standard
