@@ -90,13 +90,15 @@ std::vector<PluginInformation *> PluginLoader::getPluginsLoadedInMemory() {
     return pluginInformation;
 }
 
-void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation) {
+bool PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation) {
     std::vector<PluginData *> loadedPlugins;
+    bool success = true;
     for(size_t i = 0; i < pluginInformation.size(); i++) {
         PluginInformation * cur_info = pluginInformation[i];
         PluginData * pluginData = loadAndLinkPlugin(cur_info);
         if(pluginData == NULL) {
             DEBUG_FUNCTION_LINE("loadAndLinkPlugins failed for %d\n",i) ;
+            success = false;
             continue;
         } else {
             loadedPlugins.push_back(pluginData);
@@ -108,6 +110,7 @@ void PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInf
 
     DCFlushRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
     ICInvalidateRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
+    return success;
 }
 
 void PluginLoader::clearPluginData(std::vector<PluginData *> pluginData) {

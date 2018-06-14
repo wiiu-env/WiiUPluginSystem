@@ -85,8 +85,10 @@ public:
                 Also the hooks of the plugins will be called in the order their plugin where passed to this method.
 
         \param A list of plugin that should be linked (relocated) an loaded into memory
+
+        \return Returns true if all plugins were linked successfully. Returns false if at least one plugin failed while linking.
     **/
-    void loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation);
+    bool loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation);
 
     /**
         \brief  Iterates through the vector and delete all it's elements

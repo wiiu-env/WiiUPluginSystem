@@ -226,10 +226,9 @@ int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
     PluginLoader * pluginLoader = PluginLoader::getInstance();
     pluginLoader->resetPluginLoader();
     std::vector<PluginInformation* > pluginList = pluginLoader->getPluginInformation(WUPS_TEMP_PLUGIN_PATH);
-    if(pluginList.size() == 0) {
+    if(pluginList.size() == 0 || !pluginLoader->loadAndLinkPlugins(pluginList)) {
         return NOT_A_VALID_PLUGIN;
     }
-    pluginLoader->loadAndLinkPlugins(pluginList);
     Application::instance()->quit(APPLICATION_CLOSE_APPLY);
 
     return fileSize;
