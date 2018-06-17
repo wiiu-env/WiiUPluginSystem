@@ -4,6 +4,9 @@ DO_LOGGING          := 1
 # Non WUT plugins need to wrap the malloc functions.
 WRAP_MALLOC         := 0
 
+# Sets the "-D__WUT__" compiling flag
+USE_WUT             := 1
+
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
 
@@ -20,9 +23,9 @@ INCLUDES            := src
 # options for code generation and linking
 #---------------------------------------------------------------------------------
 # Extra C compiler flags
-CFLAGS              := 
+CFLAGS              :=
 # Extra C++ compiler flags
-CXXFLAGS            := 
+CXXFLAGS            :=
 # Extra linking flags for all linking steps
 LD_FLAGS            := 
 # extra linking flags for linking the temporarily elf file (using ld)

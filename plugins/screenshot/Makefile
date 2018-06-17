@@ -66,7 +66,7 @@ include $(WUPSDIR)/plugin_makefile.mk
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -D__WIIU__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
 
 # -x c: compile as c code
@@ -80,6 +80,11 @@ CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
    CXXFLAGS += -D__LOGGING__
+endif
+
+ifeq ($(USE_WUT), 1)
+   CFLAGS += -D__WUT__
+   CXXFLAGS += -D__WUT__
 endif
 			
 ASFLAGS	+= 

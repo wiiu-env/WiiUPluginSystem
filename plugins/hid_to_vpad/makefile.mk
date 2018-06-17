@@ -4,6 +4,9 @@ DO_LOGGING          := 1
 # Non WUT plugins need to wrap the malloc functions.
 WRAP_MALLOC         := 1
 
+# Sets the "-D__WUT__" compiling flag
+USE_WUT             := 0
+
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
 
