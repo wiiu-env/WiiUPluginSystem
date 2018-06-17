@@ -2,15 +2,13 @@
 DO_LOGGING          := 1
 
 # Non WUT plugins need to wrap the malloc functions.
-WRAP_MALLOC         := 1
+WRAP_MALLOC         := 0
 
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
 
 # Source directories
-SOURCES             :=  src \
-                        src/common \
-                        src/myfs
+SOURCES             := src
 
 # Data directories
 DATA                :=	
@@ -24,7 +22,7 @@ INCLUDES            := src
 # Extra C compiler flags
 CFLAGS              := 
 # Extra C++ compiler flags
-CXXFLAGS            := -D_GNU_SOURCE
+CXXFLAGS            := 
 # Extra linking flags for all linking steps
 LD_FLAGS            := 
 # extra linking flags for linking the temporarily elf file (using ld)
@@ -41,7 +39,7 @@ LIBDIRS             := $(WUPSDIR) $(PORTLIBS)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS                := -lwups -lfswrapper -lutils -ldynamiclibs
+LIBS                := -lwups -lwhb -lwutstdc++ -lwutnewlib -lwutmalloc -lcoreinit -lnsysnet -lnn_ac
 
 #---------------------------------------------------------------------------------
 # Will be added to the final lib paths
@@ -54,5 +52,4 @@ EXTERNAL_LIBPATHS   :=
 # Will be added to the final include paths
 # -IC:/library1/include
 #---------------------------------------------------------------------------------
-EXTERNAL_INCLUDE    :=  -I$(PORTLIBS)/include/libutils \
-                        -I$(PORTLIBS)/include/libfswrapper
+EXTERNAL_INCLUDE    :=  

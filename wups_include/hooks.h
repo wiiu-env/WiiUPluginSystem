@@ -18,7 +18,7 @@
 #ifndef WUPS_HOOKS_DEF_H_
 #define WUPS_HOOKS_DEF_H_
 
-#include <dynamic_libs/os_types.h>
+#include <wut_types.h>
 #include "common.h"
 
 #ifdef __cplusplus

@@ -31,6 +31,7 @@
 #include "ElfTools.h"
 #include "PluginData.h"
 #include "PluginLoader.h"
+#include "DynamicLinkingHelper.h"
 #include "utils/StringTools.h"
 #include "common/retain_vars.h"
 
@@ -105,11 +106,11 @@ bool PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInf
         }
     }
 
+    PluginLoader::flushCache();
+
     copyPluginDataIntoGlobalStruct(loadedPlugins);
     clearPluginData(loadedPlugins);
 
-    DCFlushRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
-    ICInvalidateRange((void*)this->startAddress,(u32)this->endAddress - (u32)this->startAddress);
     return success;
 }
 
@@ -141,8 +142,8 @@ PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformati
         goto exit_error;
     }
 
-    if(pluginInformation->getSize() > ((u32) this->getCurrentStoreAddress() - (u32) this->startAddress)) {
-        DEBUG_FUNCTION_LINE("Not enough space left to loader the plugin into memory\n");
+    if(pluginInformation->getSize() > ((u32) getAvailableSpace())) {
+        DEBUG_FUNCTION_LINE("Not enough space left to loader the plugin into memory %08X %08X\n",pluginInformation->getSize(),getAvailableSpace());
         goto exit_error;
     }
 
@@ -201,6 +202,8 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     wups_loader_hook_t *hooks = NULL;
     bool result = false;
 
+    int i = 1;
+
     std::vector<wups_loader_entry_t *> entry_t_list;
     std::vector<wups_loader_hook_t *> hook_t_list;
 
@@ -241,6 +244,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
 
             name = elf_strptr(elf, shstrndx, shdr->sh_name);
             if (name == NULL) {
+                DEBUG_FUNCTION_LINE("name is null\n");
                 continue;
             }
 
@@ -248,6 +252,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                 continue;
             } else if (strcmp(name, ".wups.load") == 0) {
                 if (entries != NULL) {
+                    DEBUG_FUNCTION_LINE("entries != NULL\n");
                     goto exit_error;
                 }
 
@@ -255,11 +260,13 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                 entries = (wups_loader_entry_t *) malloc(sizeof(wups_loader_entry_t) * entries_count);
 
                 if (entries == NULL) {
+                    DEBUG_FUNCTION_LINE("entries == NULL\n");
                     goto exit_error;
                 }
 
                 destinations[elf_ndxscn(scn)] = (uint8_t *)entries;
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, entries)) {
+                    DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
 
@@ -270,6 +277,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                 }
             } else if (strcmp(name, ".wups.hooks") == 0) {
                 if (hooks != NULL) {
+                    DEBUG_FUNCTION_LINE("hooks != NULL\n");
                     goto exit_error;
                 }
 
@@ -277,11 +285,13 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                 hooks = (wups_loader_hook_t *) malloc(sizeof(wups_loader_hook_t) * hooks_count);
 
                 if (hooks == NULL) {
+                    DEBUG_FUNCTION_LINE("hooks == NULL\n");
                     goto exit_error;
                 }
 
                 destinations[elf_ndxscn(scn)] = (uint8_t *)hooks;
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, hooks)) {
+                    DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
                 ElfTools::elfLoadSymbols(elf_ndxscn(scn), hooks, symtab, symtab_count);
@@ -305,13 +315,39 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                     goto exit_error;
                 }
 
+                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,curAddress);
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, (void*) curAddress)) {
+                    DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
                 ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void*) curAddress, symtab, symtab_count);
             }
         }
     }
+    for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
+        Elf32_Shdr *shdr;
+
+        shdr = elf32_getshdr(scn);
+        if (shdr == NULL) {
+            continue;
+        }
+        const char *name;
+
+        name = elf_strptr(elf, shstrndx, shdr->sh_name);
+        if (name == NULL) {
+            DEBUG_FUNCTION_LINE("name is null\n");
+            continue;
+        }
+        if(shdr->sh_type == 0x80000002) {
+            ImportRPLInformation * info = ImportRPLInformation::createImportRPLInformation(i,name);
+            if(info != NULL) {
+                pluginData->addImportRPLInformation(info);
+            }
+        }
+        i++;
+    }
+    i = 0;
+
 
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
         Elf32_Shdr *shdr;
@@ -324,8 +360,8 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
         if ((shdr->sh_type == SHT_PROGBITS || shdr->sh_type == SHT_NOBITS) &&
                 (shdr->sh_flags & SHF_ALLOC) &&
                 destinations[elf_ndxscn(scn)] != NULL) {
-
-            if (!ElfTools::elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true)) {
+            if (!ElfTools::elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true, pluginData)) {
+                DEBUG_FUNCTION_LINE("elfLink failed\n");
                 goto exit_error;
             }
         }
@@ -348,8 +384,6 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
 
     this->setCurrentStoreAddress((void *) curAddress);
 
-    DEBUG_FUNCTION_LINE("Copied plugin %s to %08X\n",pluginData->getPluginInformation()->getName().c_str(),curAddress);
-
     result = true;
 exit_error:
     if (!result) DEBUG_FUNCTION_LINE("exit_error\n");
@@ -371,11 +405,26 @@ exit_error:
 void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plugins) {
     // Reset data
     memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
+    DynamicLinkingHelper::getInstance()->clearAll();
     int plugin_index = 0;
     // Copy data to global struct.
     for(size_t i = 0; i< plugins.size(); i++) {
         PluginData * cur_plugin = plugins.at(i);
         PluginInformation * cur_pluginInformation = cur_plugin->getPluginInformation();
+
+        // Relocation
+        std::vector<RelocationData *> relocationData = cur_plugin->getRelocationDataList();
+        for(size_t j = 0; j < relocationData.size(); j++) {
+            if(!DynamicLinkingHelper::getInstance()->addReloationEntry(relocationData[j])) {
+                DEBUG_FUNCTION_LINE("Adding relocation for %s failed. It won't be loaded.\n",cur_pluginInformation->getName().c_str());
+                continue;
+            } else {
+                //relocationData[j]->printInformation();
+            }
+        }
+
+        // Other
+
 
         std::vector<FunctionData *> function_data_list = cur_plugin->getFunctionDataList();
         std::vector<HookData *> hook_data_list = cur_plugin->getHookDataList();

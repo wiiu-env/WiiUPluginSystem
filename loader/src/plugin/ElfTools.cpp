@@ -24,6 +24,8 @@
  */
 
 #include "ElfTools.h"
+#include "RelocationData.h"
+#include "ImportRPLInformation.h"
 #include <string.h>
 #include <malloc.h>
 #include <libelf.h>
@@ -122,7 +124,7 @@ void ElfTools::elfLoadSymbols(size_t shndx, const void *destination, Elf32_Sym *
 }
 
 
-bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals) {
+bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *symtab, size_t symtab_count, size_t symtab_strndx, bool allow_globals, PluginData * pluginData) {
     Elf_Scn *scn;
 
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
@@ -155,8 +157,10 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
 
                 symbol = ELF32_R_SYM(rel[i].r_info);
 
-                if (symbol > symtab_count)
+                if (symbol > symtab_count) {
+                    DEBUG_FUNCTION_LINE("symbol > symtab_count\n");
                     return false;
+                }
 
                 switch (symtab[symbol].st_shndx) {
                 case SHN_ABS: {
@@ -164,6 +168,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                     break;
                 }
                 case SHN_COMMON: {
+                    DEBUG_FUNCTION_LINE("case SHN_COMMON\n");
                     return false;
                 }
                 case SHN_UNDEF: {
@@ -209,11 +214,14 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                         */
                         return false;
                     } else {
+                        DEBUG_FUNCTION_LINE("case SHN_UNDEF with !allow_globals\n");
                         return false;
                     }
                 }
                 default: {
                     if (symtab[symbol].st_other != 1) {
+
+                        DEBUG_FUNCTION_LINE("symtab[symbol].st_other != 1. it's %d %08X\n",symtab[symbol].st_other,symtab[symbol].st_other);
                         return false;
                     }
 
@@ -223,6 +231,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                 }
 
                 if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rel[i].r_info), rel[i].r_offset, *(int *)((char *)destination + rel[i].r_offset), destination, symbol_addr)) {
+                    DEBUG_FUNCTION_LINE("elfLinkOne failed\n");
                     return false;
                 }
             }
@@ -248,8 +257,10 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
 
                 symbol = ELF32_R_SYM(rela[i].r_info);
 
-                if (symbol > symtab_count)
+                if (symbol > symtab_count) {
+                    DEBUG_FUNCTION_LINE("symbol > symtab_count\n");
                     return false;
+                }
 
                 switch (symtab[symbol].st_shndx) {
                 case SHN_ABS: {
@@ -257,12 +268,19 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                     break;
                 }
                 case SHN_COMMON: {
+                    DEBUG_FUNCTION_LINE("case SHN_COMMON\n");
                     return false;
                 }
                 case SHN_UNDEF: {
                     if (allow_globals) {
-                        DEBUG_FUNCTION_LINE("The elf still have unresolved relocations. This is not supported.");
+                        char *name = elf_strptr(elf, symtab_strndx, symtab[symbol].st_name);
+                        DEBUG_FUNCTION_LINE("The elf still have unresolved relocations. This is not supported: %s \n",name);
+
                         /*
+
+                        char *name = elf_strptr(elf, symtab_strndx, symtab[symbol].st_name);
+                        DEBUG_FUNCTION_LINE("%s %08X\n",name,symtab[symbol].st_value);
+
                         Not support and not needed.
                         module_unresolved_relocation_t *reloc;
                         char *name;
@@ -299,14 +317,29 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                         reloc->addend = rela[i].r_addend;
 
                         continue;*/
+                        continue;
+                    } else {
+                        DEBUG_FUNCTION_LINE("case SHN_UNDEF with !allow_global\n");
                         return false;
-                    } else
-                        return false;
+                    }
                 }
                 default: {
-
                     if (symtab[symbol].st_other != 1) {
-                        return false;
+                        char *name = elf_strptr(elf, symtab_strndx, symtab[symbol].st_name);
+                        if(pluginData == NULL) {
+                            DEBUG_FUNCTION_LINE("No plugin data provided, but we (probably) need it.\n");
+                            return false;
+                        }
+
+                        ImportRPLInformation * rplInfo = pluginData->getImportRPLInformationBySectionHeaderIndex(symtab[symbol].st_shndx);
+                        if(rplInfo == NULL) {
+                            DEBUG_FUNCTION_LINE("Couldn't find ImportRPLInformation for section header index %d \n", symtab[symbol].st_shndx);
+                            return false;
+                        }
+                        RelocationData * relocationData = new RelocationData(ELF32_R_TYPE(rela[i].r_info), rela[i].r_offset,rela[i].r_addend, destination, name, rplInfo);
+                        pluginData->addRelocationData(relocationData);
+
+                        continue;
                     }
                     symbol_addr = symtab[symbol].st_value;
                     break;
@@ -314,6 +347,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                 }
 
                 if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rela[i].r_info), rela[i].r_offset,rela[i].r_addend, destination, symbol_addr)) {
+                    DEBUG_FUNCTION_LINE("elfLinkOne failed\n");
                     return false;
                 }
             }

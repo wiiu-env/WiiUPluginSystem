@@ -40,6 +40,7 @@
 #include "common/common.h"
 #include "plugin/PluginLoader.h"
 #include "plugin/PluginInformation.h"
+#include "plugin/DynamicLinkingHelper.h"
 
 #include <wups.h>
 #include <iosuhax.h>
@@ -51,6 +52,7 @@
 #include "Application.h"
 #include "patcher/function_patcher.h"
 #include "patcher/hooks_patcher.h"
+#include "plugin/dynamic_linking_defines.h"
 #include "myutils/mocha.h"
 #include "myutils/libntfs.h"
 #include "myutils/libfat.h"
@@ -87,6 +89,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
     setup_os_exceptions();
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
+    DEBUG_FUNCTION_LINE("Sizeof dyn_linking_relocation_data_t %d\n",sizeof(dyn_linking_relocation_data_t));
     Init();
 
     init_kernel_syscalls();
@@ -101,6 +104,9 @@ extern "C" int Menu_Main(int argc, char **argv) {
         CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
         // Restore patches as the patched functions could change.
         RestorePatches();
+
+        DynamicLinkingHelper::getInstance()->clearAll();
+
         PluginLoader * pluginLoader  = PluginLoader::getInstance();
         std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
         pluginLoader->loadAndLinkPlugins(pluginList);
@@ -130,10 +136,17 @@ extern "C" int Menu_Main(int argc, char **argv) {
         }
     }
 
+    DEBUG_FUNCTION_LINE("Do relocations\n");
+
+    std::vector<dyn_linking_relocation_entry_t *> relocations = DynamicLinkingHelper::getInstance()->getAllValidDynamicLinkingRelocations();
+    DEBUG_FUNCTION_LINE("Found relocation information for %d functions\n",relocations.size()) ;
+    DynamicLinkingHelper::getInstance()->fillRelocations(relocations);
+
 
     if(!isInMiiMakerHBL()) {
         DEBUG_FUNCTION_LINE("Apply patches.\n");
         ApplyPatchesAndCallHookStartingApp();
+
 
         if(MemoryMapping::isMemoryMapped()) {
             DEBUG_FUNCTION_LINE("Mapping was already done. Running %016llX\n",gGameTitleID);

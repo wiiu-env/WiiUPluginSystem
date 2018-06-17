@@ -46,6 +46,7 @@ For building the loader you need:
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.  
 - [libgui](https://github.com/Maschell/libgui) for the gui elements.
+- [wut] (https://github.com/decaf-emu/wut) for the wut support.
 
 Install the according to their readmes. Don't forget to install their dependencies.
 

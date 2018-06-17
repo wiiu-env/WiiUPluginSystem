@@ -10,11 +10,11 @@
 
 DECL(void, __PPCExit, void) {
     // Only continue if we are in the "right" application.
-    if(OSGetTitleID() == gGameTitleID) {
-        DEBUG_FUNCTION_LINE("__PPCExit\n");
-        CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
-        DeInit();
-    }
+    //if(OSGetTitleID() == gGameTitleID) {
+    //DEBUG_FUNCTION_LINE("__PPCExit\n");
+    //CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
+    //DeInit();
+    //}
 
     real___PPCExit();
 }
@@ -26,6 +26,10 @@ DECL(u32, ProcUIProcessMessages, u32 u) {
         DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
         gAppStatus = res;
         CallHook(WUPS_LOADER_HOOK_APP_STATUS_CHANGED);
+        if(gAppStatus == WUPS_APP_STATUS_CLOSED) {
+            CallHook(WUPS_LOADER_HOOK_ENDING_APPLICATION);
+            DeInit();
+        }
     }
 
     return res;
@@ -63,7 +67,7 @@ DECL(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
     if(result > 0 && (buffer[0].btns_h == (VPAD_BUTTON_PLUS | VPAD_BUTTON_R | VPAD_BUTTON_L)) && vpadPressCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
         if(MemoryMapping::isMemoryMapped()) {
             MemoryMapping::readTestValuesFromMemory();
-        }else{
+        } else {
             DEBUG_FUNCTION_LINE("Memory was not mapped. To test the memory please exit the plugin loader by pressing MINUS\n");
         }
         vpadPressCooldown = 0x3C;

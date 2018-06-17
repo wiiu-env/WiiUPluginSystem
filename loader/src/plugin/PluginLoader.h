@@ -30,6 +30,7 @@
 #include "PluginInformation.h"
 #include "PluginData.h"
 #include "dynamic_libs/os_types.h"
+#include "dynamic_libs/os_functions.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +50,7 @@ class PluginLoader {
 public:
     static PluginLoader *getInstance() {
         if(!instance) {
-             instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
+            instance = new PluginLoader((void*)getApplicationEndAddr(),(void *)PLUGIN_LOCATION_END_ADDRESS);
         }
         return instance;
     }
@@ -89,6 +90,15 @@ public:
         \return Returns true if all plugins were linked successfully. Returns false if at least one plugin failed while linking.
     **/
     bool loadAndLinkPlugins(std::vector<PluginInformation *> pluginInformation);
+
+
+    static void flushCache() {
+        u32 startAddress = getApplicationEndAddr();
+        u32 endAddress = PLUGIN_LOCATION_END_ADDRESS;
+
+        DCFlushRange((void*)startAddress,(u32)endAddress - (u32)startAddress);
+        ICInvalidateRange((void*)startAddress,(u32)endAddress - (u32)startAddress);
+    }
 
     /**
         \brief  Iterates through the vector and delete all it's elements

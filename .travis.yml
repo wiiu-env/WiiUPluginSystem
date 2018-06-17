@@ -7,6 +7,7 @@ dist: trusty
 env:
   global:
     - DEVKITPRO=/opt/devkitpro    
+    - WUT_ROOT=/opt/devkitpro/wut  
     - DEVKITPPC=/opt/devkitpro/devkitPPC
     - DEVKITARM=/opt/devkitpro/devkitARM
     - PORTLIBREPOS=$HOME/portlibrepos
@@ -31,8 +32,10 @@ before_install:
   - yes | sudo dkp-pacman -Syu devkitPPC --needed
   - yes | sudo dkp-pacman -Syu devkitARM --needed
   - yes | sudo dkp-pacman -Syu general-tools --needed
+  - wget $(curl -s https://api.github.com/repos/decaf-emu/wut/releases/latest | grep 'browser_' | grep 'linux' | cut -d\" -f4)
 
 install:
+  - 7z x -y $(ls | grep "linux") -o${WUT_ROOT}
   - cd $PORTLIBREPOS
   - ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull))
   - (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull))

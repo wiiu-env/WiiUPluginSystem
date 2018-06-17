@@ -12,6 +12,10 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
+ifeq ($(strip $(WUT_ROOT)),)
+$(error "Please set WUT_ROOT in your environment. export WUT_ROOT=<path to>wut)
+endif
+
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
 export PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
 export WUPSDIR  := $(DEVKITPRO)/wups
@@ -57,17 +61,16 @@ include $(WUPSDIR)/plugin_makefile.mk
 # -mcpu=750: enable processor specific compilation
 # -meabi: enable eabi specific compilation
 # -mhard-float: enable hardware floating point instructions
-# -fshort-wchar: use 16 bit whcar_t type in keeping with Wii executables
 # -fno-common: stop common variables which the loader can't understand
 # -msdata-none: do not use r2 or r13 as small data areas
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fshort-wchar -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
 
 # -x c: compile as c code
-# -std=gnu11: use the gnu11 standard
+# -std=c11: use the c11 standard
 CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=gnu11
 
 # -x c: compile as c++ code
@@ -81,7 +84,12 @@ endif
 			
 ASFLAGS	+= 
 
-LDFLAG_COMMON   += 
+LDFLAG_COMMON       += 
+
+ifeq ($(WRAP_MALLOC), 1)
+   LDFLAG_COMMON += -Wl,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r
+endif
+
 LDFLAGS_MOD     += $(LD_FLAGS_MOD)
 LDFLAGS_ELF     += $(LD_FLAGS_ELF)
 
@@ -98,7 +106,7 @@ ALL_LIBS    := $(LIBS)
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	+= 
+LIBDIRS	+=  $(WUT_ROOT)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -183,7 +191,7 @@ $(OUTPUT) : output.elf
 	@echo "checking for missing symbols ..."
 	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LD_FLAGS_MOD)  $(ALL_LIBS) $(LIBPATHS_FULL) -o check_linking.elf	
 	@echo "linking ..." $@
-	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAGS_MOD) $(ALL_LIBS) $(LIBPATHS_FULL) -o $@ 
+	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LDFLAGS_MOD) $(ALL_LIBS) $(LIBPATHS_FULL) -o $@ 
 
 # Rule to make the module file.
 output.elf : $(OFILES)

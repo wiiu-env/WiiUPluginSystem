@@ -23,6 +23,8 @@
 #include "FunctionData.h"
 #include "HookData.h"
 #include "PluginInformation.h"
+#include "RelocationData.h"
+#include "ImportRPLInformation.h"
 #include <utils/logger.h>
 
 #ifdef __cplusplus
@@ -53,6 +55,18 @@ public:
                 delete hook_data_list[i];
             }
         }
+
+        for(size_t i = 0; i< relocation_data_list.size(); i++) {
+            if(relocation_data_list[i] != NULL) {
+                delete relocation_data_list[i];
+            }
+        }
+
+        for(size_t i = 0; i< importRPLInformation_list.size(); i++) {
+            if(importRPLInformation_list[i] != NULL) {
+                delete importRPLInformation_list[i];
+            }
+        }
     }
 
     void addFunctionData(FunctionData * function_data) {
@@ -71,6 +85,38 @@ public:
         return hook_data_list;
     }
 
+    void addRelocationData(RelocationData * relocation_data) {
+        relocation_data_list.push_back(relocation_data);
+    }
+
+    std::vector<RelocationData *> getRelocationDataList() {
+        return relocation_data_list;
+    }
+
+    void addImportRPLInformation(ImportRPLInformation * importRPLInformation) {
+        importRPLInformation_list.push_back(importRPLInformation);
+    }
+
+    std::vector<ImportRPLInformation *> getImportRPLInformationList() {
+        return importRPLInformation_list;
+    }
+
+    /**
+        Returns a ImportRPLInformation for a given section header index.
+
+        \param section_header_index: ID of section in elf, started counting at 1.
+
+        \return A pointer to the corresponding ImportRPLInformation, return NULL if no corresponding information was found.
+    **/
+   ImportRPLInformation * getImportRPLInformationBySectionHeaderIndex(int section_header_index) {
+        for(size_t i = 0; i< importRPLInformation_list.size(); i++) {
+            if(importRPLInformation_list[i] != NULL && importRPLInformation_list[i]->getSectionHeaderIndex() == section_header_index) {
+                return importRPLInformation_list[i];
+            }
+        }
+        return NULL;
+    }
+
     PluginInformation * getPluginInformation() {
         return pluginInformation;
     }
@@ -81,6 +127,8 @@ private:
 
     std::vector<FunctionData *> function_data_list;
     std::vector<HookData *> hook_data_list;
+    std::vector<RelocationData *> relocation_data_list;
+    std::vector<ImportRPLInformation *> importRPLInformation_list;
 };
 
 

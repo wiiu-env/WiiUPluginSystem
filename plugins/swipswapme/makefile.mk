@@ -1,6 +1,9 @@
 # Compiling the projects with libutils logging code?
 DO_LOGGING          := 1
 
+# Non WUT plugins need to wrap the malloc functions.
+WRAP_MALLOC         := 1
+
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
 
