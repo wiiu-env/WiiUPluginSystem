@@ -35,6 +35,7 @@ extern "C" {
 typedef struct _dyn_linking_function_t {
     char functionName[DYN_LINK_FUNCTION_NAME_LENGTH+1];
     void * address;
+    u32 big_jump[6];
 } dyn_linking_function_t;
 
 typedef struct _dyn_linking_import_t {

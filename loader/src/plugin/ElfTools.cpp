@@ -442,7 +442,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     case R_PPC_ADDR16_HA:
     case R_PPC_SECTOFF_HA:
     case R_PPC_EMB_NADDR16_HA: {
-        *(short *)target = (value >> 16) + ((value >> 15) & 1);
+        *(short *)target = (((value >> 16) + ((value & 0x8000) ? 1 : 0))) & 0xFFFF;
         break;
     }
     case R_PPC_ADDR16_LO:
