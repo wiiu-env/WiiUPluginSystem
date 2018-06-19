@@ -27,8 +27,8 @@
 #define _PLUGIN_LOADER_H_
 
 #include <vector>
-#include "PluginInformation.h"
 #include "PluginData.h"
+#include "PluginInformation.h"
 #include "dynamic_libs/os_types.h"
 #include "dynamic_libs/os_functions.h"
 
@@ -42,6 +42,8 @@ extern "C" {
 }
 #endif
 
+extern char gbl_common_data[0x20000];
+extern char * gbl_common_data_ptr;
 
 #define PLUGIN_LOCATION_END_ADDRESS 0x01000000
 
@@ -122,6 +124,8 @@ public:
     void resetPluginLoader() {
         this->currentStoreAddress = endAddress;
     }
+
+    uint32_t getMemoryFromDataSection(size_t align, size_t size);
 
 private:
     PluginLoader(void * startAddress, void * endAddress) {

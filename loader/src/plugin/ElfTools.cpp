@@ -268,8 +268,21 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                     break;
                 }
                 case SHN_COMMON: {
-                    DEBUG_FUNCTION_LINE("case SHN_COMMON\n");
-                    return false;
+                    u32 align = symtab[symbol].st_value;
+                    u32 size = symtab[symbol].st_size;
+
+                    uint32_t address = pluginData->getMemoryForCommonBySymbol(symbol, align, size);
+                    if(address == NULL){
+                        DEBUG_FUNCTION_LINE("Failed to get memory for common relocation\n");
+                        return false;
+                    }
+
+                    if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rela[i].r_info), rela[i].r_offset,rela[i].r_addend, destination, address)) {
+                        DEBUG_FUNCTION_LINE("elfLinkOne failed\n");
+                        return false;
+                    }
+
+                    break;
                 }
                 case SHN_UNDEF: {
                     if (allow_globals) {

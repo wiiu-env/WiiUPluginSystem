@@ -12,3 +12,7 @@ int ntfs_mount_count __attribute__((section(".data"))) = 0;
 
 struct buffer_store drc_store __attribute__((section(".data")));
 struct buffer_store tv_store __attribute__((section(".data")));
+
+
+char gbl_common_data[0x20000] __attribute__((section(".data")));
+char * gbl_common_data_ptr __attribute__((section(".data"))) = gbl_common_data;

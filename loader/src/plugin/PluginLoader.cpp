@@ -489,3 +489,18 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
     DCFlushRange((void*)&gbl_replacement_data,sizeof(gbl_replacement_data));
     ICInvalidateRange((void*)&gbl_replacement_data,sizeof(gbl_replacement_data));
 }
+
+uint32_t PluginLoader::getMemoryFromDataSection(size_t align, size_t size) {
+    uint32_t ptr = (u32)gbl_common_data_ptr;
+    ptr = (ptr + (align - 1)) & -align;  // Round up to align boundary
+    uint32_t result = ptr;
+
+    if((result + size) >= (ptr + sizeof(gbl_common_data))) {
+        DEBUG_FUNCTION_LINE("No more space =( %08X > %08X\n",(result + size),(ptr + sizeof(gbl_common_data)));
+        return 0;
+    }
+    ptr += size;
+    gbl_common_data_ptr = (char *) ptr;
+
+    return result;
+}

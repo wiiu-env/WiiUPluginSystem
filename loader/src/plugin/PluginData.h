@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "FunctionData.h"
 #include "HookData.h"
 #include "PluginInformation.h"
@@ -108,18 +109,14 @@ public:
 
         \return A pointer to the corresponding ImportRPLInformation, return NULL if no corresponding information was found.
     **/
-   ImportRPLInformation * getImportRPLInformationBySectionHeaderIndex(int section_header_index) {
-        for(size_t i = 0; i< importRPLInformation_list.size(); i++) {
-            if(importRPLInformation_list[i] != NULL && importRPLInformation_list[i]->getSectionHeaderIndex() == section_header_index) {
-                return importRPLInformation_list[i];
-            }
-        }
-        return NULL;
-    }
+    ImportRPLInformation * getImportRPLInformationBySectionHeaderIndex(int section_header_index);
+
 
     PluginInformation * getPluginInformation() {
         return pluginInformation;
     }
+
+    uint32_t getMemoryForCommonBySymbol(size_t symbol, size_t align, size_t size);
 
 private:
 
@@ -129,6 +126,8 @@ private:
     std::vector<HookData *> hook_data_list;
     std::vector<RelocationData *> relocation_data_list;
     std::vector<ImportRPLInformation *> importRPLInformation_list;
+
+    std::map<size_t, uint32_t> memoryBySymbol;
 };
 
 
