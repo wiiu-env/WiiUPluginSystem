@@ -60,7 +60,7 @@ Application::~Application() {
 
     DEBUG_FUNCTION_LINE("Destroy controller\n");
 
-    for(s32 i = 0; i < 5; i++)
+    for(int32_t i = 0; i < 5; i++)
         delete controller[i];
 
     //We may have to handle Asyncdelete in the Destructors.
@@ -82,7 +82,7 @@ Application::~Application() {
     SoundHandler::DestroyInstance();
 }
 
-s32 Application::exec() {
+int32_t Application::exec() {
     //! start main GX2 thread
     resumeThread();
     //! now wait for thread to finish
@@ -99,7 +99,7 @@ void Application::fadeOut() {
         0, 0, 0, 255
     });
 
-    for(s32 i = 0; i < 255; i += 10) {
+    for(int32_t i = 0; i < 255; i += 10) {
         if(i > 255)
             i = 255;
 
@@ -177,7 +177,7 @@ void Application::executeThread(void) {
         DEBUG_FUNCTION_LINE("Entering main loop\n");
         while(!exitApplication && !reloadUIflag) {
             //! Read out inputs
-            for(s32 i = 0; i < 5; i++) {
+            for(int32_t i = 0; i < 5; i++) {
                 if(controller[i]->update(video->getTvWidth(), video->getTvHeight()) == false)
                     continue;
 

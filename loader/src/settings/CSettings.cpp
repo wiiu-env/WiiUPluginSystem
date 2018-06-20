@@ -42,7 +42,7 @@ CSettings::CSettings() {
 }
 
 CSettings::~CSettings() {
-    for(u32 i = 0; i < settingsValues.size(); i++) {
+    for(uint32_t i = 0; i < settingsValues.size(); i++) {
         if(settingsValues[i].dataType == TypeString)
             delete settingsValues[i].strValue;
     }
@@ -50,7 +50,7 @@ CSettings::~CSettings() {
 }
 
 void CSettings::SetDefault() {
-    for(u32 i = 0; i < settingsValues.size(); i++) {
+    for(uint32_t i = 0; i < settingsValues.size(); i++) {
         if(settingsValues[i].dataType == TypeString)
             delete settingsValues[i].strValue;
     }
@@ -80,7 +80,7 @@ bool CSettings::Load() {
 
     std::string strBuffer;
     strBuffer.resize(file.size());
-    file.read((u8 *) &strBuffer[0], strBuffer.size());
+    file.read((uint8_t *) &strBuffer[0], strBuffer.size());
     file.close();
 
 
@@ -100,7 +100,7 @@ bool CSettings::Load() {
     if(lines.empty() || !ValidVersion(lines[0]))
         return false;
 
-    for(u32 i = 0; i < lines.size(); ++i) {
+    for(uint32_t i = 0; i < lines.size(); ++i) {
         std::vector<std::string> valueSplit = StringTools::stringSplit(lines[i], "=");
         if(valueSplit.size() != 2)
             continue;
@@ -111,7 +111,7 @@ bool CSettings::Load() {
         while((valueSplit[1].size() > 0) && valueSplit[1][ valueSplit[1].size() - 1 ] == ' ')
             valueSplit[1].resize(valueSplit[1].size() - 1);
 
-        for(u32 n = 0; n < settingsNames.size(); n++) {
+        for(uint32_t n = 0; n < settingsNames.size(); n++) {
             if(!settingsNames[n])
                 continue;
 
@@ -158,7 +158,7 @@ bool CSettings::Load() {
 }
 
 bool CSettings::ValidVersion(const std::string & versionString) {
-    int version = 0;
+    int32_t version = 0;
 
     if(versionString.find(VERSION_LINE) != 0)
         return false;
@@ -193,7 +193,7 @@ bool CSettings::Save() {
 
     file.fwrite("%s%i\n", VERSION_LINE, VALID_VERSION);
 
-    for(u32 i = 0; i < settingsValues.size(); i++) {
+    for(uint32_t i = 0; i < settingsValues.size(); i++) {
         switch(settingsValues[i].dataType) {
         case TypeBool:
             file.fwrite("%s=%i\n", settingsNames[i], settingsValues[i].bValue);

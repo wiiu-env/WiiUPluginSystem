@@ -70,117 +70,117 @@ public:
         MAX_VALUE
     };
 
-    static const u8 & getDataType(int idx) {
+    static const uint8_t & getDataType(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE)
             return instance()->settingsValues[idx].dataType;
 
         return instance()->nullValue.dataType;
     }
 
-    static const bool & getValueAsBool(int idx) {
+    static const bool & getValueAsBool(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeBool)
             return instance()->settingsValues[idx].bValue;
 
         return instance()->nullValue.bValue;
     }
-    static const s8 & getValueAsS8(int idx) {
+    static const int8_t & getValueAsS8(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS8)
             return instance()->settingsValues[idx].cValue;
 
         return instance()->nullValue.cValue;
     }
-    static const u8 & getValueAsU8(int idx) {
+    static const uint8_t & getValueAsU8(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU8)
             return instance()->settingsValues[idx].ucValue;
 
         return instance()->nullValue.ucValue;
     }
-    static const s16 & getValueAsS16(int idx) {
+    static const int16_t & getValueAsS16(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS16)
             return instance()->settingsValues[idx].sValue;
 
         return instance()->nullValue.sValue;
     }
-    static const u16 & getValueAsU16(int idx) {
+    static const uint16_t & getValueAsU16(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU16)
             return instance()->settingsValues[idx].usValue;
 
         return instance()->nullValue.usValue;
     }
-    static const s32 & getValueAsS32(int idx) {
+    static const int32_t & getValueAsS32(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS32)
             return instance()->settingsValues[idx].iValue;
 
         return instance()->nullValue.iValue;
     }
-    static const u32 & getValueAsU32(int idx) {
+    static const uint32_t & getValueAsU32(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU32)
             return instance()->settingsValues[idx].uiValue;
 
         return instance()->nullValue.uiValue;
     }
-    static const f32 & getValueAsF32(int idx) {
+    static const float & getValueAsF32(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeF32)
             return instance()->settingsValues[idx].fValue;
 
         return instance()->nullValue.fValue;
     }
-    static const std::string & getValueAsString(int idx) {
+    static const std::string & getValueAsString(int32_t idx) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeString && instance()->settingsValues[idx].strValue)
             return *(instance()->settingsValues[idx].strValue);
 
         return *(instance()->nullValue.strValue);
     }
 
-    static void setValueAsBool(int idx, const bool & val) {
+    static void setValueAsBool(int32_t idx, const bool & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeBool) {
             instance()->settingsValues[idx].bValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsS8(int idx, const s8 & val) {
+    static void setValueAsS8(int32_t idx, const int8_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS8) {
             instance()->settingsValues[idx].cValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsU8(int idx, const u8 & val) {
+    static void setValueAsU8(int32_t idx, const uint8_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU8) {
             instance()->settingsValues[idx].ucValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsS16(int idx, const s16 & val) {
+    static void setValueAsS16(int32_t idx, const int16_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS16) {
             instance()->settingsValues[idx].sValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsU16(int idx, const u16 & val) {
+    static void setValueAsU16(int32_t idx, const uint16_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU16) {
             instance()->settingsValues[idx].usValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsS32(int idx, const s32 & val) {
+    static void setValueAsS32(int32_t idx, const int32_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeS32) {
             instance()->settingsValues[idx].iValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsU32(int idx, const u32 & val) {
+    static void setValueAsU32(int32_t idx, const uint32_t & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeU32) {
             instance()->settingsValues[idx].uiValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsF32(int idx, const f32 & val) {
+    static void setValueAsF32(int32_t idx, const float & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeF32) {
             instance()->settingsValues[idx].fValue = val;
             instance()->bChanged = true;
         }
     }
-    static void setValueAsString(int idx, const std::string & val) {
+    static void setValueAsString(int32_t idx, const std::string & val) {
         if(idx > INVALID && idx < MAX_VALUE && instance()->settingsValues[idx].dataType == TypeString && instance()->settingsValues[idx].strValue) {
             *(instance()->settingsValues[idx].strValue) = val;
             instance()->bChanged = true;
@@ -197,17 +197,17 @@ protected:
     static CSettings *settingsInstance;
 
     typedef struct {
-        u8 dataType;
+        uint8_t dataType;
 
         union {
             bool bValue;
-            s8 cValue;
-            u8 ucValue;
-            s16 sValue;
-            u16 usValue;
-            s32 iValue;
-            u32 uiValue;
-            f32 fValue;
+            int8_t cValue;
+            uint8_t ucValue;
+            int16_t sValue;
+            uint16_t usValue;
+            int32_t iValue;
+            uint32_t uiValue;
+            float fValue;
             std::string *strValue;
         };
     } SettingValue;

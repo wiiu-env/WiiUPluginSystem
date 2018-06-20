@@ -65,7 +65,7 @@ bool PluginInformation::checkFileExtenstion(const char * path) {
 
 bool PluginInformation::openAndParseElf() {
     bool result = false;
-    int fd = -1;
+    int32_t fd = -1;
     Elf *elf = NULL;
 
     /* check for compile errors */

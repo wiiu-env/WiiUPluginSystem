@@ -25,7 +25,7 @@
 class RelocationData {
 
 public:
-    RelocationData(char type, size_t offset, int addend, void *destination, std::string name, ImportRPLInformation * rplInfo) {
+    RelocationData(char type, size_t offset, int32_t addend, void *destination, std::string name, ImportRPLInformation * rplInfo) {
         this->type = type;
         this->offset = offset;
         this->addend = addend;
@@ -46,7 +46,7 @@ public:
         return offset;
     }
 
-    int getAddend() {
+    int32_t getAddend() {
         return addend;
     }
 
@@ -69,7 +69,7 @@ public:
 private:
     char type;
     size_t offset;
-    int addend;
+    int32_t addend;
     void *destination;
     std::string name;
     ImportRPLInformation * rplInfo;

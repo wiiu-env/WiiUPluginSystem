@@ -95,11 +95,11 @@ public:
 
 
     static void flushCache() {
-        u32 startAddress = getApplicationEndAddr();
-        u32 endAddress = PLUGIN_LOCATION_END_ADDRESS;
+        uint32_t startAddress = getApplicationEndAddr();
+        uint32_t endAddress = PLUGIN_LOCATION_END_ADDRESS;
 
-        DCFlushRange((void*)startAddress,(u32)endAddress - (u32)startAddress);
-        ICInvalidateRange((void*)startAddress,(u32)endAddress - (u32)startAddress);
+        DCFlushRange((void*)startAddress,(uint32_t)endAddress - (uint32_t)startAddress);
+        ICInvalidateRange((void*)startAddress,(uint32_t)endAddress - (uint32_t)startAddress);
     }
 
     /**
@@ -110,11 +110,11 @@ public:
     void clearPluginInformation(std::vector<PluginInformation*> PluginInformation);
 
     size_t getTotalSpace() {
-        return ((u32) this->endAddress - (u32) this->startAddress);
+        return ((uint32_t) this->endAddress - (uint32_t) this->startAddress);
     }
 
     size_t getAvailableSpace() {
-        return ((u32) this->currentStoreAddress - (u32) this->startAddress);
+        return ((uint32_t) this->currentStoreAddress - (uint32_t) this->startAddress);
     }
 
     size_t getUsedSpace() {

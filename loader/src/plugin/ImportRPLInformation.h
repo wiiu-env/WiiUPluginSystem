@@ -24,7 +24,7 @@
 class ImportRPLInformation {
 
 public:
-    ImportRPLInformation(int section_header_index, std::string name, bool isData = false) {
+    ImportRPLInformation(int32_t section_header_index, std::string name, bool isData = false) {
         this->name = name;
         this->section_header_index = section_header_index;
         this->_isData = isData;
@@ -34,7 +34,7 @@ public:
 
     }
 
-    static ImportRPLInformation * createImportRPLInformation(int section_header_index, std::string rawSectionName) {
+    static ImportRPLInformation * createImportRPLInformation(int32_t section_header_index, std::string rawSectionName) {
         std::string fimport = ".fimport_";
         std::string dimport = ".dimport_";
 
@@ -61,7 +61,7 @@ public:
         return name;
     }
 
-    int getSectionHeaderIndex() {
+    int32_t getSectionHeaderIndex() {
         return section_header_index;
     }
 
@@ -72,7 +72,7 @@ public:
 private:
     std::string name;
     bool _isData = false;
-    int section_header_index = 0;
+    int32_t section_header_index = 0;
 };
 
 

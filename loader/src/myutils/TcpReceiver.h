@@ -20,21 +20,21 @@ public:
         NOT_A_VALID_PLUGIN = -5,
     };
 
-    TcpReceiver(int port);
+    TcpReceiver(int32_t port);
     ~TcpReceiver();
 
-    sigslot::signal2<GuiElement *, u32> serverReceiveStart;
-    sigslot::signal3<GuiElement *, u32, int> serverReceiveFinished;
+    sigslot::signal2<GuiElement *, uint32_t> serverReceiveStart;
+    sigslot::signal3<GuiElement *, uint32_t, int32_t> serverReceiveFinished;
 
 private:
 
     void executeThread();
-    int loadToMemory(s32 clientSocket, u32 ipAddress);
-    bool saveFileToSDCard(const char * path, void * buffer,u32 size);
+    int32_t loadToMemory(int32_t clientSocket, uint32_t ipAddress);
+    bool saveFileToSDCard(const char * path, void * buffer,uint32_t size);
 
     bool exitRequested;
-    s32 serverPort;
-    s32 serverSocket;
+    int32_t serverPort;
+    int32_t serverSocket;
 };
 
 

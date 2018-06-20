@@ -52,12 +52,12 @@ public:
         return bgMusic;
     }
 
-    s32 exec(void);
+    int32_t exec(void);
     void fadeOut(void);
 
     void reloadUI(void);
 
-    void quit(s32 code) {
+    void quit(int32_t code) {
         exitCode = code;
         exitApplication = true;
     }
@@ -79,7 +79,7 @@ private:
     CVideo *video;
     MainWindow *mainWindow;
     GuiController *controller[5];
-    s32 exitCode;
+    int32_t exitCode;
 };
 
 #endif //_APPLICATION_H

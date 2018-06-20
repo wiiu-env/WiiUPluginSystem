@@ -31,7 +31,7 @@ public:
         CONTENT_HOME,
     };
 
-    MainWindowContent(s32 w, s32 h);
+    MainWindowContent(int32_t w, int32_t h);
     virtual ~MainWindowContent();
 
     void SetScreen(ContentTemplate * new_content);
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    s32 width, height;
+    int32_t width, height;
     GuiImage bgImageColor;
 
     ContentTemplate * content = NULL;

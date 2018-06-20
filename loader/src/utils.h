@@ -11,7 +11,7 @@ extern "C" {
 
 void CallHook(wups_loader_hook_type_t hook_type);
 
-void CallHookEx(wups_loader_hook_type_t hook_type, s32 plugin_index_needed);
+void CallHookEx(wups_loader_hook_type_t hook_type, int32_t plugin_index_needed);
 
 #ifdef __cplusplus
 }

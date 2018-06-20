@@ -35,13 +35,13 @@ extern "C" {
 typedef struct _dyn_linking_function_t {
     char functionName[DYN_LINK_FUNCTION_NAME_LENGTH+1];
     void * address;
-    u32 big_jump[6];
+    uint32_t big_jump[6];
 } dyn_linking_function_t;
 
 typedef struct _dyn_linking_import_t {
     char importName[DYN_LINK_IMPORT_NAME_LENGTH+1];
     bool isData = false;
-    u32 handle = 0;
+    uint32_t handle = 0;
 } dyn_linking_import_t;
 
 typedef struct _dyn_linking_relocation_entry_t {
@@ -50,7 +50,7 @@ typedef struct _dyn_linking_relocation_entry_t {
     void * destination = NULL;
     char type;
     size_t offset;
-    int addend;
+    int32_t addend;
 } dyn_linking_relocation_entry_t;
 
 typedef struct _dyn_linking_relocation_data_t {

@@ -8,8 +8,8 @@ extern "C" {
 #endif
 
 extern hooks_magic_t method_hooks_hooks[];
-extern u32 method_hooks_size_hooks;
-extern volatile u32 method_calls_hooks[];
+extern uint32_t method_hooks_size_hooks;
+extern volatile uint32_t method_calls_hooks[];
 
 #ifdef __cplusplus
 }

@@ -9,10 +9,10 @@ extern "C" {
 
 struct buffer_store {
     void * buffer;
-    s32 buffer_size;
-    s32 mode;
-    s32 surface_format;
-    vs32 buffering_mode;
+    uint32_t buffer_size;
+    int32_t mode;
+    int32_t surface_format;
+    volatile int32_t buffering_mode;
 };
 
 void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callback);

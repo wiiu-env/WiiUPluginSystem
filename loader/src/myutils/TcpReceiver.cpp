@@ -18,7 +18,7 @@
 #include "plugin/PluginLoader.h"
 #include "plugin/PluginInformation.h"
 
-TcpReceiver::TcpReceiver(int port)
+TcpReceiver::TcpReceiver(int32_t port)
     : CThread(CThread::eAttributeAffCore0 | CThread::eAttributePinnedAff)
     , exitRequested(false)
     , serverPort(port)
@@ -40,7 +40,7 @@ void TcpReceiver::executeThread() {
     if (serverSocket < 0)
         return;
 
-    u32 enable = 1;
+    uint32_t enable = 1;
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
 
     struct sockaddr_in bindAddress;
@@ -49,7 +49,7 @@ void TcpReceiver::executeThread() {
     bindAddress.sin_port = serverPort;
     bindAddress.sin_addr.s_addr = INADDR_ANY;
 
-    s32 ret;
+    int32_t ret;
     if ((ret = bind(serverSocket, (struct sockaddr *)&bindAddress, sizeof(bindAddress))) < 0) {
         socketclose(serverSocket);
         return;
@@ -61,14 +61,14 @@ void TcpReceiver::executeThread() {
     }
 
     struct sockaddr_in clientAddr;
-    s32 addrlen = sizeof(struct sockaddr);
+    int32_t addrlen = sizeof(struct sockaddr);
 
     while(!exitRequested) {
-        s32 clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrlen);
+        int32_t clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrlen);
         if(clientSocket >= 0) {
-            u32 ipAddress = clientAddr.sin_addr.s_addr;
+            uint32_t ipAddress = clientAddr.sin_addr.s_addr;
             //serverReceiveStart(this, ipAddress);
-            int result = loadToMemory(clientSocket, ipAddress);
+            int32_t result = loadToMemory(clientSocket, ipAddress);
             //serverReceiveFinished(this, ipAddress, result);
             socketclose(clientSocket);
 
@@ -82,11 +82,11 @@ void TcpReceiver::executeThread() {
     socketclose(serverSocket);
 }
 
-int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
+int32_t TcpReceiver::loadToMemory(int32_t clientSocket, uint32_t ipAddress) {
     DEBUG_FUNCTION_LINE("Loading file from ip %08X\n", ipAddress);
 
-    u32 fileSize = 0;
-    u32 fileSizeUnc = 0;
+    uint32_t fileSize = 0;
+    uint32_t fileSizeUnc = 0;
     unsigned char haxx[8];
     memset(haxx, 0, sizeof(haxx));
     //skip haxx
@@ -97,8 +97,8 @@ int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
         recvwait(clientSocket, (unsigned char*)&fileSizeUnc, sizeof(fileSizeUnc)); // Compressed protocol, read another 4 bytes
     }
 
-    u32 bytesRead = 0;
     struct in_addr in;
+    uint32_t bytesRead = 0;
     in.s_addr = ipAddress;
 
     DEBUG_FUNCTION_LINE("transfer start\n");
@@ -112,11 +112,11 @@ int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
     // Copy rpl in memory
     while(bytesRead < fileSize) {
 
-        u32 blockSize = 0x1000;
+        uint32_t blockSize = 0x1000;
         if(blockSize > (fileSize - bytesRead))
             blockSize = fileSize - bytesRead;
 
-        int ret = recv(clientSocket, loadAddress + bytesRead, blockSize, 0);
+        int32_t ret = recv(clientSocket, loadAddress + bytesRead, blockSize, 0);
         if(ret <= 0) {
             DEBUG_FUNCTION_LINE("Failure on reading file\n");
             break;
@@ -151,7 +151,7 @@ int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
                 return NOT_ENOUGH_MEMORY;
             }
 
-            int ret = 0;
+            int32_t ret = 0;
             z_stream s;
             memset(&s, 0, sizeof(s));
 
@@ -193,7 +193,7 @@ int TcpReceiver::loadToMemory(s32 clientSocket, u32 ipAddress) {
             }
 
             uLongf f = fileSizeUnc;
-            int result = uncompress((Bytef*)&inflatedData[0], &f, (Bytef*)loadAddress, fileSize);
+            int32_t result = uncompress((Bytef*)&inflatedData[0], &f, (Bytef*)loadAddress, fileSize);
             if(result != Z_OK) {
                 DEBUG_FUNCTION_LINE("uncompress failed %i\n", result);
                 os_sleep(1);

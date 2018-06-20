@@ -81,7 +81,7 @@ std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char *
 
 std::vector<PluginInformation *> PluginLoader::getPluginsLoadedInMemory() {
     std::vector<PluginInformation *> pluginInformation;
-    for(s32 i = 0; i < gbl_replacement_data.number_used_plugins; i++) {
+    for(int32_t i = 0; i < gbl_replacement_data.number_used_plugins; i++) {
         replacement_data_plugin_t * pluginInfo = &gbl_replacement_data.plugin_data[i];
         PluginInformation * curPlugin = PluginInformation::loadPluginInformation(pluginInfo->path);
         if(curPlugin != NULL) {
@@ -134,7 +134,7 @@ void PluginLoader::clearPluginInformation(std::vector<PluginInformation *> plugi
 
 PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformation) {
     PluginData * result = NULL;
-    int fd = -1;
+    int32_t fd = -1;
     Elf *elf = NULL;
 
     if(pluginInformation == NULL) {
@@ -142,7 +142,7 @@ PluginData * PluginLoader::loadAndLinkPlugin(PluginInformation * pluginInformati
         goto exit_error;
     }
 
-    if(pluginInformation->getSize() > ((u32) getAvailableSpace())) {
+    if(pluginInformation->getSize() > ((uint32_t) getAvailableSpace())) {
         DEBUG_FUNCTION_LINE("Not enough space left to loader the plugin into memory %08X %08X\n",pluginInformation->getSize(),getAvailableSpace());
         goto exit_error;
     }
@@ -192,7 +192,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
         return false;
     }
 
-    u32 curAddress = (u32) endAddress;
+    uint32_t curAddress = (uint32_t) endAddress;
 
     Elf_Scn *scn;
     size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count, hooks_count;
@@ -202,7 +202,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     wups_loader_hook_t *hooks = NULL;
     bool result = false;
 
-    int i = 1;
+    int32_t i = 1;
 
     std::vector<wups_loader_entry_t *> entry_t_list;
     std::vector<wups_loader_hook_t *> hook_t_list;
@@ -304,13 +304,13 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                 curAddress -= shdr->sh_size;
 
                 if (shdr->sh_addralign > 3) {
-                    curAddress = (u32)((int)curAddress & ~(shdr->sh_addralign - 1));
+                    curAddress = (uint32_t)((int32_t)curAddress & ~(shdr->sh_addralign - 1));
                 } else {
-                    curAddress = (u32)((int)curAddress & ~3);
+                    curAddress = (uint32_t)((int32_t)curAddress & ~3);
                 }
                 destinations[elf_ndxscn(scn)] = (uint8_t *) curAddress;
 
-                if((u32) curAddress < (u32) this->startAddress) {
+                if((uint32_t) curAddress < (uint32_t) this->startAddress) {
                     DEBUG_FUNCTION_LINE("Not enough space to load function %s into memory at %08X.\n",name,curAddress);
                     goto exit_error;
                 }
@@ -406,7 +406,7 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
     // Reset data
     memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
     DynamicLinkingHelper::getInstance()->clearAll();
-    int plugin_index = 0;
+    int32_t plugin_index = 0;
     // Copy data to global struct.
     for(size_t i = 0; i< plugins.size(); i++) {
         PluginData * cur_plugin = plugins.at(i);
@@ -462,8 +462,8 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
             strncpy(function_data->function_name,cur_function->getName().c_str(),MAXIMUM_FUNCTION_NAME_LENGTH-1);
 
             function_data->library = cur_function->getLibrary();
-            function_data->replaceAddr = (u32) cur_function->getReplaceAddress();
-            function_data->replaceCall = (u32) cur_function->getReplaceCall();
+            function_data->replaceAddr = (uint32_t) cur_function->getReplaceAddress();
+            function_data->replaceCall = (uint32_t) cur_function->getReplaceCall();
 
             plugin_data->number_used_functions++;
         }
@@ -491,7 +491,7 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
 }
 
 uint32_t PluginLoader::getMemoryFromDataSection(size_t align, size_t size) {
-    uint32_t ptr = (u32)gbl_common_data_ptr;
+    uint32_t ptr = (uint32_t)gbl_common_data_ptr;
     ptr = (ptr + (align - 1)) & -align;  // Round up to align boundary
     uint32_t result = ptr;
 

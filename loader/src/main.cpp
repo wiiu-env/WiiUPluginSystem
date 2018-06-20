@@ -62,11 +62,11 @@
 
 static void ApplyPatchesAndCallHookStartingApp();
 static void RestorePatches();
-s32 isInMiiMakerHBL();
+int32_t isInMiiMakerHBL();
 void readAndPrintSegmentRegister(CThread *thread, void *arg);
 
 
-extern "C" int Menu_Main(int argc, char **argv) {
+extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
     if(gAppStatus == 2) {
         //"No, we don't want to patch stuff again.");
         return EXIT_RELAUNCH_ON_LOAD;
@@ -86,7 +86,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
     log_init();
 
     DEBUG_FUNCTION_LINE("We have %d kb for plugins.\n",(PLUGIN_LOCATION_END_ADDRESS-getApplicationEndAddr())/1024);
-    setup_os_exceptions();
+    //setup_os_exceptions();
 
     DEBUG_FUNCTION_LINE("Wii U Plugin System Loader %s\n",APP_VERSION);
     DEBUG_FUNCTION_LINE("Sizeof dyn_linking_relocation_data_t %d\n",sizeof(dyn_linking_relocation_data_t));
@@ -97,7 +97,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
     gGameTitleID = OSGetTitleID();
 
-    s32 result = 0;
+    int32_t result = 0;
 
     //Reset everything when were going back to the Mii Maker
     if(isInMiiMakerHBL()) {
@@ -191,7 +191,7 @@ extern "C" int Menu_Main(int argc, char **argv) {
 
 void ApplyPatchesAndCallHookStartingApp() {
     PatchInvidualMethodHooks(method_hooks_hooks, method_hooks_size_hooks, method_calls_hooks);
-    for(int plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
+    for(int32_t plugin_index=0; plugin_index<gbl_replacement_data.number_used_plugins; plugin_index++) {
         CallHookEx(WUPS_LOADER_HOOK_STARTING_APPLICATION,plugin_index);
         new_PatchInvidualMethodHooks(&gbl_replacement_data.plugin_data[plugin_index]);
         CallHookEx(WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,plugin_index);
@@ -203,14 +203,14 @@ void DeInit() {
 }
 
 void RestorePatches() {
-    for(int plugin_index=gbl_replacement_data.number_used_plugins-1; plugin_index>=0; plugin_index--) {
+    for(int32_t plugin_index=gbl_replacement_data.number_used_plugins-1; plugin_index>=0; plugin_index--) {
         DEBUG_FUNCTION_LINE("Restoring function for plugin: %d\n",plugin_index);
         new_RestoreInvidualInstructions(&gbl_replacement_data.plugin_data[plugin_index]);
     }
     RestoreInvidualInstructions(method_hooks_hooks, method_hooks_size_hooks);
 }
 
-s32 isInMiiMakerHBL() {
+int32_t isInMiiMakerHBL() {
     if (OSGetTitleID != 0 && (
                 OSGetTitleID() == 0x000500101004A200 || // mii maker eur
                 OSGetTitleID() == 0x000500101004A100 || // mii maker usa
@@ -229,7 +229,7 @@ void Init() {
 }
 
 void Init_SD_USB() {
-    int res = IOSUHAX_Open(NULL);
+    int32_t res = IOSUHAX_Open(NULL);
     if(res < 0) {
         ExecuteIOSExploitWithDefaultConfig();
     }
@@ -248,7 +248,7 @@ void Init_SD_USB() {
     } else {
         DEBUG_FUNCTION_LINE("Using IOSUHAX for SD/USB access\n");
         gSDInitDone |= WUPS_SDUSB_LIBIOSU_LOADED;
-        int ntfs_mounts = mountAllNTFS();
+        int32_t ntfs_mounts = mountAllNTFS();
         if(ntfs_mounts > 0) {
             gSDInitDone |= WUPS_USB_MOUNTED_LIBNTFS;
         }

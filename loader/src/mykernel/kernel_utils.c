@@ -4,7 +4,7 @@
 #include <kernel/syscalls.h>
 
 static void KernelReadSRs(sr_table_t * table) {
-    u32 i = 0;
+    uint32_t i = 0;
 
     // calculate PT_size ((end-start)*8/4096)*4 or (end-start)/128
     // Minimum page table size is 64Kbytes.
@@ -50,7 +50,7 @@ static void KernelReadSRs(sr_table_t * table) {
 }
 
 static void KernelWriteSRs(sr_table_t * table) {
-    u32 i = 0;
+    uint32_t i = 0;
 
 
     asm volatile("eieio; isync");
@@ -79,17 +79,17 @@ static void KernelWriteSRs(sr_table_t * table) {
     asm volatile("isync");
 }
 
-void KernelReadPTE(u32* dest, u32 size) {
-    u32 msr = 0;
-    u32 oldmsr = 0;
+void KernelReadPTE(uint32_t* dest, uint32_t size) {
+    uint32_t msr = 0;
+    uint32_t oldmsr = 0;
     //TODO: Calculate from SDR1
-    u32 addr_base = 0xFFE20000;
+    uint32_t addr_base = 0xFFE20000;
     asm volatile("mfmsr %0" : "=r" (msr));
     oldmsr = msr;
     msr &= ~0x10;
-    for(int i = 0;i<size/0x04;i++){
-        u32 value_read = 0;
-        u32 addr = addr_base + (i*4);
+    for(uint32_t i = 0;i<size/0x04;i++){
+        uint32_t value_read = 0;
+        uint32_t addr = addr_base + (i*4);
         // Disable Data address translation
         asm volatile("mtmsr %0" : : "r" (msr));
         __asm __volatile("lwz %0,0(%1)" : "=r"(value_read) : "r"(addr));
@@ -99,17 +99,17 @@ void KernelReadPTE(u32* dest, u32 size) {
     }
 }
 
-void KernelWritePTE(u32 * in_addr, u32 size) {
-    u32 msr = 0;
-    u32 oldmsr = 0;
+void KernelWritePTE(uint32_t * in_addr, uint32_t size) {
+    uint32_t msr = 0;
+    uint32_t oldmsr = 0;
     //TODO: Calculate from SDR1
-    u32 addr_base = 0xFFE20000;
+    uint32_t addr_base = 0xFFE20000;
     asm volatile("mfmsr %0" : "=r" (msr));
     oldmsr = msr;
     msr &= ~0x10;
-    for(int i = 0;i<size/0x04;i++){
-        u32 addr = addr_base + (i*4);
-        u32 value = in_addr[i];
+    for(uint32_t i = 0;i<size/0x04;i++){
+        uint32_t addr = addr_base + (i*4);
+        uint32_t value = in_addr[i];
         // Disable Data address translation
         asm volatile("mtmsr %0" : : "r" (msr));
         __asm __volatile("stw %0,0(%1)" : : "r"(value),"r"(addr));
@@ -118,11 +118,11 @@ void KernelWritePTE(u32 * in_addr, u32 size) {
     }
 }
 
-void KernelWriteWitoutDAT(u32 addr, u32 value) {
-    u32 msr = 0;
-    u32 oldmsr = 0;
+void KernelWriteWitoutDAT(uint32_t addr, uint32_t value) {
+    uint32_t msr = 0;
+    uint32_t oldmsr = 0;
     //TODO: Calculate from SDR1
-    u32 addr_base = 0xFFE20000;
+    //uint32_t addr_base = 0xFFE20000;
     asm volatile("mfmsr %0" : "=r" (msr));
     oldmsr = msr;
     msr &= ~0x10;
@@ -133,7 +133,7 @@ void KernelWriteWitoutDAT(u32 addr, u32 value) {
     asm volatile("mtmsr %0" : : "r" (oldmsr));
 }
 
-void SC0x0A_KernelWriteWitoutDAT(u32 addr,u32 value);
+void SC0x0A_KernelWriteWitoutDAT(uint32_t addr,uint32_t value);
 
 void wups_init_kernel_syscalls(){
     //! assign 1 so that this variable gets into the retained .data section
@@ -143,39 +143,38 @@ void wups_init_kernel_syscalls(){
 
     ucSyscallsSetupRequired = 0;
 
-
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x0A * 4)), (unsigned int)KernelWriteWitoutDAT);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x0A * 4)), (unsigned int)KernelWriteWitoutDAT);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x0A * 4)), (unsigned int)KernelWriteWitoutDAT);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x0A * 4)), (unsigned int)KernelWriteWitoutDAT);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x0A * 4)), (unsigned int)KernelWriteWitoutDAT);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x0A * 4)), (uint32_t)KernelWriteWitoutDAT);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x0A * 4)), (uint32_t)KernelWriteWitoutDAT);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x0A * 4)), (uint32_t)KernelWriteWitoutDAT);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x0A * 4)), (uint32_t)KernelWriteWitoutDAT);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x0A * 4)), (uint32_t)KernelWriteWitoutDAT);
 
     // Override all writes to SR8 with nops.
     SC0x0A_KernelWriteWitoutDAT(0xFFF1D754,0x60000000);
     SC0x0A_KernelWriteWitoutDAT(0xFFF1D64C,0x60000000);
     SC0x0A_KernelWriteWitoutDAT(0xFFE00638,0x60000000);
 
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x36 * 4)), (unsigned int)KernelReadSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x36 * 4)), (unsigned int)KernelReadSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x36 * 4)), (unsigned int)KernelReadSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x36 * 4)), (unsigned int)KernelReadSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x36 * 4)), (unsigned int)KernelReadSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x36 * 4)), (uint32_t)KernelReadSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x36 * 4)), (uint32_t)KernelReadSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x36 * 4)), (uint32_t)KernelReadSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x36 * 4)), (uint32_t)KernelReadSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x36 * 4)), (uint32_t)KernelReadSRs);
 
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x37 * 4)), (unsigned int)KernelReadPTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x37 * 4)), (unsigned int)KernelReadPTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x37 * 4)), (unsigned int)KernelReadPTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x37 * 4)), (unsigned int)KernelReadPTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x37 * 4)), (unsigned int)KernelReadPTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x37 * 4)), (uint32_t)KernelReadPTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x37 * 4)), (uint32_t)KernelReadPTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x37 * 4)), (uint32_t)KernelReadPTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x37 * 4)), (uint32_t)KernelReadPTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x37 * 4)), (uint32_t)KernelReadPTE);
 
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x09 * 4)), (unsigned int)KernelWritePTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x09 * 4)), (unsigned int)KernelWritePTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x09 * 4)), (unsigned int)KernelWritePTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x09 * 4)), (unsigned int)KernelWritePTE);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x09 * 4)), (unsigned int)KernelWritePTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x09 * 4)), (uint32_t)KernelWritePTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x09 * 4)), (uint32_t)KernelWritePTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x09 * 4)), (uint32_t)KernelWritePTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x09 * 4)), (uint32_t)KernelWritePTE);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x09 * 4)), (uint32_t)KernelWritePTE);
 
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x0A * 4)), (unsigned int)KernelWriteSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x0A * 4)), (unsigned int)KernelWriteSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x0A * 4)), (unsigned int)KernelWriteSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x0A * 4)), (unsigned int)KernelWriteSRs);
-    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x0A * 4)), (unsigned int)KernelWriteSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl1 + (0x0A * 4)), (uint32_t)KernelWriteSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl2 + (0x0A * 4)), (uint32_t)KernelWriteSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl3 + (0x0A * 4)), (uint32_t)KernelWriteSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl4 + (0x0A * 4)), (uint32_t)KernelWriteSRs);
+    kern_write((void*)(OS_SPECIFICS->addr_KernSyscallTbl5 + (0x0A * 4)), (uint32_t)KernelWriteSRs);
 }

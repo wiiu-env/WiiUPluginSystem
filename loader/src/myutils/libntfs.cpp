@@ -7,8 +7,8 @@
 #include <ntfs.h>
 #include "common/retain_vars.h"
 
-int mountAllNTFS() {
-    int i;
+int32_t mountAllNTFS() {
+    int32_t i;
     // Mount all NTFS volumes on all inserted block devices
     ntfs_mount_count = ntfsMountAll((ntfs_md **) &ntfs_mounts, NTFS_DEFAULT | NTFS_RECOVER);
     if (ntfs_mount_count == -1) {
@@ -25,9 +25,9 @@ int mountAllNTFS() {
     return ntfs_mount_count;
 }
 
-int unmountAllNTFS(void) {
+int32_t unmountAllNTFS(void) {
     if (ntfs_mounts) {
-        int i = 0;
+        int32_t i = 0;
         for (i = 0; i < ntfs_mount_count; i++) {
             ntfsUnmount(((ntfs_md *)ntfs_mounts)[i].name, true);
         }

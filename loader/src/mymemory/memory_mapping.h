@@ -19,12 +19,12 @@ typedef struct pageInformation_ {
 } pageInformation;
 
 typedef struct _memory_values_t {
-    unsigned int start_address;
-    unsigned int end_address;
+    uint32_t start_address;
+    uint32_t end_address;
 } memory_values_t;
 
 typedef struct _memory_mapping_t {
-    unsigned int effective_start_address;
+    uint32_t effective_start_address;
     const memory_values_t* physical_addresses;
 } memory_mapping_t;
 
@@ -115,7 +115,7 @@ public:
 
     static void setupMemoryMapping();
 
-    static void printPageTableTranslation(sr_table_t srTable, u32 * translation_table);
+    static void printPageTableTranslation(sr_table_t srTable, uint32_t * translation_table);
 
     static void writeTestValuesToMemory();
 
@@ -123,22 +123,22 @@ public:
 
     static void searchEmptyMemoryRegions();
 
-    static u32 getHeapAddress();
+    static uint32_t getHeapAddress();
 
-    static u32 getHeapSize();
+    static uint32_t getHeapSize();
 
-    static u32 getAreaSizeFromPageTable(u32 start, u32 maxSize);
+    static uint32_t getAreaSizeFromPageTable(uint32_t start, uint32_t maxSize);
 
 private:
 
-    static void memoryMappingForRegions(const memory_mapping_t * memory_mapping, sr_table_t SRTable, u32 * translation_table);
+    static void memoryMappingForRegions(const memory_mapping_t * memory_mapping, sr_table_t SRTable, uint32_t * translation_table);
 
-    static bool mapMemory(u32 pa_start_address,u32 pa_end_address,u32 ea_start_address, sr_table_t SRTable, u32 * translation_table);
+    static bool mapMemory(uint32_t pa_start_address,uint32_t pa_end_address,uint32_t ea_start_address, sr_table_t SRTable, uint32_t * translation_table);
 
 
-    static bool getPageEntryForAddress(u32 SDR1, u32 addr, u32 vsid, u32 * translation_table,u32* oPTEH, u32* oPTEL, bool checkSecondHash);
+    static bool getPageEntryForAddress(uint32_t SDR1, uint32_t addr, uint32_t vsid, uint32_t * translation_table,uint32_t* oPTEH, uint32_t* oPTEL, bool checkSecondHash);
 
-    static bool getPageEntryForAddressEx(u32 pageMask, u32 addr, u32 vsid, u32 primaryHash, u32 * translation_table,u32* oPTEH, u32* oPTEL,u32 H) ;
+    static bool getPageEntryForAddressEx(uint32_t pageMask, uint32_t addr, uint32_t vsid, uint32_t primaryHash, uint32_t * translation_table,uint32_t* oPTEH, uint32_t* oPTEL,uint32_t H) ;
 };
 
 

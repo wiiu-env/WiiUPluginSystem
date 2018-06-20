@@ -109,7 +109,7 @@ public:
 
         \return A pointer to the corresponding ImportRPLInformation, return NULL if no corresponding information was found.
     **/
-    ImportRPLInformation * getImportRPLInformationBySectionHeaderIndex(int section_header_index);
+    ImportRPLInformation * getImportRPLInformationBySectionHeaderIndex(int32_t section_header_index);
 
 
     PluginInformation * getPluginInformation() {

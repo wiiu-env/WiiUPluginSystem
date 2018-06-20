@@ -7,21 +7,22 @@
  * Any manual modification of this file will be overwriten by the generation.
  *****************************************************************************/
 #include <resources/filelist.h>
+#include <stdint.h>
 
-extern const u8 font_ttf[];
-extern const u32 font_ttf_size;
+extern const uint8_t font_ttf[];
+extern const uint32_t font_ttf_size;
 
-extern const u8 GithubIcon_png[];
-extern const u32 GithubIcon_png_size;
+extern const uint8_t GithubIcon_png[];
+extern const uint32_t GithubIcon_png_size;
 
-extern const u8 HomeButtonIcon_png[];
-extern const u32 HomeButtonIcon_png_size;
+extern const uint8_t HomeButtonIcon_png[];
+extern const uint32_t HomeButtonIcon_png_size;
 
-extern const u8 PlusButtonIcon_png[];
-extern const u32 PlusButtonIcon_png_size;
+extern const uint8_t PlusButtonIcon_png[];
+extern const uint32_t PlusButtonIcon_png_size;
 
-extern const u8 TwitterIcon_png[];
-extern const u32 TwitterIcon_png_size;
+extern const uint8_t TwitterIcon_png[];
+extern const uint32_t TwitterIcon_png_size;
 
 static ResourceFile ResourceList[] =
 {

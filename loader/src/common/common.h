@@ -15,9 +15,9 @@ extern "C" {
 #define NAME_PREFIX_SD              "sd: "
 #define NAME_PREFIX_USB             "usb:"
 
-#define ELF_DATA_ADDR               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x00))
-#define ELF_DATA_SIZE               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x04))
-#define MAIN_ENTRY_ADDR             (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x00))
+#define ELF_DATA_ADDR               (*(volatile uint32_t*)(MEM_BASE + 0x1300 + 0x00))
+#define ELF_DATA_SIZE               (*(volatile uint32_t*)(MEM_BASE + 0x1300 + 0x04))
+#define MAIN_ENTRY_ADDR             (*(volatile uint32_t*)(MEM_BASE + 0x1400 + 0x00))
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS                0

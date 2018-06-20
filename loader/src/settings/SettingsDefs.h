@@ -20,15 +20,15 @@
 #define __SETTINGS_DEFS_
 
 typedef struct {
-    int value;
+    int32_t value;
     const char *name;
 } ValueString;
 
 typedef struct {
     const char *name;
     const ValueString *valueStrings;
-    int type;
-    int index;
+    int32_t type;
+    int32_t index;
 } SettingType;
 
 #endif // __SETTINGS_DEFS_

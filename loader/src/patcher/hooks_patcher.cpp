@@ -19,8 +19,8 @@ DECL(void, __PPCExit, void) {
     real___PPCExit();
 }
 
-DECL(u32, ProcUIProcessMessages, u32 u) {
-    u32 res = real_ProcUIProcessMessages(u);
+DECL(uint32_t, ProcUIProcessMessages, uint32_t u) {
+    uint32_t res = real_ProcUIProcessMessages(u);
     // Only continue if we are in the "right" application.
     if(res != gAppStatus && OSGetTitleID() == gGameTitleID) {
         DEBUG_FUNCTION_LINE("App status changed from %d to %d \n",gAppStatus,res);
@@ -35,7 +35,7 @@ DECL(u32, ProcUIProcessMessages, u32 u) {
     return res;
 }
 
-DECL(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s32 format, s32 buffering_mode) {
+DECL(void, GX2SetTVBuffer, void *buffer, uint32_t buffer_size, int32_t tv_render_mode, int32_t format, int32_t buffering_mode) {
     tv_store.buffer = buffer;
     tv_store.buffer_size = buffer_size;
     tv_store.mode = tv_render_mode;
@@ -45,7 +45,7 @@ DECL(void, GX2SetTVBuffer, void *buffer, u32 buffer_size, s32 tv_render_mode, s3
     return real_GX2SetTVBuffer(buffer,buffer_size,tv_render_mode,format,buffering_mode);
 }
 
-DECL(void, GX2SetDRCBuffer, void *buffer, u32 buffer_size, s32 drc_mode, s32 surface_format, s32 buffering_mode) {
+DECL(void, GX2SetDRCBuffer, void *buffer, uint32_t buffer_size, int32_t drc_mode, int32_t surface_format, int32_t buffering_mode) {
     drc_store.buffer = buffer;
     drc_store.buffer_size = buffer_size;
     drc_store.mode = drc_mode;
@@ -60,9 +60,9 @@ DECL(void, GX2WaitForVsync, void) {
     real_GX2WaitForVsync();
 }
 
-u8 vpadPressCooldown = 0xFF;
-DECL(int, VPADRead, int chan, VPADData *buffer, u32 buffer_size, s32 *error) {
-    int result = real_VPADRead(chan, buffer, buffer_size, error);
+uint8_t vpadPressCooldown = 0xFF;
+DECL(int32_t, VPADRead, int32_t chan, VPADData *buffer, uint32_t buffer_size, int32_t *error) {
+    int32_t result = real_VPADRead(chan, buffer, buffer_size, error);
 
     if(result > 0 && (buffer[0].btns_h == (VPAD_BUTTON_PLUS | VPAD_BUTTON_R | VPAD_BUTTON_L)) && vpadPressCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
         if(MemoryMapping::isMemoryMapped()) {
@@ -89,8 +89,8 @@ hooks_magic_t method_hooks_hooks[] __attribute__((section(".data"))) = {
 };
 
 
-u32 method_hooks_size_hooks __attribute__((section(".data"))) = sizeof(method_hooks_hooks) / sizeof(hooks_magic_t);
+uint32_t method_hooks_size_hooks __attribute__((section(".data"))) = sizeof(method_hooks_hooks) / sizeof(hooks_magic_t);
 
 //! buffer to store our instructions needed for our replacements
-volatile u32 method_calls_hooks[sizeof(method_hooks_hooks) / sizeof(hooks_magic_t) * FUNCTION_PATCHER_METHOD_STORE_SIZE] __attribute__((section(".data")));
+volatile uint32_t method_calls_hooks[sizeof(method_hooks_hooks) / sizeof(hooks_magic_t) * FUNCTION_PATCHER_METHOD_STORE_SIZE] __attribute__((section(".data")));
 

@@ -30,7 +30,7 @@ public:
 
     static MainWindow *instance;
 
-    static MainWindow *getInstance(s32 w,s32 h) {
+    static MainWindow *getInstance(int32_t w,int32_t h) {
         if(!instance) {
             instance = new MainWindow(w, h);
         }
@@ -68,14 +68,14 @@ public:
         appendDrc(e);
     }
 
-    void insertTv(u32 pos, GuiElement *e) {
+    void insertTv(uint32_t pos, GuiElement *e) {
         if(!e)
             return;
 
         removeTv(e);
         tvElements.insert(tvElements.begin() + pos, e);
     }
-    void insertDrc(u32 pos, GuiElement *e) {
+    void insertDrc(uint32_t pos, GuiElement *e) {
         if(!e)
             return;
 
@@ -83,13 +83,13 @@ public:
         drcElements.insert(drcElements.begin() + pos, e);
     }
 
-    void insert(u32 pos, GuiElement *e) {
+    void insert(uint32_t pos, GuiElement *e) {
         insertTv(pos, e);
         insertDrc(pos, e);
     }
 
     void removeTv(GuiElement *e) {
-        for(u32 i = 0; i < tvElements.size(); ++i) {
+        for(uint32_t i = 0; i < tvElements.size(); ++i) {
             if(e == tvElements[i]) {
                 tvElements.erase(tvElements.begin() + i);
                 break;
@@ -97,7 +97,7 @@ public:
         }
     }
     void removeDrc(GuiElement *e) {
-        for(u32 i = 0; i < drcElements.size(); ++i) {
+        for(uint32_t i = 0; i < drcElements.size(); ++i) {
             if(e == drcElements[i]) {
                 drcElements.erase(drcElements.begin() + i);
                 break;
@@ -122,8 +122,8 @@ public:
 
     void appendToAllElements(GuiElement * element);
     void removeFromAllElements(GuiElement * element);
-    void setState(s32 i, s32 c = -1 );
-    void clearState(s32 i, s32 c = -1);
+    void setState(int32_t i, int32_t c = -1 );
+    void clearState(int32_t i, int32_t c = -1);
 
     void lockGUI() {
         guiMutex.lock();
@@ -133,13 +133,13 @@ public:
     }
 
 private:
-    MainWindow(s32 w, s32 h);
+    MainWindow(int32_t w, int32_t h);
     void SetupMainView(void);
 
     void OnOpenEffectFinish(GuiElement *element);
     void OnCloseEffectFinish(GuiElement *element);
 
-    s32 width, height;
+    int32_t width, height;
     std::vector<GuiElement *> drcElements;
     std::vector<GuiElement *> tvElements;
 

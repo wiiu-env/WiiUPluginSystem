@@ -25,13 +25,13 @@
 
 class MainWindowGUI : public GuiFrame, public sigslot::has_slots<> {
 public:
-    MainWindowGUI(s32 w, s32 h);
+    MainWindowGUI(int32_t w, int32_t h);
     virtual ~MainWindowGUI();
 private:
-    s32 width, height;
+    int32_t width, height;
     MainWindowContent content;
 
-    void setState(s32 i, s32 c);
+    void setState(int32_t i, int32_t c);
     void process();
 };
 

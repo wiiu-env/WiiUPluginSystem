@@ -40,6 +40,7 @@ cat <<EOF > $outFile
  * Any manual modification of this file will be overwriten by the generation.
  *****************************************************************************/
 #include <resources/filelist.h>
+#include <stdint.h>
 
 EOF
 
@@ -47,8 +48,8 @@ for i in ${files[@]}
 do
 	filename=${i%.*}
 	extension=${i##*.}
-	echo 'extern const u8 '$filename'_'$extension'[];' >> $outFile
-	echo 'extern const u32 '$filename'_'$extension'_size;' >> $outFile
+	echo 'extern const uint8_t '$filename'_'$extension'[];' >> $outFile
+	echo 'extern const uint32_t '$filename'_'$extension'_size;' >> $outFile
 	echo '' >> $outFile
 done
 

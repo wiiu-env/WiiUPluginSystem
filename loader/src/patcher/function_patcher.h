@@ -29,7 +29,7 @@ extern "C" {
 struct rpl_handling {
     wups_loader_library_type_t library;
     const char rplname[15];
-    u32 handle;
+    uint32_t handle;
 };
 #define STATIC_FUNCTION          0
 #define DYNAMIC_FUNCTION         1
@@ -40,15 +40,15 @@ struct rpl_handling {
 #define MAXIMUM_FUNCTION_NAME_LENGTH                        61
 
 struct replacement_data_function_t {
-    u32 replaceAddr;                                                /* [needs to be filled] Address of our replacement function */
-    u32 replaceCall;                                                /* [needs to be filled] Address to access the real_function */
+    uint32_t replaceAddr;                                                /* [needs to be filled] Address of our replacement function */
+    uint32_t replaceCall;                                                /* [needs to be filled] Address to access the real_function */
     wups_loader_library_type_t library;                             /* [needs to be filled] rpl where the function we want to replace is. */
     char function_name[MAXIMUM_FUNCTION_NAME_LENGTH];               /* [needs to be filled] name of the function we want to replace */
-    u32 realAddr;                                                   /* [will be filled] Address of the real function we want to replace. */
-    volatile u32 replace_data [FUNCTION_PATCHER_METHOD_STORE_SIZE]; /* [will be filled] Space for us to store some jump instructions */
-    u32 restoreInstruction;                                         /* [will be filled] Copy of the instruction we replaced to jump to our code. */
-    u8 functionType;                                                /* [will be filled] */
-    u8 alreadyPatched;                                              /* [will be filled] */
+    uint32_t realAddr;                                                   /* [will be filled] Address of the real function we want to replace. */
+    volatile uint32_t replace_data [FUNCTION_PATCHER_METHOD_STORE_SIZE]; /* [will be filled] Space for us to store some jump instructions */
+    uint32_t restoreInstruction;                                         /* [will be filled] Copy of the instruction we replaced to jump to our code. */
+    uint8_t functionType;                                                /* [will be filled] */
+    uint8_t alreadyPatched;                                              /* [will be filled] */
 };
 
 struct replacement_data_hook_t {
@@ -62,25 +62,25 @@ struct replacement_data_hook_t {
 struct replacement_data_plugin_t {
     char                        path[MAXIMUM_PLUGIN_PATH_NAME_LENGTH] = "";     // Path where the plugin is stored
     char                        plugin_name[MAXIMUM_PLUGIN_NAME_LENGTH] = "";   // Name of this plugin
-    int                         priority;                                       // Priority of this plugin
-    int                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
+    int32_t                         priority;                                       // Priority of this plugin
+    int32_t                         number_used_functions;                          // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
     replacement_data_function_t functions[MAXIMUM_FUNCTION_PER_PLUGIN];         // Replacement information for each function.
 
-    int                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_PLUGIN
+    int32_t                         number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_PLUGIN
     replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_PLUGIN];                // Replacement information for each function.
 };
 
 #define MAXIMUM_PLUGINS                                 32
 
 struct replacement_data_t {
-    int                         number_used_plugins = 0;                        // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
+    int32_t                         number_used_plugins = 0;                        // Number of used function. Maximum is MAXIMUM_FUNCTION_PER_PLUGIN
     replacement_data_plugin_t   plugin_data[MAXIMUM_PLUGINS];
 };
 
 void new_PatchInvidualMethodHooks(replacement_data_plugin_t * data);
 void new_RestoreInvidualInstructions(replacement_data_plugin_t * plugin_data);
-u32 new_GetAddressOfFunction(const char * functionName,wups_loader_library_type_t library);
-s32 new_isDynamicFunction(u32 physicalAddress);
+uint32_t new_GetAddressOfFunction(const char * functionName,wups_loader_library_type_t library);
+int32_t new_isDynamicFunction(uint32_t physicalAddress);
 void new_resetLibs();
 
 #ifdef __cplusplus

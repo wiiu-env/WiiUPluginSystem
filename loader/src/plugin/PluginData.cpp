@@ -21,7 +21,7 @@
 #include "PluginData.h"
 #include "PluginLoader.h"
 
-ImportRPLInformation * PluginData::getImportRPLInformationBySectionHeaderIndex(int section_header_index) {
+ImportRPLInformation * PluginData::getImportRPLInformationBySectionHeaderIndex(int32_t section_header_index) {
     for(size_t i = 0; i< importRPLInformation_list.size(); i++) {
         if(importRPLInformation_list[i] != NULL && importRPLInformation_list[i]->getSectionHeaderIndex() == section_header_index) {
             return importRPLInformation_list[i];

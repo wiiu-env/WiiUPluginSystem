@@ -10,14 +10,14 @@ extern "C" {
 
 typedef struct _sr_table_t
 {
-    u32 value[16];
-    u32 sdr1;
+    uint32_t value[16];
+    uint32_t sdr1;
 } sr_table_t;
 
 typedef struct _bat_t
 {
-    u32 h;
-    u32 l;
+    uint32_t h;
+    uint32_t l;
 } bat_t;
 
 typedef struct _bat_table_t

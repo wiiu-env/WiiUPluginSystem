@@ -13,7 +13,7 @@ dyn_linking_function_t * DynamicLinkingHelper::getOrAddFunctionEntryByName(const
         return NULL;
     }
     dyn_linking_function_t * result = NULL;
-    for(int i = 0; i < DYN_LINK_FUNCTION_LIST_LENGTH; i++) {
+    for(int32_t i = 0; i < DYN_LINK_FUNCTION_LIST_LENGTH; i++) {
         dyn_linking_function_t * curEntry = &gbl_dyn_linking_data.functions[i];
         if(strlen(curEntry->functionName) == 0) {
             strncpy(curEntry->functionName,functionName,DYN_LINK_FUNCTION_NAME_LENGTH);
@@ -43,7 +43,7 @@ dyn_linking_import_t * DynamicLinkingHelper::getOrAddImport(const char* importNa
         return NULL;
     }
     dyn_linking_import_t * result = NULL;
-    for(int i = 0; i < DYN_LINK_IMPORT_LIST_LENGTH; i++) {
+    for(int32_t i = 0; i < DYN_LINK_IMPORT_LIST_LENGTH; i++) {
         dyn_linking_import_t * curEntry = &gbl_dyn_linking_data.imports[i];
         if(strlen(curEntry->importName) == 0) {
             strncpy(curEntry->importName,importName,DYN_LINK_IMPORT_NAME_LENGTH);
@@ -62,7 +62,7 @@ bool DynamicLinkingHelper::addReloationEntry(RelocationData * relocationData) {
     return addReloationEntry(relocationData->getType(), relocationData->getOffset(), relocationData->getAddend(), relocationData->getDestination(), relocationData->getName(), relocationData->getImportRPLInformation());
 }
 
-bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int addend, void *destination, std::string name, ImportRPLInformation * rplInfo) {
+bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int32_t addend, void *destination, std::string name, ImportRPLInformation * rplInfo) {
     dyn_linking_import_t * importInfoGbl = DynamicLinkingHelper::getOrAddImport(rplInfo->getName().c_str(),rplInfo->isData());
     if(importInfoGbl == NULL) {
         DEBUG_FUNCTION_LINE("Getting import info failed. Probably maximum of %d rpl files to import reached.\n",DYN_LINK_IMPORT_LIST_LENGTH);
@@ -78,8 +78,8 @@ bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int adden
     return addReloationEntry(type, offset, addend, destination, functionInfo, importInfoGbl);
 }
 
-bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int addend, void *destination, dyn_linking_function_t * functionName, dyn_linking_import_t * importInfo) {
-    for(int i = 0; i < DYN_LINK_RELOCATION_LIST_LENGTH; i++) {
+bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int32_t addend, void *destination, dyn_linking_function_t * functionName, dyn_linking_import_t * importInfo) {
+    for(int32_t i = 0; i < DYN_LINK_RELOCATION_LIST_LENGTH; i++) {
         dyn_linking_relocation_entry_t * curEntry = &gbl_dyn_linking_data.entries[i];
         if(curEntry->functionEntry != NULL) {
             continue;
@@ -98,7 +98,7 @@ bool DynamicLinkingHelper::addReloationEntry(char type, size_t offset, int adden
 
 std::vector<dyn_linking_relocation_entry_t *> DynamicLinkingHelper::getAllValidDynamicLinkingRelocations() {
     std::vector<dyn_linking_relocation_entry_t *> result;
-    for(int i = 0; i < DYN_LINK_RELOCATION_LIST_LENGTH; i++) {
+    for(int32_t i = 0; i < DYN_LINK_RELOCATION_LIST_LENGTH; i++) {
         if(gbl_dyn_linking_data.entries[i].functionEntry == NULL) {
             break;
         }
@@ -133,7 +133,7 @@ bool DynamicLinkingHelper::fillRelocations(std::vector<dyn_linking_relocation_en
             } else {
                 OSDynLoad_Acquire(importEntry->importName, &importEntry->handle);
             }
-            int isData = 0;
+            int32_t isData = 0;
             if(importEntry->isData) {
                 isData = 1;
                 //DEBUG_FUNCTION_LINE("isData\n");
@@ -154,8 +154,8 @@ bool DynamicLinkingHelper::fillRelocations(std::vector<dyn_linking_relocation_en
                 80 61 ff e0     lwz     r3,-32(r1)
                 4e 80 04 20     bctr*/
                 functionEntry->big_jump[0] = 0x9061FFE0;
-                functionEntry->big_jump[1] = 0x3C600000 | ((((u32) functionEntry->address) >> 16) & 0x0000FFFF); // lis r3, real_addr@h
-                functionEntry->big_jump[2] = 0x60630000 |  (((u32) functionEntry->address) & 0x0000ffff); // ori r3, r3, real_addr@l
+                functionEntry->big_jump[1] = 0x3C600000 | ((((uint32_t) functionEntry->address) >> 16) & 0x0000FFFF); // lis r3, real_addr@h
+                functionEntry->big_jump[2] = 0x60630000 |  (((uint32_t) functionEntry->address) & 0x0000ffff); // ori r3, r3, real_addr@l
                 functionEntry->big_jump[3] = 0x7C6903A6; // mtctr   r3
                 functionEntry->big_jump[4] = 0x8061FFE0; // lwz     r3,-32(r1)
                 functionEntry->big_jump[5] = 0x4E800420; // bctr
@@ -169,14 +169,14 @@ bool DynamicLinkingHelper::fillRelocations(std::vector<dyn_linking_relocation_en
             //DEBUG_FUNCTION_LINE("We cached the address of function %s :%08X\n",functionEntry->functionName,functionEntry->address);
         }
 
-        //DEBUG_FUNCTION_LINE("Linking: t: %02X o: %08X a: %d dest: %08X tar: %08X big_j: %08X\n",curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, functionEntry->address, (u32) functionEntry->big_jump);
+        //DEBUG_FUNCTION_LINE("Linking: t: %02X o: %08X a: %d dest: %08X tar: %08X big_j: %08X\n",curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, functionEntry->address, (uint32_t) functionEntry->big_jump);
 
         DEBUG_FUNCTION_LINE("Resolving relocation to %s\n",functionEntry->functionName);
 
-        if(!curEntry->importEntry->isData && (u32) functionEntry->address > 0x04000000) {
-            ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (u32) functionEntry->big_jump);
+        if(!curEntry->importEntry->isData && (uint32_t) functionEntry->address > 0x04000000) {
+            ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (uint32_t) functionEntry->big_jump);
         } else {
-            ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (u32) functionEntry->address);
+            ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (uint32_t) functionEntry->address);
         }
 
     }

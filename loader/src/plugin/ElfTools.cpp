@@ -208,7 +208,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                         reloc->address = destination;
                         reloc->offset = rel[i].r_offset;
                         reloc->type = ELF32_R_TYPE(rel[i].r_info);
-                        reloc->addend = *(int *)((char *)destination + rel[i].r_offset);
+                        reloc->addend = *(int32_t *)((char *)destination + rel[i].r_offset);
 
                         continue;
                         */
@@ -230,7 +230,7 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                 }
                 }
 
-                if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rel[i].r_info), rel[i].r_offset, *(int *)((char *)destination + rel[i].r_offset), destination, symbol_addr)) {
+                if (!ElfTools::elfLinkOne(ELF32_R_TYPE(rel[i].r_info), rel[i].r_offset, *(int32_t *)((char *)destination + rel[i].r_offset), destination, symbol_addr)) {
                     DEBUG_FUNCTION_LINE("elfLinkOne failed\n");
                     return false;
                 }
@@ -268,11 +268,11 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
                     break;
                 }
                 case SHN_COMMON: {
-                    u32 align = symtab[symbol].st_value;
-                    u32 size = symtab[symbol].st_size;
+                    uint32_t align = symtab[symbol].st_value;
+                    uint32_t size = symtab[symbol].st_size;
 
                     uint32_t address = pluginData->getMemoryForCommonBySymbol(symbol, align, size);
-                    if(address == NULL){
+                    if(address == 0){
                         DEBUG_FUNCTION_LINE("Failed to get memory for common relocation\n");
                         return false;
                     }
@@ -372,8 +372,8 @@ bool ElfTools::elfLink(Elf *elf, size_t shndx, void *destination, Elf32_Sym *sym
     return true;
 }
 
-bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destination, uint32_t symbol_addr) {
-    int value;
+bool ElfTools::elfLinkOne(char type, size_t offset, int32_t addend, void *destination, uint32_t symbol_addr) {
+    int32_t value;
     char *target = (char *)destination + offset;
     bool result = false;
 
@@ -389,7 +389,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     case R_PPC_ADDR14_BRNTAKEN:
     case R_PPC_UADDR32:
     case R_PPC_UADDR16: {
-        value = (int)symbol_addr + addend;
+        value = (int32_t)symbol_addr + addend;
         break;
     }
     case R_PPC_REL24:
@@ -400,7 +400,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     case R_PPC_REL14_BRNTAKEN:
     case R_PPC_REL32:
     case R_PPC_ADDR30: {
-        value = (int)symbol_addr + addend - (int)target;
+        value = (int32_t)symbol_addr + addend - (int32_t)target;
         break;
     }
     case R_PPC_SECTOFF:
@@ -415,7 +415,7 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     case R_PPC_EMB_NADDR16_LO:
     case R_PPC_EMB_NADDR16_HI:
     case R_PPC_EMB_NADDR16_HA: {
-        value = addend - (int)symbol_addr;
+        value = addend - (int32_t)symbol_addr;
         break;
     }
     default:
@@ -429,15 +429,15 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     case R_PPC_REL32:
     case R_PPC_SECTOFF:
     case R_PPC_EMB_NADDR32: {
-        *(int *)target = value;
+        *(int32_t *)target = value;
         break;
     }
     case R_PPC_ADDR24:
     case R_PPC_PLTREL24:
     case R_PPC_LOCAL24PC:
     case R_PPC_REL24: {
-        *(int *)target =
-            (*(int *)target & 0xfc000003) | (value & 0x03fffffc);
+        *(int32_t *)target =
+            (*(int32_t *)target & 0xfc000003) | (value & 0x03fffffc);
         break;
     }
     case R_PPC_ADDR16:
@@ -466,26 +466,26 @@ bool ElfTools::elfLinkOne(char type, size_t offset, int addend, void *destinatio
     }
     case R_PPC_ADDR14:
     case R_PPC_REL14: {
-        *(int *)target =
-            (*(int *)target & 0xffff0003) | (value & 0x0000fffc);
+        *(int32_t *)target =
+            (*(int32_t *)target & 0xffff0003) | (value & 0x0000fffc);
         break;
     }
     case R_PPC_ADDR14_BRTAKEN:
     case R_PPC_REL14_BRTAKEN: {
-        *(int *)target =
-            (*(int *)target & 0xffdf0003) | (value & 0x0000fffc) |
+        *(int32_t *)target =
+            (*(int32_t *)target & 0xffdf0003) | (value & 0x0000fffc) |
             0x00200000;
         break;
     }
     case R_PPC_ADDR14_BRNTAKEN:
     case R_PPC_REL14_BRNTAKEN: {
-        *(int *)target =
-            (*(int *)target & 0xffdf0003) | (value & 0x0000fffc);
+        *(int32_t *)target =
+            (*(int32_t *)target & 0xffdf0003) | (value & 0x0000fffc);
         break;
     }
     case R_PPC_ADDR30: {
-        *(int *)target =
-            (*(int *)target & 0x00000003) | (value & 0xfffffffc);
+        *(int32_t *)target =
+            (*(int32_t *)target & 0x00000003) | (value & 0xfffffffc);
         break;
     }
     default:

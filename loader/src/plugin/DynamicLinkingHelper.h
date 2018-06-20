@@ -67,9 +67,9 @@ public:
 
     bool addReloationEntry(RelocationData * relocationData);
 
-    bool addReloationEntry(char type, size_t offset, int addend, void *destination, std::string name, ImportRPLInformation * rplInfo);
+    bool addReloationEntry(char type, size_t offset, int32_t addend, void *destination, std::string name, ImportRPLInformation * rplInfo);
 
-    bool addReloationEntry(char type, size_t offset, int addend, void *destination, dyn_linking_function_t * functionName, dyn_linking_import_t * importInfo);
+    bool addReloationEntry(char type, size_t offset, int32_t addend, void *destination, dyn_linking_function_t * functionName, dyn_linking_import_t * importInfo);
 
     std::vector<dyn_linking_relocation_entry_t *> getAllValidDynamicLinkingRelocations();
 

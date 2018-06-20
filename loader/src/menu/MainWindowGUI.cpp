@@ -17,7 +17,7 @@
 #include "MainWindowGUI.h"
 #include "MenuCommon.h"
 
-MainWindowGUI::MainWindowGUI(s32 w, s32 h)
+MainWindowGUI::MainWindowGUI(int32_t w, int32_t h)
     : GuiFrame(w, h)
     , width(w)
     , height(h)
@@ -27,7 +27,7 @@ MainWindowGUI::MainWindowGUI(s32 w, s32 h)
     append(&content);
 }
 
-void MainWindowGUI::setState(s32 i, s32 c) {
+void MainWindowGUI::setState(int32_t i, int32_t c) {
     GuiFrame::setState(i,c);
 }
 
