@@ -78,8 +78,8 @@ typedef struct wups_loader_init_fs_args_t {
 
 
 typedef struct wups_loader_app_started_args_t {
-    bool sd_mounted;
-    bool usb_mounted;
+    BOOL sd_mounted;
+    BOOL usb_mounted;
 } wups_loader_app_started_args_t;
 
 
