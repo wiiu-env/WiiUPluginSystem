@@ -11,9 +11,6 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
-ifeq ($(strip $(WUT_ROOT)),)
-$(error "Please set WUT_ROOT in your environment. export WUT_ROOT=<path to>wut)
-endif
 
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH):$(DEVKITPRO)/tools/bin
 export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
@@ -87,9 +84,7 @@ LIBS	:= -lgui -lm -lgcc -lfat -lntfs -liosuhax -lutils -ldynamiclibs  -lfreetype
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(CURDIR)	\
 			$(DEVKITPPC)/lib  \
-			$(DEVKITPRO)/wups  \
-            $(WUT_ROOT) \
-
+			$(DEVKITPRO)/wups
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
