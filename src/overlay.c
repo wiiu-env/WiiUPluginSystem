@@ -10,7 +10,16 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <wups.h>
-#include <coreinit/screen.h>
+
+extern void (*OSScreenInit)(void);
+extern void (*OSScreenShutdown)(void);
+extern uint32_t (*OSScreenGetBufferSizeEx)(uint32_t bufferNum);
+extern int32_t (*OSScreenSetBufferEx)(uint32_t bufferNum, void * addr);
+extern int32_t (*OSScreenClearBufferEx)(uint32_t bufferNum, uint32_t temp);
+extern int32_t (*OSScreenFlipBuffersEx)(uint32_t bufferNum);
+extern int32_t (*OSScreenPutFontEx)(uint32_t bufferNum, uint32_t posX, uint32_t posY, const char * buffer);
+extern int32_t (*OSScreenEnableEx)(uint32_t bufferNum, int32_t enable);
+extern uint32_t (*OSScreenPutPixelEx)(uint32_t bufferNum, uint32_t posX, uint32_t posY, uint32_t color);
 
 static void * overlayfunction_ptr __attribute__((section(".data"))) = NULL;
 

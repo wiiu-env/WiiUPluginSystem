@@ -18,7 +18,6 @@
 #ifndef WUPS_HOOKS_DEF_H_
 #define WUPS_HOOKS_DEF_H_
 
-#include <wut_types.h>
 #include "common.h"
 
 #ifdef __cplusplus
@@ -78,8 +77,8 @@ typedef struct wups_loader_init_fs_args_t {
 
 
 typedef struct wups_loader_app_started_args_t {
-    BOOL sd_mounted;
-    BOOL usb_mounted;
+    bool sd_mounted;
+    bool usb_mounted;
 } wups_loader_app_started_args_t;
 
 

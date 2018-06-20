@@ -7,10 +7,6 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC)
 endif
 
-ifeq ($(strip $(WUT_ROOT)),)
-$(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC)
-endif
-
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
 export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
 
@@ -64,7 +60,7 @@ LIBS	:=
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=  $(WUT_ROOT)
+LIBDIRS	:=  
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
