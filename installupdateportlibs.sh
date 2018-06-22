@@ -5,7 +5,7 @@ mkdir portlib_repos
 cd portlib_repos
 ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull))
 (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull))
-(git clone https://github.com/aliaspider/libfat.git || (cd libfat && git pull))   
+(git clone https://github.com/Maschell/libfat.git || (cd libfat && git pull))   
 (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs-wiiu && git pull))   
 (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull))   
 ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull))   
