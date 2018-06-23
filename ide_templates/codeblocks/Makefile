@@ -12,9 +12,6 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
-ifeq ($(strip $(WUT_ROOT)),)
-$(error "Please set WUT_ROOT in your environment. export WUT_ROOT=<path to>wut)
-endif
 
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
 export PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
@@ -56,8 +53,7 @@ include $(WUPSDIR)/plugin_makefile.mk
 # -Os: optimise size
 # -Wall: generate lots of warnings
 # -DGEKKO_U: define the symbol GEKKO (used in some headers)
-# -D__wiiu__: define the symbol __wii__ (used in some headers)
-# -mrvl: enable wii/gamecube compilation
+# -D__wiiu__: define the symbol __wiiu__ (used in some headers)
 # -mcpu=750: enable processor specific compilation
 # -meabi: enable eabi specific compilation
 # -mhard-float: enable hardware floating point instructions
@@ -66,7 +62,7 @@ include $(WUPSDIR)/plugin_makefile.mk
 # -memb: enable embedded application specific compilation
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
+COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -D__WIIU__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
 
 
 # -x c: compile as c code
@@ -80,6 +76,40 @@ CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
    CXXFLAGS += -D__LOGGING__
+endif
+
+ADD_NO_WHOLE_ARCHIVE  := 0
+
+ifeq ($(WUT_ENABLE_CPP), 1)
+    WUT_ENABLE_NEWLIB    := 1
+       
+    LD_FLAGS_ELF         += -whole-archive -lwutstdc++
+    ADD_NO_WHOLE_ARCHIVE := 1
+    NEEDS_WUT            := 1
+endif
+
+ifeq ($(WUT_ENABLE_NEWLIB), 1)     
+    LD_FLAGS_ELF          += -whole-archive -lwutnewlib
+    ADD_NO_WHOLE_ARCHIVE := 1
+    NEEDS_WUT            := 1
+endif
+
+ifeq ($(WUT_DEFAULT_MALLOC), 1)       
+    LD_FLAGS_ELF          += -whole-archive -lwutmalloc
+    ADD_NO_WHOLE_ARCHIVE := 1
+    NEEDS_WUT            := 1
+endif
+
+ifeq ($(ADD_NO_WHOLE_ARCHIVE), 1)       
+    LD_FLAGS_ELF          += -no-whole-archive    
+endif
+
+ifeq ($(NEEDS_WUT), 1)       
+    ifeq ($(strip $(WUT_ROOT)),)
+        $(error "Please set WUT_ROOT in your environment. export WUT_ROOT=<path to>wut)
+    endif
+    CFLAGS += -D__WUT__
+    CXXFLAGS += -D__WUT__
 endif
 			
 ASFLAGS	+= 
@@ -106,7 +136,7 @@ ALL_LIBS    := $(LIBS)
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	+=  $(WUT_ROOT)
+LIBDIRS	+=
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

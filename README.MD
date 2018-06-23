@@ -46,7 +46,6 @@ For building the loader you need:
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.  
 - [libgui](https://github.com/Maschell/libgui) for the gui elements.
-- [wut] (https://github.com/decaf-emu/wut) for the wut support.
 
 Install the according to their readmes. Don't forget to install their dependencies.
 
@@ -68,16 +67,11 @@ make
 This should create an "wiiupluginloader.elf" which can be loaded with the Homebrew Launcher.
 
 ### Plugins
+
 Last but not least you need to build the plugins that should be loaded.
 Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
-In the folder "plugins" you can find serveral example plugins. In their READMEs are information about needed dependencies.
 
-You can build them all with the following command in the "plugins" folder (when all dependencies are installed).
-```
-make
-```
-
-You can also check out the travis script for needed dependencies of the library, loader and example plugins.
+Example plugins can be found here: (TODO)
 
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 

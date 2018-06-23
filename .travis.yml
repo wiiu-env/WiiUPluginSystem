@@ -6,8 +6,7 @@ dist: trusty
 
 env:
   global:
-    - DEVKITPRO=/opt/devkitpro    
-    - WUT_ROOT=/opt/devkitpro/wut  
+    - DEVKITPRO=/opt/devkitpro
     - DEVKITPPC=/opt/devkitpro/devkitPPC
     - DEVKITARM=/opt/devkitpro/devkitARM
     - PORTLIBREPOS=$HOME/portlibrepos
@@ -32,27 +31,21 @@ before_install:
   - yes | sudo dkp-pacman -Syu devkitPPC --needed
   - yes | sudo dkp-pacman -Syu devkitARM --needed
   - yes | sudo dkp-pacman -Syu general-tools --needed
-  - wget $(curl -s https://api.github.com/repos/decaf-emu/wut/releases/latest | grep 'browser_' | grep 'linux' | cut -d\" -f4)
 
 install:
-  - 7z x -y $(ls | grep "linux") -o${WUT_ROOT}
   - cd $PORTLIBREPOS
   - ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull))
   - (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull))
   - (git clone https://github.com/Maschell/libfat.git || (cd libfat && git pull))   
   - (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs-wiiu && git pull))   
   - (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull))   
-  - ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull))   
-  - (git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull))  
-  - (git clone https://github.com/Maschell/controller_patcher.git || (cd controller_patcher && git pull))
+  - ((git clone https://github.com/Maschell/libgui.git && (7z x -y ./libgui/libs/portlibs.zip -o${DEVKITPRO})) || (cd libgui && git pull))
   - (cd dynamic_libs && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
   - (cd libiosuhax && make -j8 && make install) 
   - (cd libfat && make wiiu-release && make wiiu-install)
   - (cd libntfs-wiiu && make wiiu-install)
   - (cd libutils && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
   - (cd libgui && ((make -j8 | grep -c "built ... ") && make install) || echo "no need for make install")
-  - (cd fs_wrapper && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
-  - (cd controller_patcher && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
 
 before_script:
   - cd $TRAVIS_BUILD_DIR/
@@ -60,17 +53,14 @@ before_script:
 script:
 - make && make install
 - (cd loader && make)
-- (cd plugins && make)
 
 before_deploy:
 - cd $TRAVIS_BUILD_DIR/
 - mkdir -p "wiiu/apps/wiiupluginloader"
-- mkdir -p "wiiu/plugins"
 - commit="$(git rev-parse --short=7 HEAD)"
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
 - (cd loader && make)
-- find plugins -type f -name "*.mod" | xargs -i cp {} wiiu/plugins
 - cp loader/meta/* wiiu/apps/wiiupluginloader
 - cp loader/wiiupluginloader.elf wiiu/apps/wiiupluginloader
 - zip -r WiiUPluginLoader_$versiontag.zip wiiu

@@ -2,7 +2,24 @@
 DO_LOGGING          := 1
 
 # Non WUT plugins need to wrap the malloc functions.
-WRAP_MALLOC         := 1
+WRAP_MALLOC         := 0
+
+# Sets the "-D__WUT__" compiling flag
+USE_WUT             := 0
+
+# Links against the wut implementation of newlib, this is useful for using any function
+# from the C standard library
+WUT_ENABLE_NEWLIB   := 0
+
+# Links against the wut implementation of stdcpp, this is useful for using any function
+# from the C++ standard library. This will enable WUT_ENABLE_NEWLIB if you have not already done so.
+WUT_ENABLE_CPP      := 0
+
+# By default newlib will allocate 90% of the default heap for use with sbrk & malloc, 
+# if this is unacceptable to you then you should use this as it replaces the newlib 
+# malloc functions which ones which redirect to the CafeOS default heap functions 
+# such as MEMAllocFromDefaultHeap.
+WUT_DEFAULT_MALLOC  := 0
 
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
@@ -39,7 +56,7 @@ LIBDIRS             := $(WUPSDIR) $(PORTLIBS)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS                := -lwups -lutils -ldynamiclibs
+LIBS                := -lwups
 
 #---------------------------------------------------------------------------------
 # Will be added to the final lib paths
@@ -52,4 +69,4 @@ EXTERNAL_LIBPATHS   :=
 # Will be added to the final include paths
 # -IC:/library1/include
 #---------------------------------------------------------------------------------
-EXTERNAL_INCLUDE    :=  -I$(PORTLIBS)/include/libutils
+EXTERNAL_INCLUDE    :=
