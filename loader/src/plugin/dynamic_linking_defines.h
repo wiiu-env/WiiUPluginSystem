@@ -30,7 +30,7 @@ extern "C" {
 
 #define DYN_LINK_FUNCTION_LIST_LENGTH           500
 #define DYN_LINK_IMPORT_LIST_LENGTH             50
-#define DYN_LINK_RELOCATION_LIST_LENGTH         50000
+#define DYN_LINK_RELOCATION_LIST_LENGTH         5000
 
 typedef struct _dyn_linking_function_t {
     char functionName[DYN_LINK_FUNCTION_NAME_LENGTH+1];
