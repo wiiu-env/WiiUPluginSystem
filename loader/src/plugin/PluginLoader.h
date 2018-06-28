@@ -114,7 +114,7 @@ public:
     }
 
     size_t getAvailableSpace() {
-        return ((uint32_t) this->currentStoreAddress - (uint32_t) this->startAddress);
+        return ((uint32_t) this->endAddress - (uint32_t) this->currentStoreAddress);
     }
 
     size_t getUsedSpace() {
@@ -122,7 +122,7 @@ public:
     }
 
     void resetPluginLoader() {
-        this->currentStoreAddress = endAddress;
+        this->currentStoreAddress = (void*) ROUNDUP((uint32_t)startAddress, 0x100);
     }
 
     uint32_t getMemoryFromDataSection(size_t align, size_t size);
@@ -132,7 +132,7 @@ private:
         // TODO: Check if endAddress > startAddress.
         this->startAddress = startAddress;
         this->endAddress = endAddress;
-        this->currentStoreAddress = endAddress;
+        this->currentStoreAddress = (void*) ROUNDUP((uint32_t)startAddress, 0x100);
     }
 
     ~PluginLoader() {

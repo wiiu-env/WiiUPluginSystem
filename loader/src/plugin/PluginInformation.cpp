@@ -158,10 +158,10 @@ bool PluginInformation::parseElf( Elf *elf) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Invalid ELF header\n", path_c);
         goto exit_error;
     }
-    if (ehdr->e_type != ET_REL) {
+    /*if (ehdr->e_type != ET_REL) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Not relocatable ELF.\n", path_c);
         goto exit_error;
-    }
+    }*/
     if (ehdr->e_machine != EM_PPC) {
         DEBUG_FUNCTION_LINE("Warning: Ignoring '%s' - Architecture not EM_PPC.\n", path_c);
         goto exit_error;

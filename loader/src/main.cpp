@@ -139,8 +139,12 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
     DEBUG_FUNCTION_LINE("Do relocations\n");
 
     std::vector<dyn_linking_relocation_entry_t *> relocations = DynamicLinkingHelper::getInstance()->getAllValidDynamicLinkingRelocations();
-    DEBUG_FUNCTION_LINE("Found relocation information for %d functions\n",relocations.size()) ;
-    DynamicLinkingHelper::getInstance()->fillRelocations(relocations);
+    DEBUG_FUNCTION_LINE("Found relocation information for %d functions\n",relocations.size());
+
+    if(!DynamicLinkingHelper::getInstance()->fillRelocations(relocations)){
+        OSFatal("fillRelocations failed.");
+    }
+
 
 
     if(!isInMiiMakerHBL()) {

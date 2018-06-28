@@ -187,12 +187,13 @@ exit_error:
     return result;
 }
 
-bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endAddress) {
-    if(pluginData == NULL || elf == NULL || endAddress == NULL) {
+bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * startAddress) {
+    if(pluginData == NULL || elf == NULL || startAddress == NULL) {
         return false;
     }
 
-    uint32_t curAddress = (uint32_t) endAddress;
+    uint32_t curAddress = (uint32_t) startAddress;
+    uint32_t firstCurAddress = (uint32_t) startAddress;
 
     Elf_Scn *scn;
     size_t symtab_count, section_count, shstrndx, symtab_strndx, entries_count, hooks_count;
@@ -226,6 +227,8 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     }
 
     destinations = (uint8_t **) malloc(sizeof(uint8_t *) * section_count);
+
+    DEBUG_FUNCTION_LINE("Copy sections\n");
 
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
         Elf32_Shdr *shdr;
@@ -264,13 +267,15 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                     goto exit_error;
                 }
 
-                destinations[elf_ndxscn(scn)] = (uint8_t *)entries;
+                // We need to subtract the sh_addr because it will be added later in the relocations.
+                destinations[elf_ndxscn(scn)] = (uint8_t *)entries - (shdr->sh_addr);
+
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, entries)) {
                     DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
 
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), entries, symtab, symtab_count);
+                ElfTools::elfLoadSymbols(elf_ndxscn(scn), entries- (shdr->sh_addr), symtab, symtab_count);
 
                 for(size_t i = 0; i< entries_count; i++) {
                     entry_t_list.push_back(&entries[i]);
@@ -289,41 +294,40 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
                     goto exit_error;
                 }
 
-                destinations[elf_ndxscn(scn)] = (uint8_t *)hooks;
+                // We need to subtract the sh_addr because it will be added later in the relocations.
+                uint32_t destination = (uint32_t)hooks - (shdr->sh_addr);
+                destinations[elf_ndxscn(scn)] = (uint8_t *)destination;
                 if (!ElfTools::elfLoadSection(elf, scn, shdr, hooks)) {
                     DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), hooks, symtab, symtab_count);
+                ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void *) destination, symtab, symtab_count);
 
                 for(size_t i = 0; i< hooks_count; i++) {
                     hook_t_list.push_back(&hooks[i]);
                 }
 
             } else {
-                curAddress -= shdr->sh_size;
+                uint32_t destination = firstCurAddress + shdr->sh_addr;
+                destinations[elf_ndxscn(scn)] = (uint8_t *) firstCurAddress;
 
-                if (shdr->sh_addralign > 3) {
-                    curAddress = (uint32_t)((int32_t)curAddress & ~(shdr->sh_addralign - 1));
-                } else {
-                    curAddress = (uint32_t)((int32_t)curAddress & ~3);
-                }
-                destinations[elf_ndxscn(scn)] = (uint8_t *) curAddress;
-
-                if((uint32_t) curAddress < (uint32_t) this->startAddress) {
-                    DEBUG_FUNCTION_LINE("Not enough space to load function %s into memory at %08X.\n",name,curAddress);
+                if((uint32_t) destination + shdr->sh_size > (uint32_t) this->endAddress) {
+                    DEBUG_FUNCTION_LINE("Not enough space to load function %s into memory at %08X.\n",name,destination);
                     goto exit_error;
                 }
 
-                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,curAddress);
-                if (!ElfTools::elfLoadSection(elf, scn, shdr, (void*) curAddress)) {
+                DEBUG_FUNCTION_LINE("Copy section %s to %08X\n",name,destination);
+                if (!ElfTools::elfLoadSection(elf, scn, shdr, (void*) destination)) {
                     DEBUG_FUNCTION_LINE("elfLoadSection failed\n");
                     goto exit_error;
                 }
-                ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void*) curAddress, symtab, symtab_count);
+                ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void*) firstCurAddress, symtab, symtab_count);
+
+                curAddress = destination + shdr->sh_size;
             }
         }
     }
+
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
         Elf32_Shdr *shdr;
 
@@ -348,7 +352,6 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
     }
     i = 0;
 
-
     for (scn = elf_nextscn(elf, NULL); scn != NULL; scn = elf_nextscn(elf, scn)) {
         Elf32_Shdr *shdr;
 
@@ -357,15 +360,25 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
             continue;
         }
 
+        const char *name;
+
+        name = elf_strptr(elf, shstrndx, shdr->sh_name);
+        if (name == NULL) {
+            DEBUG_FUNCTION_LINE("name is null\n");
+            continue;
+        }
         if ((shdr->sh_type == SHT_PROGBITS || shdr->sh_type == SHT_NOBITS) &&
                 (shdr->sh_flags & SHF_ALLOC) &&
                 destinations[elf_ndxscn(scn)] != NULL) {
+
+            DEBUG_FUNCTION_LINE("Linking (%d)... %s\n",i++,name);
             if (!ElfTools::elfLink(elf, elf_ndxscn(scn), destinations[elf_ndxscn(scn)], symtab, symtab_count, symtab_strndx, true, pluginData)) {
                 DEBUG_FUNCTION_LINE("elfLink failed\n");
                 goto exit_error;
             }
         }
     }
+    DEBUG_FUNCTION_LINE("Linking done \n");
 
     for(size_t j=0; j<hook_t_list.size(); j++) {
         wups_loader_hook_t * hook = hook_t_list[j];
@@ -386,7 +399,9 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * endA
 
     result = true;
 exit_error:
-    if (!result) DEBUG_FUNCTION_LINE("exit_error\n");
+    if (!result) {
+        DEBUG_FUNCTION_LINE("exit_error\n");
+    }
     if (destinations != NULL) {
         free(destinations);
     }
