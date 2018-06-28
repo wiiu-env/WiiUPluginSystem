@@ -111,13 +111,12 @@ WUPSDIR := $(DEVKITPRO)/wups
 
 # Rule to install wups.
 PHONY += install
-install :  wups.ld  wups_elf.ld
+install :  wups.ld
 	$(addprefix $Qrm -rf ,$(wildcard $(WUPSDIR)))
 	$Qmkdir $(WUPSDIR)
 	$Qmkdir $(WUPSDIR)/lib/
 	$Qcp -r wups_include $(WUPSDIR)/include
 	$Qcp -r wups.ld $(WUPSDIR)
-	$Qcp -r wups_elf.ld $(WUPSDIR)
 	$Qcp -r plugin_makefile.mk $(WUPSDIR)
 	@cp $(BUILD)/lib/libwups.a $(WUPSDIR)/lib/
 
