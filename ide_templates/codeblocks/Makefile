@@ -1,5 +1,5 @@
-#   You probably never need to adjust this Makefile.
-#   All changes can be done in the makefile.mk
+# You probably never need to adjust this Makefile.
+# All changes can be done in the makefile.mk
 
 #---------------------------------------------------------------------------------
 # Clear the implicit built in rules
@@ -13,10 +13,10 @@ ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
 
-export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
+export PATH		:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
 export PORTLIBS :=	$(DEVKITPRO)/portlibs/ppc
-export WUPSDIR  := $(DEVKITPRO)/wups
-export GCC_VER  := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
+export WUPSDIR  :=  $(DEVKITPRO)/wups
+export GCC_VER  :=  $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
 
 PREFIX	:=	powerpc-eabi-
 
@@ -33,16 +33,17 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR)).mod
+TARGET		:=	$(notdir $(CURDIR))
 BUILD		:= 	build
 
 ifeq ($(notdir $(CURDIR)),$(BUILD))
-include ../makefile.mk
+    include ../makefile.mk
 else
-include makefile.mk
+    include makefile.mk
 endif
 
 include $(WUPSDIR)/plugin_makefile.mk
+
 
 #MAP ?= $(TARGET:.mod=.map)
 
@@ -52,56 +53,67 @@ include $(WUPSDIR)/plugin_makefile.mk
 
 # -Os: optimise size
 # -Wall: generate lots of warnings
-# -DGEKKO_U: define the symbol GEKKO (used in some headers)
 # -D__wiiu__: define the symbol __wiiu__ (used in some headers)
 # -mcpu=750: enable processor specific compilation
 # -meabi: enable eabi specific compilation
 # -mhard-float: enable hardware floating point instructions
-# -fno-common: stop common variables which the loader can't understand
-# -msdata-none: do not use r2 or r13 as small data areas
-# -memb: enable embedded application specific compilation
+# -nostartfiles: Do not use the standard system startup files when linking
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	+= -Os -Wall -DGEKKO_U -D__wiiu__ -D__WIIU__ -mrvl -mcpu=750 -meabi -mhard-float -fno-common -msdata=none -memb -ffunction-sections -fdata-sections
-
+COMMON_CFLAGS	:= -Os -Wall -mcpu=750 -meabi -mhard-float  -D__WIIU__ -nostartfiles -ffunction-sections -fdata-sections -Wl,-q  $(COMMON_CFLAGS)
 
 # -x c: compile as c code
 # -std=c11: use the c11 standard
-CFLAGS	  		+= $(COMMON_CFLAGS) -x c -std=gnu11
+CFLAGS	  		:= $(COMMON_CFLAGS) -x c -std=gnu11 $(CFLAGS)
 
 # -x c: compile as c++ code
 # -std=gnu++11: use the c++11 standard
-CXXFLAGS  		+= $(COMMON_CFLAGS) -x c++ -std=gnu++11
+CXXFLAGS  		:= $(COMMON_CFLAGS) -x c++ -std=gnu++11 $(CXXFLAGS)
 
 ifeq ($(DO_LOGGING), 1)
    CFLAGS += -D__LOGGING__
    CXXFLAGS += -D__LOGGING__
 endif
 
-ADD_NO_WHOLE_ARCHIVE  := 0
+#---------------------------------------------------------------------------------
+# any extra ld flags
+#--------------------------------------------------------------------------------
+# --gc-sections: remove unneeded symbols
+# -Map: generate a map file
+LDFLAGS +=  -Wl,-Map,$(notdir $@).map,--gc-sections
 
+
+#---------------------------------------------------------------------------------
+Q := @
+MAKEFLAGS += --no-print-directory
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
+LIBS    +=
+#  
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	+=
+
+NEEDS_WUT := 0
+                    
 ifeq ($(WUT_ENABLE_CPP), 1)
     WUT_ENABLE_NEWLIB    := 1
        
-    LD_FLAGS_ELF         += -whole-archive -lwutstdc++
-    ADD_NO_WHOLE_ARCHIVE := 1
+    LDFLAGS              += -Wl,-whole-archive,-lwutstdc++,-no-whole-archive
     NEEDS_WUT            := 1
 endif
 
 ifeq ($(WUT_ENABLE_NEWLIB), 1)     
-    LD_FLAGS_ELF          += -whole-archive -lwutnewlib
-    ADD_NO_WHOLE_ARCHIVE := 1
+    LDFLAGS              += -Wl,-whole-archive,-lwutnewlib,-no-whole-archive
     NEEDS_WUT            := 1
 endif
 
 ifeq ($(WUT_DEFAULT_MALLOC), 1)       
-    LD_FLAGS_ELF          += -whole-archive -lwutmalloc
-    ADD_NO_WHOLE_ARCHIVE := 1
+    LDFLAGS              += -Wl,-whole-archive,-lwutmalloc,-no-whole-archive
     NEEDS_WUT            := 1
-endif
-
-ifeq ($(ADD_NO_WHOLE_ARCHIVE), 1)       
-    LD_FLAGS_ELF          += -no-whole-archive    
 endif
 
 ifeq ($(NEEDS_WUT), 1)       
@@ -111,32 +123,6 @@ ifeq ($(NEEDS_WUT), 1)
     CFLAGS += -D__WUT__
     CXXFLAGS += -D__WUT__
 endif
-			
-ASFLAGS	+= 
-
-LDFLAG_COMMON       += 
-
-ifeq ($(WRAP_MALLOC), 1)
-   LDFLAG_COMMON += -Wl,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r
-endif
-
-LDFLAGS_MOD     += $(LD_FLAGS_MOD)
-LDFLAGS_ELF     += $(LD_FLAGS_ELF)
-
-#---------------------------------------------------------------------------------
-Q := @
-MAKEFLAGS += --no-print-directory
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project
-#---------------------------------------------------------------------------------
-ALL_LIBS    := $(LIBS)
-#  
-
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	+=
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -165,9 +151,9 @@ PNGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(CPPFILES)),)
-	export LD_MOD	:=	$(CC)
+	export REAL_LD	:=	$(CC)
 else
-	export LD_MOD	:=	$(CXX)
+	export REAL_LD	:=	$(CXX)
 endif
 
 export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
@@ -178,8 +164,8 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 # build a list of include paths
 #---------------------------------------------------------------------------------
 export INCLUDE_FULL	+=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-                    $(EXTERNAL_INCLUDE)
+                        $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+                        $(EXTERNAL_INCLUDE)
 
 #---------------------------------------------------------------------------------
 # build a list of library paths
@@ -199,7 +185,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf	$(OUTPUT)
+	@rm -fr $(BUILD) $(OUTPUT).mod $(OUTPUT)
 
 #---------------------------------------------------------------------------------
 else
@@ -216,17 +202,11 @@ all : $(OUTPUT)
 ###############################################################################
 # Special build rules
 
-# Rule to make the module file.
-$(OUTPUT) : output.elf
-	@echo "checking for missing symbols ..."
-	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LD_FLAGS_MOD)  $(ALL_LIBS) $(LIBPATHS_FULL) -o check_linking.elf	
-	@echo "linking ..." $@
-	@$(LD_MOD) ../$(BUILD)/output.elf $(LDFLAG_COMMON) $(LDFLAGS_MOD) $(ALL_LIBS) $(LIBPATHS_FULL) -o $@ 
 
 # Rule to make the module file.
-output.elf : $(OFILES)
-	@echo "linking ... output.elf"
-	@$(LD) $(OFILES) $(LDFLAGS_ELF)  $(ALL_LIBS) $(LIBPATHS_FULL) -o $@ 
+$(OUTPUT) : $(OFILES)
+	@echo "linking ... " $@
+	@$(REAL_LD) $(OFILES) $(LDFLAGS) $(LIBS) $(LIBPATHS_FULL) -o $@
   
 ###############################################################################
 # Standard build rules
@@ -250,7 +230,7 @@ output.elf : $(OFILES)
 #---------------------------------------------------------------------------------
 %.o: %.S
 	@echo $(notdir $<)
-	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(INCLUDE_FULL) -c $< -o $@ $(ERROR_FILTER)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(INCLUDE_FULL) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.png.o : %.png
