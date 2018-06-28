@@ -19,3 +19,4 @@ release/*
 *.til
 *.layout
 wups.cbp
+tools/udp_debug_reader/GeckoLog.txt
