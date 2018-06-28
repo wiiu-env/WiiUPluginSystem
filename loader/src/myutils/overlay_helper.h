@@ -9,7 +9,7 @@ extern "C" {
 
 struct buffer_store {
     void * buffer;
-    uint32_t buffer_size;
+    int32_t buffer_size;
     int32_t mode;
     int32_t surface_format;
     volatile int32_t buffering_mode;
