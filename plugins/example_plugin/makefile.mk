@@ -13,7 +13,7 @@ WUT_ENABLE_CPP      := 0
 # if this is unacceptable to you then you should use this as it replaces the newlib 
 # malloc functions which ones which redirect to the CafeOS default heap functions 
 # such as MEMAllocFromDefaultHeap.
-WUT_DEFAULT_MALLOC  := 0
+WUT_DEFAULT_MALLOC  := 1
 
 # Target filename
 TARGET              := $(notdir $(CURDIR)).mod
