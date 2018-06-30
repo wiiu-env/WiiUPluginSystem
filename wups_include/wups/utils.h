@@ -67,13 +67,27 @@ typedef struct wups_loader_init_fs_args_t {
     MKDirFunction mkdir_repl;
 } wups_loader_init_fs_args_t;
 
+typedef uint32_t (*KernelReadFunction)(const void *addr);
+typedef void     (*KernelWriteFunction)(void *addr, uint32_t value);
+typedef void     (*KernelCopyDataFunction)(uint32_t addr, uint32_t src, uint32_t len);
 
+typedef struct wups_loader_init_kernel_args_t_ {
+    KernelReadFunction kern_read_ptr;
+    KernelWriteFunction kern_write_ptr;
+    KernelCopyDataFunction kern_copy_data_ptr;
+} wups_loader_init_kernel_args_t;
 
 /*
     Gets called by the framework
 */
 void WUPS_InitFS(wups_loader_init_fs_args_t args);
 void WUPS_InitOverlay(wups_loader_init_overlay_args_t args);
+
+/**
+    Sets the function pointers for kernel functions.
+    If none or NULL pointers is provided, calling the corresponding function has no effect.
+**/
+void WUPS_InitKernel(wups_loader_init_kernel_args_t args);
 
 /*
     Can be called by the user.
@@ -85,6 +99,27 @@ void WUPS_Overlay_OSScreenClear(wups_overlay_options_type_t screen);
 void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen);
 
 void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback);
+
+/**
+    Reads a 32bit value from a given address with kernel rights.
+    This function only has an effect if the plugin has the "WUPS_ALLOW_KERNEL" hook and the loader is NOT blocking the kernel access.
+    The argument of the ON_APPLICATION_START hook provides the information if the plugin has kernel access which should be checked before using/relying on this function.
+**/
+uint32_t WUPS_KernelRead(const void *addr);
+
+/**
+    Write a 32bit value from a given address with kernel rights.
+    This function only has an effect if the plugin has the "WUPS_ALLOW_KERNEL" hook and the loader is NOT blocking the kernel access.
+    The argument of the ON_APPLICATION_START hook provides the information if the plugin has kernel access which should be checked before using/relying on this function.
+**/
+void WUPS_KernelWrite(void *addr, uint32_t value);
+
+/**
+    Copies data from a source address to a destination address for a given lenght with kernel rights.
+    This function only has an effect if the plugin has the "WUPS_ALLOW_KERNEL" hook and the loader is NOT blocking the kernel access.
+    The argument of the ON_APPLICATION_START hook provides the information if the plugin has kernel access which should be checked before using/relying on this function.
+**/
+void WUPS_KernelCopyDataFunction(uint32_t addr, uint32_t src, uint32_t len);
 
 #ifdef __cplusplus
 }

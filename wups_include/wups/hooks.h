@@ -43,7 +43,8 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_ENDING_APPLICATION,    /* Called when an application ends */
     WUPS_LOADER_HOOK_VSYNC,                 /* Called when an application calls GX2WaitForVsync (most times each frame) */
     WUPS_LOADER_HOOK_APP_STATUS_CHANGED,    /* Called when the app status changes (foreground, background, closing) */
-
+       
+    WUPS_LOADER_HOOK_INIT_KERNEL,           /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -61,6 +62,7 @@ typedef enum wups_loader_app_status_t {
 typedef struct wups_loader_app_started_args_t {
     bool sd_mounted;
     bool usb_mounted;
+    bool kernel_access;
 } wups_loader_app_started_args_t;
 
 #define WUPS_FS_ACCESS() \
@@ -75,6 +77,13 @@ typedef struct wups_loader_app_started_args_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_OVERLAY,init_overlay); \
     void init_overlay(wups_loader_init_overlay_args_t args){ \
         WUPS_InitOverlay(args);\
+    }
+    
+#define WUPS_ALLOW_KERNEL() \
+    void init_kernel(wups_loader_init_kernel_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_KERNEL,init_kernel); \
+    void init_kernel(wups_loader_init_kernel_args_t args){ \
+        WUPS_InitKernel(args);\
     }
 
 #define INITIALIZE_PLUGIN() \

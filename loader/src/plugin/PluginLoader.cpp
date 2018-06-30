@@ -458,6 +458,10 @@ void PluginLoader::copyPluginDataIntoGlobalStruct(std::vector<PluginData *> plug
 
         replacement_data_plugin_t * plugin_data = &gbl_replacement_data.plugin_data[plugin_index];
 
+        #warning TODO: add GUI option to let the user choose
+        plugin_data->kernel_allowed = true;
+        plugin_data->kernel_init_done = false;
+
         strncpy(plugin_data->plugin_name,cur_pluginInformation->getName().c_str(),MAXIMUM_PLUGIN_NAME_LENGTH-1);
         strncpy(plugin_data->path,cur_pluginInformation->getPath().c_str(),MAXIMUM_PLUGIN_PATH_NAME_LENGTH-1);
 

@@ -173,6 +173,7 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
 
 
     if(result == APPLICATION_CLOSE_APPLY || result == APPLICATION_CLOSE_APPLY_MEMORY) {
+        CallHook(WUPS_LOADER_HOOK_INIT_KERNEL);
         CallHook(WUPS_LOADER_HOOK_INIT_FS);
         CallHook(WUPS_LOADER_HOOK_INIT_OVERLAY);
         CallHook(WUPS_LOADER_HOOK_INIT_PLUGIN);

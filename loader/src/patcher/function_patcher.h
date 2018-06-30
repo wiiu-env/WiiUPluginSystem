@@ -68,6 +68,8 @@ struct replacement_data_plugin_t {
 
     int32_t                     number_used_hooks;                              // Number of used hooks. Maximum is MAXIMUM_HOOKS_PER_PLUGIN
     replacement_data_hook_t     hooks[MAXIMUM_HOOKS_PER_PLUGIN];                // Replacement information for each function.
+    bool                        kernel_allowed;                                 // Allow kernel access for the plugin!?!.
+    bool                        kernel_init_done;                               // KernelInit was done
 };
 
 #define MAXIMUM_PLUGINS                                 32
