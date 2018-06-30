@@ -80,7 +80,18 @@ typedef struct wups_loader_init_kernel_args_t_ {
 /*
     Gets called by the framework
 */
+/**
+    Sets the pointer for wrapping the fs functions.
+    If NULL pointers are provided, the original function will be called.
+    The whole point of replacing the fs functions is to inherit SD/USB access. 
+    The argument of the ON_APPLICATION_START hook provides information on the state of SD or USB access.
+**/
 void WUPS_InitFS(wups_loader_init_fs_args_t args);
+
+/**
+    Sets the function pointer for opening the overlay.
+    If none or a NULL pointer is provided, calling "WUPS_OpenOverlay" has no effect.
+**/
 void WUPS_InitOverlay(wups_loader_init_overlay_args_t args);
 
 /**
