@@ -21,13 +21,13 @@ void OSScreenPutFontEx(uint32_t bufferNum, uint32_t posX, uint32_t posY, const c
 void OSScreenEnableEx(uint32_t bufferNum, int32_t enable);
 void OSScreenPutPixelEx(uint32_t bufferNum, uint32_t posX, uint32_t posY, uint32_t color);
 
-static void * overlayfunction_ptr __attribute__((section(".data"))) = NULL;
+static OverlayOpenFunction overlayfunction_ptr __attribute__((section(".data"))) = NULL;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 void WUPS_InitOverlay(wups_loader_init_overlay_args_t args) {
-    overlayfunction_ptr = (void*) args.overlayfunction_ptr;
+    overlayfunction_ptr = args.overlayfunction_ptr;
 }
 
 void WUPS_Overlay_PrintTextOnScreen(wups_overlay_options_type_t screen, int x,int y, const char * msg, ...) {
@@ -80,7 +80,7 @@ void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen) {
 
 void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback) {
     if(overlayfunction_ptr != NULL) {
-        ( (void (*)(wups_overlay_options_type_t, overlay_callback))((unsigned int*)overlayfunction_ptr) )(screen,callback);
+        overlayfunction_ptr(screen,callback);
     }
 }
 

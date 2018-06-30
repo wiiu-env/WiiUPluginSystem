@@ -19,6 +19,7 @@
 #define WUPS_HOOKS_DEF_H_
 
 #include "common.h"
+#include "utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,30 +58,10 @@ typedef enum wups_loader_app_status_t {
     WUPS_APP_STATUS_UNKNOWN,            /* Unknown status _should_ never happen.*/
 } wups_loader_app_status_t;
 
-typedef struct wups_loader_init_overlay_args_t {
-    const void * overlayfunction_ptr;
-} wups_loader_init_overlay_args_t;
-
-typedef struct wups_loader_init_fs_args_t {
-    const void * open_repl;
-    const void * close_repl;
-    const void * write_repl;
-    const void * read_repl;
-    const void * lseek_repl;
-    const void * stat_repl;
-    const void * fstat_repl;
-    const void * opendir_repl;
-    const void * closedir_repl;
-    const void * readdir_repl;
-    const void * mkdir_repl;
-} wups_loader_init_fs_args_t;
-
-
 typedef struct wups_loader_app_started_args_t {
     bool sd_mounted;
     bool usb_mounted;
 } wups_loader_app_started_args_t;
-
 
 #define WUPS_FS_ACCESS() \
     void init_fs(wups_loader_init_fs_args_t);\

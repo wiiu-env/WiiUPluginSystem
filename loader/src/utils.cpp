@@ -34,27 +34,25 @@ void CallHookEx(wups_loader_hook_type_t hook_type, int32_t plugin_index_needed) 
                 void * func_ptr = hook_data->func_pointer;
                 //TODO: Switch cases depending on arguments etc.
                 // Adding arguments!
-
                 if(func_ptr != NULL) {
                     if(hook_type == WUPS_LOADER_HOOK_INIT_FS) {
                         wups_loader_init_fs_args_t args;
-                        args.open_repl = (const void*)&open;
-                        args.close_repl = (const void*)&close;
-                        args.write_repl = (const void*)&write;
-                        args.read_repl = (const void*)&read;
-                        args.lseek_repl = (const void*)&lseek;
-                        args.stat_repl = (const void*)&stat;
-                        args.fstat_repl = (const void*)&fstat;
-                        args.opendir_repl = (const void*)&opendir;
-                        args.closedir_repl = (const void*)&closedir;
-                        args.readdir_repl = (const void*)&readdir;
-                        args.mkdir_repl = (const void*)&mkdir;
-
+                        // open is defined as "extern int open (const char *, int, ...);", we are ignoring the varargs part
+                        args.open_repl = (OpenFunction) &open;
+                        args.close_repl = &close;
+                        args.write_repl = &write;
+                        args.read_repl = &read;
+                        args.lseek_repl = &lseek;
+                        args.stat_repl = &stat;
+                        args.fstat_repl = &fstat;
+                        args.opendir_repl = &opendir;
+                        args.closedir_repl = &closedir;
+                        args.readdir_repl = &readdir;
+                        args.mkdir_repl = &mkdir;
                         ((void (*)(wups_loader_init_fs_args_t))((uint32_t*)func_ptr) )(args);
                     } else if(hook_type == WUPS_LOADER_HOOK_INIT_OVERLAY) {
                         wups_loader_init_overlay_args_t args;
-                        args.overlayfunction_ptr = (const void*)&overlay_helper;
-
+                        args.overlayfunction_ptr = &overlay_helper;
                         ((void (*)(wups_loader_init_overlay_args_t))((uint32_t*)func_ptr) )(args);
                     } else if(hook_type == WUPS_LOADER_HOOK_INIT_PLUGIN) {
                         ((void (*)(void))((uint32_t*)func_ptr) )();

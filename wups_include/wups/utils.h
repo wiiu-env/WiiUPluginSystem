@@ -35,6 +35,40 @@ wups_overlay_options_type_t;
 
 typedef void (*overlay_callback)(wups_overlay_options_type_t);
 
+typedef void (*OverlayOpenFunction)(wups_overlay_options_type_t screen, overlay_callback callback);
+
+typedef struct wups_loader_init_overlay_args_t {
+    OverlayOpenFunction overlayfunction_ptr;
+} wups_loader_init_overlay_args_t;
+
+typedef int             (*OpenFunction)     (const char *pathname, int flags);
+typedef ssize_t         (*WriteFunction)    (int fd, const void *buf, size_t count);
+typedef int             (*CloseFunction)    (int fd);
+typedef ssize_t         (*ReadFunction)     (int fd, void *buf, size_t count);
+typedef off_t           (*LSeekFunction)    (int fd, off_t offset, int whence);
+typedef int             (*StatFunction)     (const char *pathname, struct stat *statbuf);
+typedef int             (*FStatFunction)    (int fd, struct stat *statbuf);
+typedef DIR*            (*OpenDirFunction)  (const char * arg);
+typedef int             (*CloseDirFunction) (DIR *dirp);
+typedef struct dirent * (*ReadDirFunction)  (DIR *dirp);
+typedef int             (*MKDirFunction)    (const char *path, mode_t mode);
+
+typedef struct wups_loader_init_fs_args_t {
+    OpenFunction open_repl;
+    CloseFunction close_repl;
+    WriteFunction write_repl;
+    ReadFunction read_repl;
+    LSeekFunction lseek_repl;
+    StatFunction stat_repl;
+    FStatFunction fstat_repl;
+    OpenDirFunction opendir_repl;
+    CloseDirFunction closedir_repl;
+    ReadDirFunction readdir_repl;
+    MKDirFunction mkdir_repl;
+} wups_loader_init_fs_args_t;
+
+
+
 /*
     Gets called by the framework
 */
