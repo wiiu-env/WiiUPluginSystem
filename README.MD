@@ -1,4 +1,4 @@
-[Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  
+[Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  | [Discord](https://discord.gg/bZ2rep2)
 # Plugin system for the Wii U. (WIP) [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
 WARNING: THIS PROJECT HAS JUST STARTED AND IS FOR DEVS AND PEOPLE WHO WANT TO PLAY AROUND WITH NEW THINGS. IT MAY BE BUGGY, FEATURE COULD BREAK AT ANY TIME, INTERFACES CAN CHANGE, AND MANY BUGS CAN OCCUR. THIS APPLICATION COMES WITH NO WARRANTY-
@@ -71,7 +71,22 @@ This should create an "wiiupluginloader.elf" which can be loaded with the Homebr
 Last but not least you need to build the plugins that should be loaded.
 Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
 
-Example plugins can be found here: (TODO)
+This is a (maybe incomplete) list of currently available plugins:
+
+- [HID to VPAD](https://github.com/Maschell/hid_to_vpad/tree/wups):  
+Port of [HID to VPAD](https://github.com/Maschell/hid_to_vpad).
+No configuration is possible yet, all controllers map automatically to the game pad, pro controller mapping not support. Network client is working.
+- [Screenshot plugin](https://github.com/Maschell/ScreenshotWUPS):  
+Simple plugin that take a screenshot by presing L+R+ZL+ZR on the gamepad. Button combo can be changed.
+- [SD Cafiine](https://github.com/Maschell/SDCafiine/tree/wups):  
+Port of the orignal SDCafiine (https://github.com/Maschell/SDCafiine). No NTFS support yet.
+- [SwipSwapMe](https://github.com/Maschell/SwipSwapMe):  
+Swaps the TV and gamepad screen via a buttons combo.The button combo can be changed.
+- [Diibugger](https://github.com/Maschell/DiiBuggerWUPS):  
+Port of the DiiBugger.
+- [WUPSPluginPlayground (Various other demo plugins)](https://github.com/Maschell/WUPSPluginPlayground):  
+This repository is supposed to hold serveral small testing plugins for the Wii U Plugin System.
+Most of the plugin are either really small (Padcon, NNU_Patcher) or are just for testing / gathering information.
 
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
@@ -83,8 +98,8 @@ When using this feature, **only** this plugin will be loaded. The plugin will co
 A windows executable can be found in `tools/wiiload.exe`  
 More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
-# Future
-Checkout the PLANS.MD for goals, issues and future plans.
+# Future and contribution
+On the Discord you can more information about open task and how to contribute: https://discord.gg/bZ2rep2
 
 # Credits
 Some files are based on brainslug by Chadderz:  
