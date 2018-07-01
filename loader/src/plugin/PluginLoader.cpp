@@ -323,7 +323,7 @@ bool PluginLoader::loadAndLinkElf(PluginData * pluginData, Elf *elf, void * star
                 }
                 ElfTools::elfLoadSymbols(elf_ndxscn(scn), (void*) firstCurAddress, symtab, symtab_count);
 
-                curAddress = destination + shdr->sh_size;
+                curAddress = ROUNDUP(destination + shdr->sh_size,0x100);
             }
         }
     }
