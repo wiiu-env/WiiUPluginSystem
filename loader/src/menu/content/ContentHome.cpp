@@ -35,7 +35,11 @@ ContentHome::ContentHome():ContentTemplate()
     , exitPlus(gettext("Apply Patches"))
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
     , wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
-    , buttonClickSound(Resources::GetSound("settings_click_2.mp3")) {
+    , buttonClickSound(Resources::GetSound("settings_click_2.mp3"))
+    , buttonATrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_A, true)
+    , buttonUpTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
+    , buttonDownTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
+    , DPADButtons(0,0) {
     glm::vec4 textColor = glm::vec4(1.0f,1.0f,1.0f,1.0f);
 
     homebutton_img.setAlignment(ALIGN_LEFT);
@@ -62,8 +66,8 @@ ContentHome::ContentHome():ContentTemplate()
 
     welcomeHeadLineLabel.setColor(textColor);
     welcomeHeadLineLabel.setAlignment(ALIGN_MIDDLE|ALIGN_TOP);
-    welcomeHeadLineLabel.setFontSize(40);
-    welcomeHeadLineLabel.setPosition(-330,-50);
+    welcomeHeadLineLabel.setFontSize(50);
+    welcomeHeadLineLabel.setPosition(-370,-50);
 
     twitterLogoImage.setAlignment(ALIGN_BOTTOM|ALIGN_LEFT);
     twitterLogoImage.setPosition(10,20);
@@ -78,6 +82,12 @@ ContentHome::ContentHome():ContentTemplate()
     URLLabel.setAlignment(ALIGN_BOTTOM|ALIGN_LEFT);
     URLLabel.setPosition(280,50);
 
+    DPADButtons.setTrigger(&buttonATrigger);
+    DPADButtons.setTrigger(&buttonDownTrigger);
+    DPADButtons.setTrigger(&buttonUpTrigger);
+    DPADButtons.clicked.connect(this, &ContentHome::OnDPADClick);
+    append(&DPADButtons);
+
     PluginLoader * pluginLoader  = PluginLoader::getInstance();
     std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
     std::vector<PluginInformation *> pluginListLoaded = pluginLoader->getPluginsLoadedInMemory();
@@ -89,10 +99,15 @@ ContentHome::ContentHome():ContentTemplate()
 
     float frameoffset = 0;
     float frameheight = 50.0f;
+    int32_t selectionMappingIndex = 0;
+    selectionMappingMin = 0;
     for (std::vector<PluginInformation *>::iterator it = pluginList.begin() ; it != pluginList.end(); ++it) {
         PluginInformation * curPlugin = *it;
 
         DefaultGuiSwitch * element = new DefaultGuiSwitch(false);
+        selectionMapping[selectionMappingIndex] = element;
+        selectionMappingIndex++;
+
         element->setTrigger(&touchTrigger);
         element->setTrigger(&wpadTouchTrigger);
         element->setSoundClick(buttonClickSound);
@@ -113,7 +128,7 @@ ContentHome::ContentHome():ContentTemplate()
         frame->append(left);
         frame->append(right);
         frame->setAlignment(ALIGN_TOP_CENTER);
-        frame->setSize(getWidth()*0.80f,frameheight);
+        frame->setSize(getWidth()*0.65f,frameheight);
 
         GuiText * text = new GuiText(curPlugin->getName().c_str());
         text->setColor(glm::vec4(0.3f,0.3f,0.3f,1.0f));
@@ -139,6 +154,10 @@ ContentHome::ContentHome():ContentTemplate()
         toDelete.push_back(right);
         toDelete.push_back(text);
     }
+    selectionMappingMax = selectionMapping.size() -1;
+    if(selectionMappingMax < 0) {
+        selectionMappingMax = 0;
+    }
 
     pluginLoader->clearPluginInformation(pluginListLoaded);
 
@@ -152,6 +171,41 @@ ContentHome::ContentHome():ContentTemplate()
 
     auto fp = std::bind(&ContentHome::linkPlugins, this);
     Application::instance()->setLinkPluginsCallback(fp);
+}
+
+void ContentHome::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger) {
+    if(trigger == &buttonATrigger) {
+        if((controller->chan & (GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5)) && controller->data.validPointer) {
+            return;
+        }
+        GuiToggle * toggleElement = selectionMapping[selectionMappingCur];
+        if(toggleElement != NULL) {
+            buttonClickSound->Play();
+            DEBUG_FUNCTION_LINE("Pressed a for %d\n",selectionMappingCur);
+            toggleElement->setValue(!toggleElement->getValue());
+        }
+    } else if(trigger == &buttonUpTrigger || trigger == &buttonDownTrigger) {
+        if(selectionMappingCur == -1) {
+            selectionMappingCur = selectionMappingMin;
+        } else {
+            if(trigger == &buttonUpTrigger) {
+                if(selectionMappingCur > 0) {
+                    selectionMappingCur--;
+                } else {
+                    selectionMappingCur = selectionMappingMax;
+                }
+            } else if(trigger == &buttonDownTrigger) {
+                if(selectionMappingCur < selectionMappingMax) {
+                    selectionMappingCur++;
+                } else {
+                    selectionMappingCur = 0;
+                }
+            }
+        }
+        DEBUG_FUNCTION_LINE("%d\n",selectionMappingCur);
+        updateButtons = true;
+    }
+
 }
 
 void ContentHome::OnValueChanged(GuiToggle * toggle,bool value) {
@@ -171,6 +225,25 @@ bool ContentHome::linkPlugins() {
     }
 
     return PluginLoader::getInstance()->loadAndLinkPlugins(willBeLoaded);
+}
+
+
+void ContentHome::update(GuiController * c) {
+    ContentTemplate::update(c);
+    if(updateButtons){
+        for (auto const& x : selectionMapping) {
+            int index = x.first;
+            GuiToggle* toggle = x.second;
+            if(toggle != NULL) {
+                if(index != selectionMappingCur) {
+                    toggle->clearState(STATE_SELECTED);
+                } else {
+                    toggle->setState(STATE_SELECTED);
+                }
+            }
+        }
+        updateButtons = false;
+    }
 }
 
 ContentHome::~ContentHome() {

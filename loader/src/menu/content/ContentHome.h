@@ -59,12 +59,27 @@ private:
 
     GuiSound *buttonClickSound;
 
+    GuiTrigger buttonATrigger;
+    GuiTrigger buttonUpTrigger;
+    GuiTrigger buttonDownTrigger;
+
+    GuiButton DPADButtons;
+
     GuiFrame pluginsFrame;
 
     std::vector<GuiElement*> toDelete;
+    void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
     void OnValueChanged(GuiToggle * toggle,bool value);
     bool linkPlugins();
     std::map<GuiToggle *, PluginInformation *> pluginMapping;
+    std::map<int, GuiToggle *> selectionMapping;
+    int selectionMappingMin = 0;
+    int selectionMappingMax = 0;
+    int selectionMappingCur = -1;
+
+    bool updateButtons = true;
+
+    virtual void update(GuiController * c);
 };
 
 #endif //_CONTENT_HOME_H
