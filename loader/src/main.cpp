@@ -107,9 +107,10 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
 
         DynamicLinkingHelper::getInstance()->clearAll();
 
-        PluginLoader * pluginLoader  = PluginLoader::getInstance();
-        std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
-        pluginLoader->loadAndLinkPlugins(pluginList);
+        //PluginLoader * pluginLoader  = PluginLoader::getInstance();
+        //std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
+        //pluginLoader->loadAndLinkPlugins(pluginList);
+        //pluginLoader->clearPluginInformation(pluginList);
 
         //!*******************************************************************
         //!                    Initialize heap memory                        *
@@ -145,8 +146,6 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
         OSFatal("fillRelocations failed.");
     }
 
-
-
     if(!isInMiiMakerHBL()) {
         DEBUG_FUNCTION_LINE("Apply patches.\n");
         ApplyPatchesAndCallHookStartingApp();
@@ -166,11 +165,8 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
             DEBUG_FUNCTION_LINE("<----------------- COPY PASTE ME END -----------------> \n");
             DEBUG_FUNCTION_LINE("<-----------------------------------------------------> \n");
         }
-
-
         return EXIT_RELAUNCH_ON_LOAD;
     }
-
 
     if(result == APPLICATION_CLOSE_APPLY || result == APPLICATION_CLOSE_APPLY_MEMORY) {
         CallHook(WUPS_LOADER_HOOK_INIT_KERNEL);

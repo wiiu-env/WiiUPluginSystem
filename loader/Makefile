@@ -35,6 +35,7 @@ TARGET    :=  wiiupluginloader
 BUILD     :=  build
 BUILD_DBG	:=  $(TARGET)_dbg
 SOURCES   :=  src/common \
+              src/custom/gui \
               src/libelf \
               src/menu/content \
               src/menu \

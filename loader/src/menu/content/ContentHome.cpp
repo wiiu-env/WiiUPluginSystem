@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "ContentHome.h"
+#include "plugin/PluginLoader.h"
+#include "custom/gui/DefaultGuiSwitch.h"
+#include "Application.h"
 
 ContentHome::ContentHome():ContentTemplate()
     , welcomeHeadLineLabel(gettext("Welcome to the Wii U plugin loader"))
@@ -29,7 +32,10 @@ ContentHome::ContentHome():ContentTemplate()
     , exitHome(gettext("Exit to HBL  "))
     , plusbutton_imgdata(Resources::GetImageData("PlusButtonIcon.png"))
     , plusbutton_img(plusbutton_imgdata)
-    , exitPlus(gettext("Apply Patches")) {
+    , exitPlus(gettext("Apply Patches"))
+    , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
+    , wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
+    , buttonClickSound(Resources::GetSound("settings_click_2.mp3")) {
     glm::vec4 textColor = glm::vec4(1.0f,1.0f,1.0f,1.0f);
 
     homebutton_img.setAlignment(ALIGN_LEFT);
@@ -72,6 +78,70 @@ ContentHome::ContentHome():ContentTemplate()
     URLLabel.setAlignment(ALIGN_BOTTOM|ALIGN_LEFT);
     URLLabel.setPosition(280,50);
 
+    PluginLoader * pluginLoader  = PluginLoader::getInstance();
+    std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
+    std::vector<PluginInformation *> pluginListLoaded = pluginLoader->getPluginsLoadedInMemory();
+
+    pluginsFrame.setAlignment(ALIGN_TOP_CENTER);
+    pluginsFrame.setPosition(0,-80);
+    pluginsFrame.setSize(getWidth(),getHeight());
+    append(&pluginsFrame);
+
+    float frameoffset = 0;
+    float frameheight = 50.0f;
+    for (std::vector<PluginInformation *>::iterator it = pluginList.begin() ; it != pluginList.end(); ++it) {
+        PluginInformation * curPlugin = *it;
+
+        DefaultGuiSwitch * element = new DefaultGuiSwitch(false);
+        element->setTrigger(&touchTrigger);
+        element->setTrigger(&wpadTouchTrigger);
+        element->setSoundClick(buttonClickSound);
+        element->valueChanged.connect(this, &ContentHome::OnValueChanged);
+
+        for (std::vector<PluginInformation *>::iterator itOther = pluginListLoaded.begin() ; itOther != pluginListLoaded.end(); ++itOther) {
+            PluginInformation * otherPlugin = *itOther;
+            if(otherPlugin->getName().compare(curPlugin->getName()) == 0) {
+                element->setValue(true);
+            }
+        }
+        pluginMapping[element] = curPlugin;
+
+        GuiFrame * frame = new GuiFrame();
+        GuiFrame * left = new GuiFrame();
+        GuiFrame * right = new GuiFrame();
+
+        frame->append(left);
+        frame->append(right);
+        frame->setAlignment(ALIGN_TOP_CENTER);
+        frame->setSize(getWidth()*0.80f,frameheight);
+
+        GuiText * text = new GuiText(curPlugin->getName().c_str());
+        text->setColor(glm::vec4(0.3f,0.3f,0.3f,1.0f));
+        text->setFontSize(40);
+        text->setColor(textColor);
+        text->setAlignment(ALIGN_LEFT);
+        left->append(text);
+        left->setAlignment(ALIGN_LEFT);
+        right->setAlignment(ALIGN_RIGHT);
+        element->setAlignment(ALIGN_RIGHT);
+        element->setPosition(0,10);
+        element->setScale(2.0f);
+
+        right->append(element);
+
+        frameoffset -= frameheight;
+        frame->setPosition(0,frameoffset);
+        pluginsFrame.append(frame);
+
+        toDelete.push_back(element);
+        toDelete.push_back(frame);
+        toDelete.push_back(left);
+        toDelete.push_back(right);
+        toDelete.push_back(text);
+    }
+
+    pluginLoader->clearPluginInformation(pluginListLoaded);
+
     append(&welcomeHeadLineLabel);
     append(&twitterLogoImage);
     append(&githubLogoImage);
@@ -79,6 +149,28 @@ ContentHome::ContentHome():ContentTemplate()
     append(&URLLabel);
     append(&exitHomeFrame);
     append(&exitPlusFrame);
+
+    auto fp = std::bind(&ContentHome::linkPlugins, this);
+    Application::instance()->setLinkPluginsCallback(fp);
+}
+
+void ContentHome::OnValueChanged(GuiToggle * toggle,bool value) {
+
+}
+
+bool ContentHome::linkPlugins() {
+    std::vector<PluginInformation*> willBeLoaded;
+
+    for (auto const& x : pluginMapping) {
+        GuiToggle * guiElement = x.first;
+        if(guiElement->getValue()) {
+            PluginInformation* pluginInformation = x.second;
+            DEBUG_FUNCTION_LINE("We want to link %s\n",pluginInformation->getName().c_str());
+            willBeLoaded.push_back(pluginInformation);
+        }
+    }
+
+    return PluginLoader::getInstance()->loadAndLinkPlugins(willBeLoaded);
 }
 
 ContentHome::~ContentHome() {
@@ -91,4 +183,15 @@ ContentHome::~ContentHome() {
     remove(&URLLabel);
     remove(&exitHomeFrame);
     remove(&exitPlusFrame);
+
+    for (auto const& x : pluginMapping) {
+        // x.first is also in the toDelete vector.
+        PluginInformation* pluginInformation = x.second;
+        delete pluginInformation;
+    }
+
+    Resources::RemoveSound(buttonClickSound);
+    for (std::vector<GuiElement *>::iterator it = toDelete.begin() ; it != toDelete.end(); ++it) {
+        delete *it;
+    }
 }

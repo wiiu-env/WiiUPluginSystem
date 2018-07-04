@@ -108,7 +108,13 @@ bool PluginLoader::loadAndLinkPlugins(std::vector<PluginInformation *> pluginInf
 
     PluginLoader::flushCache();
 
-    copyPluginDataIntoGlobalStruct(loadedPlugins);
+    if(success) {
+        copyPluginDataIntoGlobalStruct(loadedPlugins);
+    } else {
+        PluginLoader::resetPluginLoader();
+        memset((void*)&gbl_replacement_data,0,sizeof(gbl_replacement_data));
+    }
+
     clearPluginData(loadedPlugins);
 
     return success;

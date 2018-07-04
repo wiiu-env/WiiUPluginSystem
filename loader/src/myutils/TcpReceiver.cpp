@@ -223,12 +223,14 @@ int32_t TcpReceiver::loadToMemory(int32_t clientSocket, uint32_t ipAddress) {
     if(plugin == NULL) {
         return NOT_A_VALID_PLUGIN;
     }
+    delete plugin;
     PluginLoader * pluginLoader = PluginLoader::getInstance();
     pluginLoader->resetPluginLoader();
     std::vector<PluginInformation* > pluginList = pluginLoader->getPluginInformation(WUPS_TEMP_PLUGIN_PATH);
     if(pluginList.size() == 0 || !pluginLoader->loadAndLinkPlugins(pluginList)) {
         return NOT_A_VALID_PLUGIN;
     }
+    pluginLoader->clearPluginInformation(pluginList);
     Application::instance()->quit(APPLICATION_CLOSE_APPLY);
 
     return fileSize;

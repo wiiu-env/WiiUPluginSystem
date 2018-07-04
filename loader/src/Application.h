@@ -19,6 +19,7 @@
 #define _APPLICATION_H
 
 #include "menu/MainWindow.h"
+#include <functional>
 #include <video/CVideo.h>
 #include <system/CThread.h>
 #include <language/gettext.h>
@@ -61,6 +62,11 @@ public:
         exitCode = code;
         exitApplication = true;
     }
+
+    void setLinkPluginsCallback(std::function<bool(void)> fun) {
+        linkPluginsCallback = fun;
+        DEBUG_FUNCTION_LINE("Set callback to %08X \n",linkPluginsCallback);
+    }
 private:
     Application();
 
@@ -80,6 +86,7 @@ private:
     MainWindow *mainWindow;
     GuiController *controller[5];
     int32_t exitCode;
+    std::function<bool(void)> linkPluginsCallback = NULL;
 };
 
 #endif //_APPLICATION_H

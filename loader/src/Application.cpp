@@ -183,6 +183,14 @@ void Application::executeThread(void) {
 
                 if(controller[i]->data.buttons_d & VPAD_BUTTON_PLUS) {
                     exitCode = APPLICATION_CLOSE_APPLY;
+                    if(linkPluginsCallback != NULL) {
+                        bool result = linkPluginsCallback();
+                        if(!result) {
+                            // On linking errors return to the HBL.
+                            #warning TODO: proper error handling when linking fails.
+                            exitCode = APPLICATION_CLOSE_MIIMAKER;
+                        }
+                    }
                     exitApplication = true;
                 }
 

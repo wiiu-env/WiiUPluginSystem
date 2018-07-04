@@ -20,6 +20,8 @@
 #include "gui/Gui.h"
 #include "ContentTemplate.h"
 #include "language/gettext.h"
+#include "plugin/PluginInformation.h"
+#include "custom/gui/DefaultGuiSwitch.h"
 
 class ContentHome : public ContentTemplate {
 public:
@@ -52,6 +54,17 @@ private:
     GuiText exitPlus;
     GuiFrame exitPlusFrame;
 
+    GuiTrigger touchTrigger;
+    GuiTrigger wpadTouchTrigger;
+
+    GuiSound *buttonClickSound;
+
+    GuiFrame pluginsFrame;
+
+    std::vector<GuiElement*> toDelete;
+    void OnValueChanged(GuiToggle * toggle,bool value);
+    bool linkPlugins();
+    std::map<GuiToggle *, PluginInformation *> pluginMapping;
 };
 
 #endif //_CONTENT_HOME_H
