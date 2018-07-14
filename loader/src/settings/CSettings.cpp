@@ -20,7 +20,6 @@
 
 #include "common/common.h"
 #include "CSettings.h"
-#include "SettingsEnums.h"
 #include <fs/CFile.hpp>
 #include <fs/FSUtils.h>
 #include <utils/StringTools.h>

@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <dynamic_libs/os_types.h>
 #include <vector>
-#include "SettingsEnums.h"
 
 class CSettings {
 public:
