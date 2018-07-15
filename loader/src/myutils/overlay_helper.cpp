@@ -1,16 +1,9 @@
 #include <utils/logger.h>
 #include <malloc.h>
-#include "libfat.h"
-#include <iosuhax.h>
 #include <wups.h>
-#include <fat.h>
 #include "common/retain_vars.h"
 #include "overlay_helper.h"
 #include <dynamic_libs/gx2_functions.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 uint32_t * getFromGX2Buffer(struct buffer_store store, uint32_t size) {
     if(store.buffer != NULL) {
@@ -24,7 +17,7 @@ uint32_t * getFromGX2Buffer(struct buffer_store store, uint32_t size) {
     return NULL;
 }
 
-void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callback) {
+void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callback, void * args) {
     if(callback == NULL) return;
     if(!OSIsHomeButtonMenuEnabled()) return; // This pauses the game. Make sure to only do it when the home button is allowed.
 
@@ -151,7 +144,7 @@ void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callbac
 
     // call the callback.
     if(real_screen_type != WUPS_OVERLAY_NONE) {
-        callback(real_screen_type);
+        callback(real_screen_type, args);
     }
 
     if(tv_store.buffer != NULL) {
@@ -175,7 +168,3 @@ error_exit:
 
     return;
 }
-
-#ifdef __cplusplus
-}
-#endif

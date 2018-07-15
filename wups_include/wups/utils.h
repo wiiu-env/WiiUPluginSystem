@@ -33,9 +33,9 @@ typedef enum wups_overlay_options_type_t {
 }
 wups_overlay_options_type_t;
 
-typedef void (*overlay_callback)(wups_overlay_options_type_t);
+typedef void (*overlay_callback)(wups_overlay_options_type_t, void*);
 
-typedef void (*OverlayOpenFunction)(wups_overlay_options_type_t screen, overlay_callback callback);
+typedef void (*OverlayOpenFunction)(wups_overlay_options_type_t screen, overlay_callback callback, void*);
 
 typedef struct wups_loader_init_overlay_args_t {
     OverlayOpenFunction overlayfunction_ptr;
@@ -109,7 +109,7 @@ void WUPS_Overlay_OSScreenClear(wups_overlay_options_type_t screen);
 
 void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen);
 
-void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback);
+void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback, void* args);
 
 /**
     Reads a 32bit value from a given address with kernel rights.

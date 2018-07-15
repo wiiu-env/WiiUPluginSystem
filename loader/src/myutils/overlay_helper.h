@@ -1,11 +1,11 @@
 #ifndef __OVERLAY_HELPER_H_
 #define __OVERLAY_HELPER_H_
 
+#include <wups.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <wups.h>
 
 struct buffer_store {
     void * buffer;
@@ -15,10 +15,10 @@ struct buffer_store {
     volatile int32_t buffering_mode;
 };
 
-void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callback);
-
 #ifdef __cplusplus
 }
 #endif
+
+void overlay_helper(wups_overlay_options_type_t screen, overlay_callback callback, void * args);
 
 #endif

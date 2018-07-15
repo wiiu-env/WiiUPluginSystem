@@ -78,9 +78,9 @@ void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen) {
     }
 }
 
-void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback) {
+void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback, void* arg) {
     if(overlayfunction_ptr != NULL) {
-        overlayfunction_ptr(screen,callback);
+        overlayfunction_ptr(screen, callback, arg);
     }
 }
 
