@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
+#include "common/common.h"
 #include "ContentHome.h"
 #include "plugin/PluginLoader.h"
 #include "custom/gui/DefaultGuiSwitch.h"
@@ -89,7 +90,7 @@ ContentHome::ContentHome():ContentTemplate()
     append(&DPADButtons);
 
     PluginLoader * pluginLoader  = PluginLoader::getInstance();
-    std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation("sd:/wiiu/plugins/");
+    std::vector<PluginInformation *> pluginList = pluginLoader->getPluginInformation(WUPS_PLUGIN_PATH);
     std::vector<PluginInformation *> pluginListLoaded = pluginLoader->getPluginsLoadedInMemory();
 
     pluginsFrame.setAlignment(ALIGN_TOP_CENTER);

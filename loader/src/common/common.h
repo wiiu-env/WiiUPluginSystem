@@ -29,6 +29,7 @@ extern "C" {
 #define DEFAULT_LANG_PATH           DEFAULT_WUPSLOADER_PATH "/languages"
 #define LANGUAGE_FILE_EXT           ".lang"
 
+#define WUPS_PLUGIN_PATH            SD_PATH WIIU_PATH "/plugins"
 #define WUPS_TEMP_PLUGIN_PATH       SD_PATH WIIU_PATH "/plugins/temp"
 #define WUPS_TEMP_PLUGIN_FILE       WUPS_TEMP_PLUGIN_PATH "/temp.mod"
 
