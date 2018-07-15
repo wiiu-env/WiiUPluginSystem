@@ -116,7 +116,7 @@ ContentHome::ContentHome():ContentTemplate()
 
         for (std::vector<PluginInformation *>::iterator itOther = pluginListLoaded.begin() ; itOther != pluginListLoaded.end(); ++itOther) {
             PluginInformation * otherPlugin = *itOther;
-            if(otherPlugin->getName().compare(curPlugin->getName()) == 0) {
+            if(otherPlugin->getPath().compare(curPlugin->getPath()) == 0) {
                 element->setValue(true);
             }
         }
