@@ -4,6 +4,7 @@
 #include "common/retain_vars.h"
 #include "hooks_patcher.h"
 #include "myutils/overlay_helper.h"
+#include "myutils/ConfigUtils.h"
 #include "main.h"
 #include "utils.h"
 #include "mymemory/memory_mapping.h"
@@ -61,6 +62,48 @@ DECL(void, GX2WaitForVsync, void) {
 }
 
 uint8_t vpadPressCooldown = 0xFF;
+
+uint8_t angleX_counter = 0;
+float angleX_delta = 0.0f;
+float angleX_last = 0.0f;
+uint8_t angleX_frameCounter = 0;
+
+bool checkMagic(VPADData *buffer) {
+    // buffer->angle stores the rotations per axis since the app started.
+    // Each full rotation add/subtracts 1.0f (depending on the direction).
+
+    // Check for rotation every only 5 frames.
+    angleX_frameCounter++;
+    if(angleX_frameCounter >= 5) {
+        // Get how much the gamepad rotated within the last 5 frames.
+        float diff_angle = -(buffer->angle.x - angleX_last);
+        // We want the gamepad to make (on average) at least 0.16% (1/6) of a full rotation per 5 frames (for 6 times in a row).
+        float target_diff = (0.16f);
+        // Calculate if rotated enough in this step (including the delta from the last step).
+        float total_diff = (diff_angle + angleX_delta) - target_diff;
+        if(total_diff > 0.0f) {
+            // The rotation in this step was enough.
+            angleX_counter++;
+            // When the gamepad rotated ~0.16% for 6 times in a row we made a full rotation!
+            if(angleX_counter > 5) {
+                ConfigUtils::openConfigMenu();
+                // reset stuff.
+                angleX_counter = 0;
+                angleX_delta = 0.0f;
+            } else {
+                // Save difference as it will be added on the next check.
+                angleX_delta = total_diff;
+            }
+        } else {
+            // reset counter if it stopped rotating.
+            angleX_counter = 0;
+        }
+        angleX_frameCounter = 0;
+        angleX_last = buffer->angle.x;
+    }
+
+}
+
 DECL(int32_t, VPADRead, int32_t chan, VPADData *buffer, uint32_t buffer_size, int32_t *error) {
     int32_t result = real_VPADRead(chan, buffer, buffer_size, error);
 
@@ -72,6 +115,14 @@ DECL(int32_t, VPADRead, int32_t chan, VPADData *buffer, uint32_t buffer_size, in
         }
         vpadPressCooldown = 0x3C;
     }
+
+    if(result > 0 && (buffer[0].btns_h == (VPAD_BUTTON_L | VPAD_BUTTON_DOWN | VPAD_BUTTON_MINUS)) && vpadPressCooldown == 0 && OSIsHomeButtonMenuEnabled()) {
+        ConfigUtils::openConfigMenu();
+        vpadPressCooldown = 0x3C;
+    } else if(result > 0 && OSIsHomeButtonMenuEnabled()) {
+        checkMagic(buffer);
+    }
+
     if(vpadPressCooldown > 0) {
         vpadPressCooldown--;
     }

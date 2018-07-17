@@ -28,6 +28,7 @@ extern "C" {
 #define DEFAULT_WUPSLOADER_PATH     SD_PATH WIIU_PATH "/apps/wiiupluginsystem"
 #define DEFAULT_LANG_PATH           DEFAULT_WUPSLOADER_PATH "/languages"
 #define LANGUAGE_FILE_EXT           ".lang"
+#define PLUGIN_CONFIG_FILE_EXT      ".cfg"
 #define PLUGIN_FILE_EXT             ".mod"
 
 #define WUPS_PLUGIN_PATH            SD_PATH WIIU_PATH "/plugins"

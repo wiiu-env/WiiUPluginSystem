@@ -45,6 +45,7 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_APP_STATUS_CHANGED,    /* Called when the app status changes (foreground, background, closing) */
        
     WUPS_LOADER_HOOK_INIT_KERNEL,           /* Only for internal usage */
+    WUPS_LOADER_HOOK_GET_CONFIG,            /* Called when the config-menu will be loaded */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -85,7 +86,7 @@ typedef struct wups_loader_app_started_args_t {
     void init_kernel(wups_loader_init_kernel_args_t args){ \
         WUPS_InitKernel(args);\
     }
-
+    
 #define INITIALIZE_PLUGIN() \
     void init_plugin(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN,init_plugin); \

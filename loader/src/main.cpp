@@ -57,6 +57,7 @@
 #include "myutils/libntfs.h"
 #include "myutils/libfat.h"
 #include "myutils/overlay_helper.h"
+#include "myutils/ConfigUtils.h"
 #include "version.h"
 #include "settings/CSettings.h"
 
@@ -64,7 +65,6 @@ static void ApplyPatchesAndCallHookStartingApp();
 static void RestorePatches();
 int32_t isInMiiMakerHBL();
 void readAndPrintSegmentRegister(CThread *thread, void *arg);
-
 
 extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
     if(gAppStatus == 2) {
@@ -142,14 +142,14 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
     std::vector<dyn_linking_relocation_entry_t *> relocations = DynamicLinkingHelper::getInstance()->getAllValidDynamicLinkingRelocations();
     DEBUG_FUNCTION_LINE("Found relocation information for %d functions\n",relocations.size());
 
-    if(!DynamicLinkingHelper::getInstance()->fillRelocations(relocations)){
+    if(!DynamicLinkingHelper::getInstance()->fillRelocations(relocations)) {
         OSFatal("fillRelocations failed.");
     }
 
     if(!isInMiiMakerHBL()) {
         DEBUG_FUNCTION_LINE("Apply patches.\n");
         ApplyPatchesAndCallHookStartingApp();
-
+        ConfigUtils::loadConfigFromSD();
 
         if(MemoryMapping::isMemoryMapped()) {
             DEBUG_FUNCTION_LINE("Mapping was already done. Running %016llX\n",gGameTitleID);

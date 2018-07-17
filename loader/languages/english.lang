@@ -1,4 +1,10 @@
+msgid "Press HOME to return."
+msgstr ""
+
 msgid "Language"
+msgstr ""
+
+msgid "Press B to return to the plugin overview."
 msgstr ""
 
 # English translations for Wii U Plugin System loader
@@ -16,14 +22,33 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/menu/content/ContentHome.cpp:23
+msgid "Press B to return to the plugin overview, HOME to return to the running application."
+msgstr ""
+
+#: src/menu/content/ContentHome.cpp:24
 msgid "Welcome to the Wii U plugin loader"
 msgstr ""
 
-#: src/menu/content/ContentHome.cpp:32
+#: src/menu/content/ContentHome.cpp:33
 msgid "Exit to HBL  "
 msgstr ""
 
-#: src/menu/content/ContentHome.cpp:35
+#: src/menu/content/ContentHome.cpp:36
 msgid "Apply Patches"
+msgstr ""
+
+#: src/myutils/ConfigUtils.cpp:113
+msgid "Press HOME to return to the running application."
+msgstr ""
+
+#: src/myutils/ConfigUtils.cpp:114
+msgid "Configurable running plugins:"
+msgstr ""
+
+#: src/myutils/ConfigUtils.cpp:118
+msgid "No configurable running plugins found."
+msgstr ""
+
+#: src/myutils/ConfigUtils.cpp:243
+msgid "B = plugin overview, HOME  = back to running application."
 msgstr ""
