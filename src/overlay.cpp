@@ -11,6 +11,10 @@
 #include <dirent.h>
 #include <wups.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void OSScreenInit(void);
 void OSScreenShutdown(void);
 uint32_t OSScreenGetBufferSizeEx(uint32_t bufferNum);
@@ -23,9 +27,6 @@ void OSScreenPutPixelEx(uint32_t bufferNum, uint32_t posX, uint32_t posY, uint32
 
 static OverlayOpenFunction overlayfunction_ptr __attribute__((section(".data"))) = NULL;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void WUPS_InitOverlay(wups_loader_init_overlay_args_t args) {
     overlayfunction_ptr = args.overlayfunction_ptr;
 }
