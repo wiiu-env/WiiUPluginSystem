@@ -50,8 +50,9 @@ CSettings::~CSettings() {
 
 void CSettings::SetDefault() {
     for(uint32_t i = 0; i < settingsValues.size(); i++) {
-        if(settingsValues[i].dataType == TypeString)
+        if(settingsValues[i].dataType == TypeString) {
             delete settingsValues[i].strValue;
+        }
     }
 
     settingsNames.resize(MAX_VALUE);
