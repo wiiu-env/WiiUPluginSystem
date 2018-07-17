@@ -102,7 +102,7 @@ This has been created by @dimok789 and can be found in the tools folder.
 
 # Load plugin via network
 While the loader is running, it's possible to load a single plugin via wiiload.  
-When using this feature, this and all plugins in ``sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
+When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
 A windows executable can be found in `tools/wiiload.exe`  
 More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
