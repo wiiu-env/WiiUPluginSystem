@@ -94,7 +94,8 @@ Most of the plugin are either really small (Padcon, NNU_Patcher) or are just for
 Plugins can register to the configuration menu.
 This configuration menu can be opened while running any application (e.g. while gameplay).
 Just press L, DPAD down and Minus on the gamepad.  
-This does only work when the game is allowed to open the home menu.
+This does only work when the game is allowed to open the home menu.  
+Settings made using the configuration menu will be saved to the SD Card and reloaded the next time the plugin will be used.
 
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
@@ -102,7 +103,7 @@ This has been created by @dimok789 and can be found in the tools folder.
 
 # Load plugin via network
 While the loader is running, it's possible to load a single plugin via wiiload.  
-When using this feature, this and all plugins in ``sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
+When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
 A windows executable can be found in `tools/wiiload.exe`  
 More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
