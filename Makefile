@@ -32,7 +32,8 @@ include $(DEVKITPPC)/base_rules
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		?=	release
-SOURCES		:=	src 
+SOURCES		:=	src \
+				src/config
 
 INCLUDES	:=	src \
 				wups_include
