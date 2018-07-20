@@ -18,13 +18,60 @@ The project is still in it's very early days, but it already has basic functions
 - Multiple plugins can override the same system functions.
 - Plugins can register for certain hook (for example whenever an application was started)
 - Plugins inherit the SD/USB access from the loader. All plugins have global SD and USB (FAT32 only) access.
-- Plugins can be configured at run-time. Press L, DPAD down, and minus on the gamepad at the same time to open the configuration menu.
+- Plugins can be configured at run-time. Press **L, DPAD down, and minus** on the gamepad at the same time to open the configuration menu.
+
+# Usage
+
+The "Wii U Plugin Loader" is built to be loaded through the homebrew launcher, which can be either loaded with the browser exploit or haxchi.  
+Plugins needs to be placed into the folder:
+
+```
+sd:/wiiu/plugins
+```
+
+
+# Available Plugins
+
+This is a (maybe incomplete) list of currently available plugins:
+
+- [HID to VPAD](https://github.com/Maschell/hid_to_vpad/tree/wups):  
+Port of [HID to VPAD](https://github.com/Maschell/hid_to_vpad).
+No configuration is possible yet, all controllers map automatically to the game pad, pro controller mapping not support. Network client is working.
+- [Screenshot plugin](https://github.com/Maschell/ScreenshotWUPS):  
+Simple plugin that take a screenshot by presing L+R+ZL+ZR on the gamepad. Button combo can be changed.
+- [Streaming plugin](https://github.com/Maschell/StreamingPluginWiiU):  
+Gamepad streaming tool. Open http://<ip of your wii u>:8000 on a browser in the same network.
+- [SD Cafiine](https://github.com/Maschell/SDCafiine/tree/wups):  
+Port of the orignal SDCafiine (https://github.com/Maschell/SDCafiine). No NTFS support yet.
+- [SwipSwapMe](https://github.com/Maschell/SwipSwapMe):  
+Swaps the TV and gamepad screen via a buttons combo.The button combo can be changed.
+- [Diibugger](https://github.com/Maschell/DiiBuggerWUPS):  
+Port of the DiiBugger.
+- [WUPSPluginPlayground (Various other demo plugins)](https://github.com/Maschell/WUPSPluginPlayground):  
+This repository is supposed to hold serveral small testing plugins for the Wii U Plugin System.
+Most of the plugin are either really small (Padcon, NNU_Patcher) or are just for testing / gathering information.
+
+# Configuration of the plugins
+Plugins can register to the configuration menu.
+This configuration menu can be opened while running any application (e.g. while gameplay).  
+
+Just press **L, DPAD down and minus** on the gamepad.  
+
+This does only work when the game is allowed to open the home menu.  
+Settings made using the configuration menu will be saved to the SD Card and reloaded the next time the plugin will be used.
+
+# Load plugin via network
+While the loader is running, it's possible to load a single plugin via wiiload.  
+When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
+A windows executable can be found in `tools/wiiload.exe`  
+More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
+
 
 # How to build
 
 The building process is split into multiple parts. 
 
-### WUPS library
+## WUPS library
 First we have the "Wii U Plugin System" (WUPS) library. 
 To compile this, you need DEVKITPRO and DEVKITPPC installed and set in your environment.
 Then call the following command in the root directory.
@@ -35,7 +82,7 @@ make install
 ```
 The "make" builds the library, the "make install" copies it into your DEVKITPRO folder.
 
-### Plugin loader
+## Plugin loader
 The plugin loader is the software run via the Homebrew Launcher, that uses the plugins.
 It contains a copy mocha, so for building you need a copy of DEVKITARM installed and set in your environment.
 
@@ -66,46 +113,9 @@ make
 
 This should create an "wiiupluginloader.elf" which can be loaded with the Homebrew Launcher.
 
-### Plugins
-
-Last but not least you need to build the plugins that should be loaded.
-Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
-
-This is a (maybe incomplete) list of currently available plugins:
-
-- [HID to VPAD](https://github.com/Maschell/hid_to_vpad/tree/wups):  
-Port of [HID to VPAD](https://github.com/Maschell/hid_to_vpad).
-No configuration is possible yet, all controllers map automatically to the game pad, pro controller mapping not support. Network client is working.
-- [Screenshot plugin](https://github.com/Maschell/ScreenshotWUPS):  
-Simple plugin that take a screenshot by presing L+R+ZL+ZR on the gamepad. Button combo can be changed.
-- [Streaming plugin](https://github.com/Maschell/StreamingPluginWiiU):  
-Gamepad streaming tool. Open http://<ip of your wii u>:8000 on a browser in the same network.
-- [SD Cafiine](https://github.com/Maschell/SDCafiine/tree/wups):  
-Port of the orignal SDCafiine (https://github.com/Maschell/SDCafiine). No NTFS support yet.
-- [SwipSwapMe](https://github.com/Maschell/SwipSwapMe):  
-Swaps the TV and gamepad screen via a buttons combo.The button combo can be changed.
-- [Diibugger](https://github.com/Maschell/DiiBuggerWUPS):  
-Port of the DiiBugger.
-- [WUPSPluginPlayground (Various other demo plugins)](https://github.com/Maschell/WUPSPluginPlayground):  
-This repository is supposed to hold serveral small testing plugins for the Wii U Plugin System.
-Most of the plugin are either really small (Padcon, NNU_Patcher) or are just for testing / gathering information.
-
-# Configuration of the plugins
-Plugins can register to the configuration menu.
-This configuration menu can be opened while running any application (e.g. while gameplay).
-Just press L, DPAD down and Minus on the gamepad.  
-This does only work when the game is allowed to open the home menu.  
-Settings made using the configuration menu will be saved to the SD Card and reloaded the next time the plugin will be used.
-
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
 This has been created by @dimok789 and can be found in the tools folder.
-
-# Load plugin via network
-While the loader is running, it's possible to load a single plugin via wiiload.  
-When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
-A windows executable can be found in `tools/wiiload.exe`  
-More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
 # Future and contribution
 On the Discord you can more information about open tasks and how to contribute: https://discord.gg/bZ2rep2
@@ -113,7 +123,7 @@ On the Discord you can more information about open tasks and how to contribute: 
 # Credits
 Some files are based on brainslug by Chadderz:  
 https://github.com/Chadderz121/brainslug-wii  
-Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff in based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
+Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff is based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
 Also thanks to everyone who made actual exploits.  
 Thanks to dhewg for wiiload:  
 http://wiibrew.org/wiki/Wiiload
