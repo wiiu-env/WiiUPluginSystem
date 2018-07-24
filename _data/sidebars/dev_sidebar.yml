@@ -25,6 +25,10 @@ entries:
       url: /dev_required_libraries.html
       output: web, pdf
 
+    - title: Setting up wut
+      url: /dev_wut_setup.html
+      output: web, pdf
+
   - title: Plugin loader
     output: web, pdf
     folderitems:
