@@ -23,7 +23,10 @@ DECL_FUNCTION(  RETURN_TYPE, ARBITRARY_NAME_OF_FUNCTION , ARGS_SEPERATED_BY_COMM
 * `ARGS_SEPERATED_BY_COMMA` is parameter list, each argument seperated by a comma. Example `int, int, char`.
 * Inside macro is the code of the function replacement. The return value corresponds to `RETURN_TYPE`.
 * Inside the macro the function pointer `my_ARBITRARY_NAME_OF_FUNCTION` and `real_ARBITRARY_NAME_OF_FUNCTION` are avaiable. Calling `real_XXX` will call the original, replaced function.
+
+
 ### Example
+
 To replace the function 
 ```C
 int FSOpenFile(FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error)
