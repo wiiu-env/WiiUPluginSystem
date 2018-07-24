@@ -1,1 +1,1 @@
-# WUPS-wiki
+Open me at: [https://maschell.github.io/WiiUPluginSystem](https://maschell.github.io/WiiUPluginSystem)
