@@ -1,0 +1,83 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: Development documentation
+  folders:
+
+  - title: Overview
+    output: web, pdf
+    folderitems:
+
+    - title: Get started
+      url: /dev_overview.html
+      output: web, pdf
+
+  - title: General / Preperation
+    output: web, pdf
+    folderitems:
+
+    - title: Setting up the Toolchain
+      url: /dev_toolchain_setup.html
+      output: web, pdf
+
+    - title: Installing the required libraries for creating plugins.
+      url: /dev_required_libraries.html
+      output: web, pdf
+
+  - title: Plugin loader
+    output: web, pdf
+    folderitems:
+
+    - title: How to compile the loader
+      url: /dev_compile_loader.html
+      output: web, pdf
+
+  - title: (Optional) Using an IDE.
+    output: web, pdf
+    folderitems:
+    - title: Setting up an IDE
+      url: /dev_ide_setup.html
+      output: web, pdf
+    - title: Using project templates
+      url: /dev_project_template_in_code_blocks.html
+      output: web, pdf
+    - title: Create a new project for a existing plugin
+      url: /dev_codeblocks_project_from_scratch.html
+      output: web, pdf
+
+  - title: Plugin development
+    output: web, pdf
+
+    folderitems:
+    - title: Overview
+      url: /dev_plugin_creation_overview.html
+      output: web, pdf
+
+    - title: Using the Makefile
+      url: /dev_plugin_makefile.html
+      output: web, pdf
+
+    - title: Setting meta information
+      url: /dev_plugin_creation_overview.html#meta-information
+      output: web, pdf
+
+    - title: How to use official system functions
+      url: /dev_using_system_functions.html
+      output: web, pdf
+
+    - title: Inherit functions from the loader
+      url: /dev_inherit_features.html
+      output: web, pdf
+
+    - title: Using built in hooks
+      url: /dev_plugin_hooks.html
+      output: web, pdf
+
+    - title: Replacing functions
+      url: /dev_function_replacing.html
+      output: web, pdf
+
+    - title: Register to the configuration menu
+      url: /dev_configuration_menu.html
+      output: web, pdf
