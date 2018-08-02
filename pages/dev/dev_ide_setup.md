@@ -13,7 +13,7 @@ topnav: topnav
 This page is about setting up `Code::Blocks` for developing Wii U Homebrew using the `devkitPPC` toolchain.  
 
 ### Preparations
-If you didn't set up `devkitPPC` already, you may want to follow [this](dev_toolchain_setup) tutorial. You should've installed the required libraries for plugin development by now as well. If not, check out this [this](dev_required_libraries) page.  
+If you didn't set up `devkitPPC` already, you may want to follow [this](dev_toolchain_setup) tutorial. You should've installed the required libraries for plugin development by now as well. If not, check out [this](dev_required_libraries) page.  
 
 ### Installation
 `Code::Blocks` is a free IDE and can be downloaded [here](http://www.codeblocks.org/). Install it according to the `Code::Blocks` homepage.
@@ -37,8 +37,8 @@ An example configuration can be found here:
 ![Example configuration of the compiler in Code::Blocks](https://i.imgur.com/cnfkmHR.gif)
 
 ### Next steps
-Now you can turn any existing project into a `Code::Blocks` project by following [this](https://maschell.github.io/WiiUPluginSystem/dev_codeblocks_project_from_scratch.html) tutorial.  
+Now you can turn any existing project into a `Code::Blocks` project by following [this](dev_codeblocks_project_from_scratch.html) tutorial.  
 
-Alternatively, you can use the `Code::Blocks` template to create a new plugin project from the scratch. A tutroial for this can be found [here](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks).
+Alternatively, you can use the `Code::Blocks` template to create a new plugin project from the scratch. A tutorial for this can be found [here](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks).
 
 {% include links.html %}
