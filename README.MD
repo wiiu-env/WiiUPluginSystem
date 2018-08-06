@@ -88,8 +88,8 @@ It contains a copy mocha, so for building you need a copy of DEVKITARM installed
 
 For building the loader you need:  
 - [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
-- [libfat](https://github.com/aliaspider/libfat/)
-- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
+- [libfat](https://github.com/aliaspider/libfat/) (Build with `make wiiu-release && make wiiu-install`)
+- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with `make wiiu-install`)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.  
 - [libgui](https://github.com/Maschell/libgui) for the gui elements.
@@ -98,7 +98,7 @@ Install the according to their readmes. Don't forget to install their dependenci
 
 **Dependencies**
 
-All needed dependencies are in the "loader/libs" folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
+All needed dependencies are in the `loader/libs` folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
 The archive includes:
 
 - zlib
