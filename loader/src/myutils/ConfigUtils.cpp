@@ -266,6 +266,7 @@ void ConfigUtils::configMenuOpenedCallback(wups_overlay_options_type_t screen, v
                 if(curSelect == inSelect) {
                     if(pressedButtons != WUPS_CONFIG_BUTTON_NONE) {
                         curItem->onButtonPressed(pressedButtons);
+                        firstRun = true;
                     }
                     ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"> %-40s %s\n",curItem->getDisplayName().c_str(),curItem->getCurrentValueSelectedDisplay().c_str());
                 } else if((screen_y_pos - visible_rows_start) >= 0) {
