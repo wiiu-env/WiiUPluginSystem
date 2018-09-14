@@ -22,7 +22,9 @@
 #include <vector>
 #include <wups/config/WUPSConfigItem.h>
 
-typedef void (*BooleanValueChangedCallback)(bool);
+class WUPSConfigItemBoolean;
+
+typedef void (*BooleanValueChangedCallback)(WUPSConfigItemBoolean *, bool);
 
 class WUPSConfigItemBoolean : public WUPSConfigItem {
 public:
@@ -63,6 +65,8 @@ public:
     virtual void loadValue(std::string persistedValue);
 
     virtual void restoreDefault();
+
+    virtual bool callCallback();
 
 private:
     BooleanValueChangedCallback callback = NULL;

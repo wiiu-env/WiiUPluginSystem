@@ -82,6 +82,7 @@ bool ConfigInformation::loadValuesFromSD() {
             if(prevValue.compare(loadedValue) != 0) {
                 //DEBUG_FUNCTION_LINE("Call loadValue\n");
                 curItem->loadValue(loadedValue);
+                // calling the callback here is _NOT_ needed. It will be called when the menu is closed.
             }
         }
     }
@@ -105,7 +106,12 @@ bool ConfigInformation::updateConfigSettings() {
         for (auto & curItem : curCat->getItems()) {
             std::string configID = curItem->getConfigID();
             std::string newValue = curItem->persistValue();
-            this->configSettings->setValueAsString(this->configSettings->getIdByName(configID), newValue);
+            if(this->configSettings->setValueAsString(this->configSettings->getIdByName(configID), newValue)){
+                // When the value has changed, call the callback.
+                DEBUG_FUNCTION_LINE("Called callback. Reason. Menu was closed and value has changed\n");
+                curItem->callCallback();
+            }
+
             //DEBUG_FUNCTION_LINE("Set %s(%d) to %s\n",configID.c_str(),this->configSettings->getIdByName(configID), newValue.c_str());
         }
     }

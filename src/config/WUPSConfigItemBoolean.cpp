@@ -82,19 +82,21 @@ void WUPSConfigItemBoolean::loadValue(std::string persistedValue) {
     if(persistedValue.compare("1") == 0) {
         newValue = true;
     }
-
-    if(newValue != value) {
-        toggleValue();
-    }
+    value = newValue;
 }
 
 void WUPSConfigItemBoolean::toggleValue() {
     value = !value;
-    if(callback != NULL) {
-        callback(value);
-    }
 }
 
 void WUPSConfigItemBoolean::restoreDefault() {
     this->value = this->defaultValue;
+}
+
+bool WUPSConfigItemBoolean::callCallback(){
+    if(callback != NULL) {
+        callback(this, this->value);
+        return true;
+    }
+    return false;
 }

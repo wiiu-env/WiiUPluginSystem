@@ -189,16 +189,22 @@ public:
         }
     }
 
-    void setValueAsString(int32_t idx, const std::string & val) {
+    bool setValueAsString(int32_t idx, const std::string & val) {
         if(isValidId(idx) && settingsValues[idx].dataType == TypeString && settingsValues[idx].strValue) {
             if(val.compare(*(settingsValues[idx].strValue)) != 0) { // Only update if the value changed.
                 *(settingsValues[idx].strValue) = val;
                 bChanged = true;
+                return true;
             }
         }
+        return false;
     }
 
     int32_t getIdByName(std::string configID);
+
+    bool hasChanged(){
+        return bChanged;
+    }
 
 protected:
     bool ValidVersion(const std::string & versionString);

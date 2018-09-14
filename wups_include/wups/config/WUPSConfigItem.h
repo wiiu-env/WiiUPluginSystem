@@ -115,6 +115,16 @@ public:
     **/
     virtual void restoreDefault() = 0;
 
+
+    /**
+        Call callback with with current value.
+        This function will be called whenever this item should call it's (optional) given
+        callback with the current value.
+        Returns true if a valid callback could be called
+        Returns false if no callback was called (e.g. callback was NULL)
+    **/
+    virtual bool callCallback() = 0;
+
     WUPSConfigItem(std::string configID, std::string displayName){
         this->configID = configID;
         this->displayName = displayName;
@@ -122,6 +132,7 @@ public:
 
     virtual ~WUPSConfigItem(){
     }
+
 private:
     std::string displayName;
 

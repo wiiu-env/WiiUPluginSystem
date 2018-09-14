@@ -22,7 +22,9 @@
 #include <map>
 #include <wups/config/WUPSConfigItem.h>
 
-typedef void (*MultipleValuesChangedCallback)(int32_t);
+class WUPSConfigItemMultipleValues;
+
+typedef void (*MultipleValuesChangedCallback)(WUPSConfigItemMultipleValues *, int32_t);
 
 class WUPSConfigItemMultipleValues : public WUPSConfigItem {
 public:
@@ -45,6 +47,8 @@ public:
     virtual void loadValue(std::string persistedValue);
 
     virtual void restoreDefault();
+
+    virtual bool callCallback();
 
 private:
     MultipleValuesChangedCallback callback = NULL;

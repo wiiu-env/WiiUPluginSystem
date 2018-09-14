@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
+#include <stdlib.h>     /* atoi */
 
 WUPSConfigItemMultipleValues::WUPSConfigItemMultipleValues(std::string configID, std::string displayName, int32_t defaultValue, std::map<int32_t,std::string> values_, MultipleValuesChangedCallback callback) : WUPSConfigItem(configID,displayName)  {
     if(values_.size() == 0) {
@@ -62,7 +63,12 @@ std::string WUPSConfigItemMultipleValues::getCurrentValueDisplay() {
 }
 
 std::string WUPSConfigItemMultipleValues::getCurrentValueSelectedDisplay() {
-    uint32_t index_max = values.size()-1;
+    if(values.size() == 0) {
+        return "<ERROR>";
+    }
+
+    uint32_t index_max = values.size() -1;
+
     uint32_t index = 0;
     for (auto& kv : values) {
         if(index == valueIndex) {
@@ -89,7 +95,6 @@ void WUPSConfigItemMultipleValues::onSelected(bool isSelected) {
 }
 
 void WUPSConfigItemMultipleValues::onButtonPressed(WUPSConfigButtons buttons) {
-    uint32_t previousValue = valueIndex;
     if(buttons & WUPS_CONFIG_BUTTON_LEFT) {
         if(valueIndex != 0){
             valueIndex--;
@@ -99,17 +104,6 @@ void WUPSConfigItemMultipleValues::onButtonPressed(WUPSConfigButtons buttons) {
         valueIndex++;
         if(valueIndex > values.size()-1) {
             valueIndex = values.size()-1;
-
-        }
-    }
-    if(previousValue != valueIndex) {
-        uint32_t index = 0;
-        for (auto& kv : values) {
-            if(index == valueIndex) {
-                callback(kv.first);
-                break;
-            }
-            index++;
         }
     }
 }
@@ -123,20 +117,31 @@ std::string WUPSConfigItemMultipleValues::persistValue() {
 }
 
 void WUPSConfigItemMultipleValues::loadValue(std::string persistedValue) {
-    uint32_t newValueIndex = std::stoi(persistedValue);
-    if(newValueIndex != valueIndex) {
-        uint32_t index = 0;
-        for (auto& kv : values) {
-            if(index == newValueIndex) {
-                valueIndex = newValueIndex;
-                callback(kv.first);
-                break;
-            }
-            index++;
-        }
+    // Note: std::stoi would throw an exception on error. atoi leads to an undefined behavior, but we
+    // check if the result is in range anyway.
+    uint32_t newValueIndex = atoi(persistedValue.c_str());
+    if(newValueIndex >= 0 && (newValueIndex +1) <= this->values.size()) {
+        valueIndex = newValueIndex;
+    }else{
+        valueIndex = 0;
     }
 }
 
 void WUPSConfigItemMultipleValues::restoreDefault() {
     this->valueIndex = 0;
+}
+
+bool WUPSConfigItemMultipleValues::callCallback() {
+    if(callback == NULL) {
+        return false;
+    }
+    uint32_t index = 0;
+    for (auto& kv : values) {
+        if(index == valueIndex) {
+            callback(this, kv.first);
+            return true;
+        }
+        index++;
+    }
+    return false;
 }
