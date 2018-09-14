@@ -137,7 +137,6 @@ void ConfigUtils::configMenuOpenedCallback(wups_overlay_options_type_t screen, v
                             maxSelect--;
                         }
                     }
-
                 } else {
                     ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"  %s",curConfig_->getName().c_str());
                 }
@@ -213,6 +212,7 @@ void ConfigUtils::configMenuOpenedCallback(wups_overlay_options_type_t screen, v
         for (auto & curCat : curConfig->getCategories()) {
             cur_visible_rows += 2;
             for (auto & curItem : curCat->getItems()) {
+
                 cur_visible_rows++;
                 if(!ignore && curSelect == inSelect) {
                     if(curSelect == 0) {
