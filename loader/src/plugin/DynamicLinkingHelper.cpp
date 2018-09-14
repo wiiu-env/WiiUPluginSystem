@@ -173,7 +173,7 @@ bool DynamicLinkingHelper::fillRelocations(std::vector<dyn_linking_relocation_en
 
         DEBUG_FUNCTION_LINE("Resolving relocation to %s\n",functionEntry->functionName);
 
-        if(!curEntry->importEntry->isData && (uint32_t) functionEntry->address > 0x04000000) {
+        if(!curEntry->importEntry->isData && (uint32_t) functionEntry->address > 0x01FFFFC) {
             ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (uint32_t) functionEntry->big_jump);
         } else {
             ElfTools::elfLinkOne(curEntry->type, curEntry->offset, curEntry->addend, curEntry->destination, (uint32_t) functionEntry->address);
