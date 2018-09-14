@@ -10,34 +10,35 @@ topnav: topnav
 ---
 
 ## Code::Blocks
-This page is about setting up CodeBlocks for developing Wii U Homebrew using the DevkitPPC toolchain.  
-If you haven't already set up the toolchain, [follow this tutorial](dev_toolchain_setup).  
-You also should've installed the required libraries by now. If not check out: [Installing the required libraries](dev_required_libraries).  
+This page is about setting up `Code::Blocks` for developing Wii U Homebrew using the `devkitPPC` toolchain.  
 
-Code::Blocks is free and can be downloaded [here](http://www.codeblocks.org/).  
-Download and install it according to the Code::Blocks homepage.
+### Preparations
+If you didn't set up `devkitPPC` already, you may want to follow [this](dev_toolchain_setup) tutorial. You should've installed the required libraries for plugin development by now as well. If not, check out [this](dev_required_libraries) page.  
+
+### Installation
+`Code::Blocks` is a free IDE and can be downloaded [here](http://www.codeblocks.org/). Install it according to the `Code::Blocks` homepage.
 
 ### Setting up the compiler
-The Wii U is using custom Makefiles, but Code::Blocks still needs to have an valid compiler/toolchain set. Using this tutorial we are overriding an existing compiler setting. 
-If you are using it for non-WiiU projects, make sure to make an backup / copy.  
-Once you have opened Code::Blocks, you can access the compiler options via `Settings->Compiler...` on the menu bar.
+For Wii U homebrew we generally use custom makefiles but `Code::Blocks` still needs to have a valid compiler/toolchain set. Using this tutorial we are overriding an existing compiler setting. 
+If you are using it for non Wii U projects, make sure to make a backup/copy of the settings.  
+Once you have opened Code::Blocks, you can access the compiler options menu via `Settings -> Compiler...` on the menu bar.
 1. Select the `GNU GCC Compiler for PowerPC (HighTec)` in the dropdown menu.
 2. Press `Set as default`
 3. Click on the `Toolchain executables` tab.
-4. Set `Compiler's installation directory` to the bin folder of your DEVKITPPC installation (on windows probably `C:\devkitPro\devkitPPC\bin`)
-5. Set `C compiler` to `powerpc-eabi-gcc` (on windows `powerpc-eabi-gcc.exe`)
-6. Set `C++ compiler` to `powerpc-eabi-g++` (on windows `powerpc-eabi-g++.exe`)
-7. Set `Linker for dynamic libs:` to `powerpc-eabi-g++` (on windows `powerpc-eabi-g++.exe`)
-8. Set `Linker for static libs:` to `powerpc-eabi-ar` (on windows `powerpc-eabi-ar.exe`)
-9. Set `Make program` to `make` (on windows `make.exe`)
-10. Save the settings by clicking on `Ok`
+4. Set `Compiler's installation directory` to the bin folder of your `devkitPPC` installation (on Windows this usually is `C:\devkitPro\devkitPPC\bin`)
+5. Set `C compiler` to `powerpc-eabi-gcc` (on Windows `powerpc-eabi-gcc.exe`)
+6. Set `C++ compiler` to `powerpc-eabi-g++` (on Windows `powerpc-eabi-g++.exe`)
+7. Set `Linker for dynamic libs:` to `powerpc-eabi-g++` (on Windows `powerpc-eabi-g++.exe`)
+8. Set `Linker for static libs:` to `powerpc-eabi-ar` (on Windows `powerpc-eabi-ar.exe`)
+9. Set `Make program` to `make` (on Windows `make.exe`)
+10. Save the settings by clicking on `OK`
 
 An example configuration can be found here:  
 ![Example configuration of the compiler in Code::Blocks](https://i.imgur.com/cnfkmHR.gif)
 
 ### Next steps
-Now you can turn any existing project into an Code::Blocks project by following [this](https://github.com/Maschell/WiiUPluginSystem/wiki/Creating-a-Code::Blocks-project-from-the-scratch) tutorial.  
+Now you can turn any existing project into a `Code::Blocks` project by following [this](dev_codeblocks_project_from_scratch.html) tutorial.  
 
-Or you can use the the Code::Blocks template to create a new plugin project from the scratch. A tutroial can be found [here](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks).
+Alternatively, you can use the `Code::Blocks` template to create a new plugin project from the scratch. A tutorial for this can be found [here](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks).
 
 {% include links.html %}
