@@ -1,4 +1,4 @@
-[Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  | [Discord](https://discord.gg/bZ2rep2)
+[Nightly builds](https://github.com/Maschell/WiiUPluginSystem/releases) | [Issue Tracker](https://github.com/Maschell/WiiUPluginSystem/issues) | [Discussion](https://gbatemp.net/threads/wii-u-plugin-system.496659/).  | [Discord](https://discord.gg/bZ2rep2) | [Wiki](https://maschell.github.io/WiiUPluginSystem/dev_overview.html)
 # Plugin system for the Wii U. (WIP) [![Build Status](https://api.travis-ci.org/Maschell/WiiUPluginSystem.svg?branch=master)](https://travis-ci.org/Maschell/WiiUPluginSystem)
 
 WARNING: THIS PROJECT HAS JUST STARTED AND IS FOR DEVS AND PEOPLE WHO WANT TO PLAY AROUND WITH NEW THINGS. IT MAY BE BUGGY, FEATURE COULD BREAK AT ANY TIME, INTERFACES CAN CHANGE, AND MANY BUGS CAN OCCUR. THIS APPLICATION COMES WITH NO WARRANTY-
@@ -18,19 +18,19 @@ The project is still in it's very early days, but it already has basic functions
 - Multiple plugins can override the same system functions.
 - Plugins can register for certain hook (for example whenever an application was started)
 - Plugins inherit the SD/USB access from the loader. All plugins have global SD and USB (FAT32 only) access.
-- Plugins can be configured at run-time. Press **L, DPAD down, and minus** on the gamepad at the same time to open the configuration menu.
+- Plugins can be configured at run-time. Press L, DPAD down, and minus on the gamepad at the same time to open the configuration menu.
 
-# Usage
+# How to build
 
-The "Wii U Plugin Loader" is built to be loaded through the homebrew launcher, which can be either loaded with the browser exploit or haxchi.  
-Plugins needs to be placed into the folder:
+A detailed instruction can be found in the Wiki:
 
-```
-sd:/wiiu/plugins
-```
+- [Installing the required libraries for creating plugins](https://maschell.github.io/WiiUPluginSystem/dev_required_libraries.html)  
+- [How to compile the loader](https://maschell.github.io/WiiUPluginSystem/dev_compile_loader.html)  
 
+### Plugins
 
-# Available Plugins
+Last but not least you need to build the plugins that should be loaded.
+Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
 
 This is a (maybe incomplete) list of currently available plugins:
 
@@ -60,62 +60,15 @@ Just press **L, DPAD down and minus** on the gamepad.
 This does only work when the game is allowed to open the home menu.  
 Settings made using the configuration menu will be saved to the SD Card and reloaded the next time the plugin will be used.
 
-# Load plugin via network
-While the loader is running, it's possible to load a single plugin via wiiload.  
-When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
-A windows executable can be found in `tools/wiiload.exe`  
-More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
-
-
-# How to build
-
-The building process is split into multiple parts. 
-
-## WUPS library
-First we have the "Wii U Plugin System" (WUPS) library. 
-To compile this, you need DEVKITPRO and DEVKITPPC installed and set in your environment.
-Then call the following command in the root directory.
-
-```
-make
-make install
-```
-The "make" builds the library, the "make install" copies it into your DEVKITPRO folder.
-
-## Plugin loader
-The plugin loader is the software run via the Homebrew Launcher, that uses the plugins.
-It contains a copy mocha, so for building you need a copy of DEVKITARM installed and set in your environment.
-
-For building the loader you need:  
-- [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
-- [libfat](https://github.com/aliaspider/libfat/) (Build with `make wiiu-release && make wiiu-install`)
-- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with `make wiiu-install`)
-- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
-- [libutils](https://github.com/Maschell/libutils) for common functions.  
-- [libgui](https://github.com/Maschell/libgui) for the gui elements.
-
-Install the according to their readmes. Don't forget to install their dependencies.
-
-**Dependencies**
-
-All needed dependencies are in the `loader/libs` folder of this repository. Extract the "portlibs.zip" archive into your devkitPro directory.
-The archive includes:
-
-- zlib
-
-**Compiling**
-
-Then call the following command in the "loader" directory.
-
-```
-make
-```
-
-This should create an "wiiupluginloader.elf" which can be loaded with the Homebrew Launcher.
-
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
 This has been created by @dimok789 and can be found in the tools folder.
+
+# Load a plugin via network
+While the loader is running, it's possible to load a single plugin via [wiiload](http://wiibrew.org/wiki/Wiiload).  
+When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
+A windows executable can be found in `tools/wiiload.exe`  
+More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
 # Future and contribution
 On the Discord you can more information about open tasks and how to contribute: https://discord.gg/bZ2rep2
@@ -123,7 +76,7 @@ On the Discord you can more information about open tasks and how to contribute: 
 # Credits
 Some files are based on brainslug by Chadderz:  
 https://github.com/Chadderz121/brainslug-wii  
-Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff is based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
+Much stuff also wouldn't be possible without dimok789. He made many great tools and homebrew this stuff in based on (Makefiles, Mocha, homebrew channel, udp logger, dynamic_libs etc.)  
 Also thanks to everyone who made actual exploits.  
 Thanks to dhewg for wiiload:  
 http://wiibrew.org/wiki/Wiiload
