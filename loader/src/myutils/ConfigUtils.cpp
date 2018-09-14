@@ -268,9 +268,9 @@ void ConfigUtils::configMenuOpenedCallback(wups_overlay_options_type_t screen, v
                         curItem->onButtonPressed(pressedButtons);
                         firstRun = true;
                     }
-                    ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"> %-40s %s\n",curItem->getDisplayName().c_str(),curItem->getCurrentValueSelectedDisplay().c_str());
+                    ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"> %-36s %s\n",curItem->getDisplayName().c_str(),curItem->getCurrentValueSelectedDisplay().c_str());
                 } else if((screen_y_pos - visible_rows_start) >= 0) {
-                    ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"  %-40s %s\n",curItem->getDisplayName().c_str(),curItem->getCurrentValueDisplay().c_str());
+                    ScreenUtils::printTextOnScreen(screen, x, screen_y_pos++,"  %-36s %s\n",curItem->getDisplayName().c_str(),curItem->getCurrentValueDisplay().c_str());
                 } else {
                     screen_y_pos++;
                 }
