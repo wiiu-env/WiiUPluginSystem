@@ -91,9 +91,8 @@ void WUPSConfigItemMultipleValues::onSelected(bool isSelected) {
 void WUPSConfigItemMultipleValues::onButtonPressed(WUPSConfigButtons buttons) {
     uint32_t previousValue = valueIndex;
     if(buttons & WUPS_CONFIG_BUTTON_LEFT) {
-        valueIndex--;
-        if(valueIndex < 0) {
-            valueIndex = 0;
+        if(valueIndex != 0){
+            valueIndex--;
         }
     }
     if(buttons & WUPS_CONFIG_BUTTON_RIGHT && values.size() > 0) {
