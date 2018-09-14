@@ -12,7 +12,8 @@ topnav: topnav
 Plugins can register add their configuration to the configuration menu. This menu can be opened during gameplay to configure plugins.
 
 ## Register configuration
-To register a configuration to the plugin loader, the plugin need use the `WUPS_GET_CONFIG` macro. **This macro does only work in a C++ Context**.  
+To register a configuration to the plugin loader, the plugin need use the `WUPS_GET_CONFIG` macro.  
+**This macro does only work in a C++ Context**.  
 Usage:
 ```C++
 #include <wups/config.h>
@@ -64,14 +65,14 @@ It's also possible to add an existing `WUPSConfigCategory` using `WUPSConfigCate
 You don't have to take care of deleting the created `WUPSConfigCategory`, the plugin loader will do that for you.
 
 ### Adding an item - WUPSConfigItem
-Each category can hold multiple items. These items need be inhereted from the abstract `WUPSConfigItem` class.  
-WUPS provide serveral implementations that can be used, but it's also possible to use an own implementation. See the [WUPSConfigItem](https://github.com/Maschell/WiiUPluginSystem/blob/master/wups_include/wups/config/WUPSConfigItem.h) class for details on the functions that need to be implemented.
+Each category can hold multiple items. These items need be inherited from the abstract `WUPSConfigItem` class.  
+WUPS provide several implementations that can be used, but it's also possible to use an own implementation. See the [WUPSConfigItem](https://github.com/Maschell/WiiUPluginSystem/blob/master/wups_include/wups/config/WUPSConfigItem.h) class for details on the functions that need to be implemented.
 Example usage using a boolean item (`WUPSConfigItemBoolean`, [provided by WUPS](https://github.com/Maschell/WiiUPluginSystem/blob/master/wups_include/wups/config/WUPSConfigItemBoolean.h)):
 ```C++
 #include <wups/config.h>
 
 // callback that will be called when the value changes.
-void rumbleConfigChanged(bool newValue) {
+void rumbleConfigChanged(WUPSConfigItemBoolean * configItem, bool newValue) {
     DEBUG_FUNCTION_LINE("New rumble value %d\n",newValue);
 }
 
@@ -93,7 +94,7 @@ You don't have to take care of deleting the created `WUPSConfigItem`, the plugin
 The Wii U Plugin System tries automatically persist the configurations to the SD Card. It created configuration files next to the plugins. When you have for example a `sd:/wiiu/plugins/hidtovpad.wups`, a 
 `sd:/wiiu/plugins/hidtovpad.cfg` will be created.  
 Everytime you start or switch an application, this configuration will be read from the sd card. In case the loaded value is different from the default on, the "changed"-callback of an item will be called. 
-**If possible, sure to always pass the current value as default value**. Otherwise the callback will be called more than nessecary (each time you switch an application or open the menu).
+**If possible, make sure to always pass the current value as default value**. Otherwise the callback will be called more than necessary (each time you switch an application or open the menu).
 
 Everytime the configuration menu is opened, the configuration from the sd card will be read. Everytime you close it, the changes will be written to the sd card.  
 To persist a configuration, each item has an "configID". Using this, the values can be saved as key/value pairs, where the key is the configID. The value is provided by the `WUPSConfigItem` implementation, 
@@ -103,7 +104,7 @@ The idea is to have the following workflow.
 * Choose a default value for a configuration item in case no configuration was saved before.
 * Save it in a variable which lays in the .data section. This allows the variable to keep the value even when the  running application switches.
 * Update this variable inside the valueChanged callback.
-* Use this value to initalize the `WUPSConfigItem`
+* Use this variable as the default value for the config item.
 
 Example using the `WUPSConfigItemBoolean`:
 
@@ -112,13 +113,14 @@ Example using the `WUPSConfigItemBoolean`:
 #include <wups/config/WUPSConfigItemBoolean.h>
 
 // Save a variable into the data section so it'll survive changing the apps.
+// And give it the default value "false"
 bool gRumbleActive __attribute__((section(".data"))) = false;
 
 // callback that will be called when the value changes.
-void rumbleConfigChanged(bool newValue) {
+void rumbleConfigChanged(WUPSConfigItemBoolean * item, bool newValue) {
     DEBUG_FUNCTION_LINE("New rumble value %d\n",newValue);
     
-    // Update
+    // Update the "gRumbleActive" with the new value. Use it as a default value the next time we build the config item
     gRumbleActive = newValue;
 }
 
@@ -127,9 +129,9 @@ WUPS_GET_CONFIG() {
     //Create a new category
     WUPSConfigCategory* catOther = config->addCategory("Other");
     
-    // Add a boolean item to the category. As default value we choose the current value.
+    // Add a boolean item to the category. As default value we choose the current value which is saved in the "gRumbleActive" variable.
     //                item Type                | config id | displayed name | default value | onChangeCallback.
-    catOther->addItem(new WUPSConfigItemBoolean("rumble", "Enable rumble",    gRumbleActive,              rumbleConfigChanged));
+    catOther->addItem(new WUPSConfigItemBoolean("rumble", "Enable rumble",    gRumbleActive, rumbleConfigChanged));
     
     return config;
 }
@@ -146,18 +148,19 @@ This item can be used for simple boolean values (e.g. on/off switches).
 
 **Constructor:**
 ```C++
-typedef void (*BooleanValueChangedCallback)(bool);
+typedef void (*BooleanValueChangedCallback)(WUPSConfigItemBoolean*, bool);
 
 WUPSConfigItemBoolean(std::string configID, std::string displayName, bool defaultValue, BooleanValueChangedCallback callback);
 ```
-* _configID_: 
+* **_configID_:**  
   ID which is used to save the state of the item. Needs to be unique across the whole plugin config
-* _displayName_:
+* **_displayName_:**  
   Text that will displayed to the describe this item on the configuration menu.
-* _defaultValue_:
+* **_defaultValue_:**  
   The default value of the item.
-* callback:
-  Callback that will be called (with the new value) whenever the value changes. This is also the case when the _loaded value_ is different from the _default value_
+* **callback:**  
+  Callback that will be called (with the new value) whenever the configuration menu has been closed and value changed.
+  It will also be called when the value read from the sd card is different than the default value.
   
 **Notes:**  
 On default the text for a "true"-vale is "on", and for a "false"-value if "off". You can change it by using `void setTrueValueName(std::string trueValName)` or 
@@ -197,20 +200,21 @@ This item can be used to create a item which multiple, pre-defined values. Each 
 
 **Constructor:**
 ```C++
-typedef void (*MultipleValuesChangedCallback)(int32_t);
+typedef void (*MultipleValuesChangedCallback)(WUPSConfigItemMultipleValues*, int32_t);
 
 WUPSConfigItemMultipleValues(std::string configID, std::string displayName, int32_t defaultValue, std::map<int32_t,std::string> values_, MultipleValuesChangedCallback callback);
 ```
-* _configID_: 
+* **_configID_:**  
   ID which is used to save the state of the item. Needs to be unique across the whole plugin config.
-* _displayName_:
+* **_displayName_:**  
   Text that will displayed to the describe this item on the configuration menu.
-* _defaultValue_:
+* **_defaultValue_:**  
   The default value of the item.
-* _values_:
+* **_values_:**  
   Map which provides a list of possible values and their label.
-* callback:
-  Callback that will be called (with the new value) whenever the value changes. This is also the case when the _loaded value_ is different from the _default value_
+* **callback:**  
+  Callback that will be called (with the new value) whenever the configuration menu has been closed and value has been changed. 
+  It will also be called when the value read from the sd card is different than the default value.
 
 **Notes:**  
 If the _default value_ is not a part of the provided value list, the first element will be used as default value.
@@ -225,7 +229,7 @@ If the _default value_ is not a part of the provided value list, the first eleme
 #define RESOLUTION_360P 2
 #define RESOLUTION_480P 3
 
-void resolutionChanged(int32_t newResolution) {
+void resolutionChanged(WUPSConfigItemMultipleValues * item, int32_t newResolution) {
     DEBUG_FUNCTION_LINE("Resolution changed to value %d \n",newResolution);    
 }
 
@@ -245,7 +249,6 @@ WUPS_GET_CONFIG() {
 }
 ```
 
-See the class definition for more information:   
-https://github.com/Maschell/WiiUPluginSystem/blob/master/wups_include/wups/config/WUPSConfigItemMultipleValues.h
+See the class definition for more information: [Link](https://github.com/Maschell/WiiUPluginSystem/blob/master/wups_include/wups/config/WUPSConfigItemMultipleValues.h)
   
 {% include links.html %}
