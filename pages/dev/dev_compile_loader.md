@@ -1,5 +1,5 @@
 ---
-title: How to use official system functions
+title: How to compile the loader
 tags: 
 keywords: system functions, dynamic_libs, dynamic libs, wut
 last_updated: July 24, 2018
