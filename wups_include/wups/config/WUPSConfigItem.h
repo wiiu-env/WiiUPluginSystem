@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include "../utils.h"
 
 #define WUPS_CONFIG_BUTTON_NONE     0
 #define WUPS_CONFIG_BUTTON_LEFT     (1<<0)
@@ -115,7 +116,6 @@ public:
     **/
     virtual void restoreDefault() = 0;
 
-
     /**
         Call callback with with current value.
         This function will be called whenever this item should call it's (optional) given
@@ -125,6 +125,16 @@ public:
     **/
     virtual bool callCallback() = 0;
 
+    /**
+        Will be called by the "config menu manager" if this configitem is currently displayed on the screen.
+        If this config item decides to draw onto the screen, it can use "lastVisibleOnScreen()" function to
+        get information about which screen(s) are available.
+        Check the Overlay API for more information on drawing on the screen.
+    **/
+    virtual void visibleOnScreen(wups_overlay_options_type_t screen){
+        this->displayScreen = screen;
+    }
+
     WUPSConfigItem(std::string configID, std::string displayName){
         this->configID = configID;
         this->displayName = displayName;
@@ -133,10 +143,21 @@ public:
     virtual ~WUPSConfigItem(){
     }
 
+protected:
+    /**
+        If this config item decides to draw onto the screen, this function can be used
+        get information about which screen(s) are available for OS drawing.
+        Check the Overlay API for more information on drawing on the screen.
+    **/
+    wups_overlay_options_type_t lastVisibleOnScreen(){
+        return displayScreen;
+    }
 private:
     std::string displayName;
 
     std::string configID;
+
+    wups_overlay_options_type_t displayScreen = WUPS_OVERLAY_NONE;
 };
 
 #endif

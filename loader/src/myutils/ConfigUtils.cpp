@@ -263,6 +263,7 @@ void ConfigUtils::configMenuOpenedCallback(wups_overlay_options_type_t screen, v
                 if(screen_y_pos >= visible_rows_end) {
                     break;
                 }
+                curItem->visibleOnScreen(screen);
                 if(curSelect == inSelect) {
                     if(pressedButtons != WUPS_CONFIG_BUTTON_NONE) {
                         curItem->onButtonPressed(pressedButtons);
