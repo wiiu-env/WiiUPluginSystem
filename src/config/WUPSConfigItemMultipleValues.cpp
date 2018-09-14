@@ -43,7 +43,6 @@ WUPSConfigItemMultipleValues::WUPSConfigItemMultipleValues(std::string configID,
         valueIndex = 0;
     }
 
-
     this->callback = callback;
 }
 
@@ -52,7 +51,7 @@ WUPSConfigItemMultipleValues::~WUPSConfigItemMultipleValues() {
 }
 
 std::string WUPSConfigItemMultipleValues::getCurrentValueDisplay() {
-    int32_t index = 0;
+    uint32_t index = 0;
     for (auto& kv : values) {
         if(index == valueIndex) {
             return "  " + kv.second;
@@ -63,8 +62,8 @@ std::string WUPSConfigItemMultipleValues::getCurrentValueDisplay() {
 }
 
 std::string WUPSConfigItemMultipleValues::getCurrentValueSelectedDisplay() {
-    int32_t index_max = values.size()-1;
-    int32_t index = 0;
+    uint32_t index_max = values.size()-1;
+    uint32_t index = 0;
     for (auto& kv : values) {
         if(index == valueIndex) {
             std::string s;
@@ -90,21 +89,22 @@ void WUPSConfigItemMultipleValues::onSelected(bool isSelected) {
 }
 
 void WUPSConfigItemMultipleValues::onButtonPressed(WUPSConfigButtons buttons) {
-    int32_t previousValue = valueIndex;
+    uint32_t previousValue = valueIndex;
     if(buttons & WUPS_CONFIG_BUTTON_LEFT) {
         valueIndex--;
         if(valueIndex < 0) {
             valueIndex = 0;
         }
     }
-    if(buttons & WUPS_CONFIG_BUTTON_RIGHT) {
+    if(buttons & WUPS_CONFIG_BUTTON_RIGHT && values.size() > 0) {
         valueIndex++;
         if(valueIndex > values.size()-1) {
             valueIndex = values.size()-1;
+
         }
     }
     if(previousValue != valueIndex) {
-        int32_t index = 0;
+        uint32_t index = 0;
         for (auto& kv : values) {
             if(index == valueIndex) {
                 callback(kv.first);
@@ -124,9 +124,9 @@ std::string WUPSConfigItemMultipleValues::persistValue() {
 }
 
 void WUPSConfigItemMultipleValues::loadValue(std::string persistedValue) {
-    int32_t newValueIndex = std::stoi(persistedValue);
+    uint32_t newValueIndex = std::stoi(persistedValue);
     if(newValueIndex != valueIndex) {
-        int32_t index = 0;
+        uint32_t index = 0;
         for (auto& kv : values) {
             if(index == newValueIndex) {
                 valueIndex = newValueIndex;

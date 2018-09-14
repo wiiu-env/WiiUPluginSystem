@@ -49,7 +49,7 @@ public:
 private:
     MultipleValuesChangedCallback callback = NULL;
     int32_t defaultValue;
-    int32_t valueIndex = 0;
+    uint32_t valueIndex = 0;
     std::map<int32_t,std::string> values;
 };
 
