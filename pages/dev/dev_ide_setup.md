@@ -2,7 +2,7 @@
 title: Setting up an IDE
 tags: [ide]
 keywords: ide, codeblocks
-last_updated: July 24, 2018
+last_updated: September 14, 2018
 sidebar: dev_sidebar
 permalink: dev_ide_setup.html
 folder: dev
@@ -39,6 +39,6 @@ An example configuration can be found here:
 ### Next steps
 Now you can turn any existing project into a `Code::Blocks` project by following [this](dev_codeblocks_project_from_scratch.html) tutorial.  
 
-Alternatively, you can use the `Code::Blocks` template to create a new plugin project from the scratch. A tutorial for this can be found [here](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks).
+Alternatively, you can use the `Code::Blocks` template to create a new plugin project from the scratch. A tutorial for this can be found [here](dev_project_template_in_code_blocks.html).
 
 {% include links.html %}
