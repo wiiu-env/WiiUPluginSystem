@@ -102,7 +102,7 @@ void WUPSConfigItemMultipleValues::onButtonPressed(WUPSConfigButtons buttons) {
     }
     if(buttons & WUPS_CONFIG_BUTTON_RIGHT && values.size() > 0) {
         valueIndex++;
-        if(valueIndex > values.size()-1) {
+        if(valueIndex > (int32_t) values.size()-1) {
             valueIndex = values.size()-1;
         }
     }
