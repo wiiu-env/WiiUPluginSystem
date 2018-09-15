@@ -183,7 +183,7 @@ extern "C" int32_t Menu_Main(int32_t argc, char **argv) {
     DEBUG_FUNCTION_LINE("Restoring the patched functions\n");
     RestorePatches();
     DEBUG_FUNCTION_LINE("Calling the plugin deinit hook\n");
-    CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
+    //CallHook(WUPS_LOADER_HOOK_DEINIT_PLUGIN);
     DEBUG_FUNCTION_LINE("Unmounting SD/USB devices\n");
     DeInit();
     DEBUG_FUNCTION_LINE("Bye bye!\n");
