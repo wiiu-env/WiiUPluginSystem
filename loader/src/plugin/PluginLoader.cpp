@@ -75,6 +75,9 @@ std::vector<PluginInformation *> PluginLoader::getPluginInformation(const char *
             }
         }
     }
+    if(dfd != NULL){
+        closedir(dfd);
+    }
 
     return result;
 }
