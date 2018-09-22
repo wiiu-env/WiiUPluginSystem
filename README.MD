@@ -7,27 +7,16 @@ WARNING: THIS PROJECT HAS JUST STARTED AND IS FOR DEVS AND PEOPLE WHO WANT TO PL
 
 The Wii U Plugin allows you to load multiple plugins on your Wii U which enhance your experience. 
 For example you can mod your games, use USB controller, swap your gamepad and TV screen and much more.
-
-# Features
-
-The project is still in it's very early days, but it already has basic functions to play with.
-
-- The plugins will be loaded, even when you swap the running game.
-- Support for up to 32 plugins at the same time.
-- Each plugin can override up to 100 different existing system functions.
-- Multiple plugins can override the same system functions.
-- Plugins can register for certain hook (for example whenever an application was started)
-- Plugins inherit the SD/USB access from the loader. All plugins have global SD and USB (FAT32 only) access.
-- Plugins can be configured at run-time. Press L, DPAD down, and minus on the gamepad at the same time to open the configuration menu.
-
 # How to build
 
 A detailed instruction can be found in the Wiki:
 
 - [Installing the required libraries for creating plugins](https://maschell.github.io/WiiUPluginSystem/dev_required_libraries.html)  
-- [How to compile the loader](https://maschell.github.io/WiiUPluginSystem/dev_compile_loader.html)  
 
-### Plugins
+# Plugin loader
+To load the plugins, you need the WiiUPluginLoader, you can find it [here](https://github.com/Maschell/WiiUPluginLoader).
+
+# Plugins
 
 Last but not least you need to build the plugins that should be loaded.
 Plugins depend on the "WUPS library" installed in build step one, other dependencies are optional.
@@ -63,12 +52,6 @@ Settings made using the configuration menu will be saved to the SD Card and relo
 # Logging
 For logging (for example of the loader) you need to start the UdpDebugReader on a computer in the same network. 
 This has been created by @dimok789 and can be found in the tools folder.
-
-# Load a plugin via network
-While the loader is running, it's possible to load a single plugin via [wiiload](http://wiibrew.org/wiki/Wiiload).  
-When using this feature, this and all plugins in `sd:/wiiu/plugins/temp` will be loaded. The plugin will copied to the SDCard, this mean a SDCard is required.
-A windows executable can be found in `tools/wiiload.exe`  
-More information about wiiload and alternatives can be found here: http://wiibrew.org/wiki/Wiiload
 
 # Future and contribution
 On the Discord you can more information about open tasks and how to contribute: https://discord.gg/bZ2rep2
