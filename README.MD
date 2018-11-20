@@ -29,7 +29,7 @@ No configuration is possible yet, all controllers map automatically to the game 
 - [Screenshot plugin](https://github.com/Maschell/ScreenshotWUPS):  
 Simple plugin that take a screenshot by presing L+R+ZL+ZR on the gamepad. Button combo can be changed.
 - [Streaming plugin](https://github.com/Maschell/StreamingPluginWiiU):  
-Gamepad streaming tool. Open http://<ip of your wii u>:8000 on a browser in the same network.
+Gamepad streaming tool. Requires the [StreamingPluginClient](https://github.com/Maschell/StreamingPluginClient)
 - [SD Cafiine](https://github.com/Maschell/SDCafiine/tree/wups):  
 Port of the orignal SDCafiine (https://github.com/Maschell/SDCafiine). No NTFS support yet.
 - [SwipSwapMe](https://github.com/Maschell/SwipSwapMe):  
