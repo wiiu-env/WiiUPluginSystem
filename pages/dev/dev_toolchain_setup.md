@@ -2,7 +2,7 @@
 title: Setting up the toolchain
 tags: [toolchain]
 keywords: toolchain, devkitpro, devkitppc
-last_updated: July 24, 2018
+last_updated: November 20, 2018
 sidebar: dev_sidebar
 permalink: dev_toolchain_setup.html
 folder: dev
@@ -16,9 +16,11 @@ On Windows you can use the [graphical installer](https://github.com/devkitPro/in
 
 After installing you can [open MSYS](https://devkitpro.org/wiki/Getting_Started#Windows) (Start -> devkitPro -> MSYS) and check if the needed packages are installed and on the newest version.
 ```
-yes | pacman -Syu devkitPPC --needed
-yes | pacman -Syu devkitARM --needed
-yes | pacman -Syu general-tools --needed
+pacman -Syu devkitPPC --needed
+pacman -Syu devkitARM --needed
+pacman -Syu general-tools --needed
+# We need xxd for building the plugin loader
+pacman -Syu vim
 ```
 
 Make sure the following environment variables are set:
@@ -29,9 +31,9 @@ DEVKITPPC=/opt/devkitpro/devkitPPC
 ```
 
 ## Unix
-The offical installation guide can be found here: https://devkitpro.org/wiki/Getting_Started#Unix-like_platforms
+The offical installation guide can be found [here](https://devkitpro.org/wiki/Getting_Started#Unix-like_platforms)
 
-Basically you need to grab the [newest devkitpro pacman version](https://github.com/devkitPro/pacman/releases/) and install the `devkitPPC`, `devkitARM ` and `general-tools` package.
+Basically you need to grab the [newest devkitpro pacman version](https://github.com/devkitPro/pacman/releases/) and install the `devkitPPC`, `devkitARM `, `general-tools` and `vim` (for `xxd`) package.
 
 Example commands for installing:
 ```Bash
@@ -40,9 +42,11 @@ wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.
 # Install it
 sudo dpkg -i /tmp/devkitpro-pacman.deb
 # Install needed packages
-yes | sudo dkp-pacman -Syu devkitPPC --needed
-yes | sudo dkp-pacman -Syu devkitARM --needed
-yes | sudo dkp-pacman -Syu general-tools --needed
+sudo dkp-pacman -Syu devkitPPC --needed
+sudo dkp-pacman -Syu devkitARM --needed
+sudo dkp-pacman -Syu general-tools --needed
+# We need xxd for building the plugin loader
+pacman -Syu vim
 ```
 
 After installing, make sure the following environment variables are set:
