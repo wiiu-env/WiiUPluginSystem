@@ -19,8 +19,7 @@ Before the loader can be compiled, dependencies need to be installed. This can b
 
 ### Installing libraries via bash script
 The plugin system provides an experimental bash script that clones all needed git repositories and builds/installs these libraries.  
-The script can be found here:  
-https://github.com/Maschell/WiiUPluginSystem/blob/master/installupdateportlibs.sh
+The script can be found [here](https://github.com/Maschell/WiiUPluginLoader/blob/master/installupdateportlibs.sh)
 
 Before the bash script can be used, make sure you have the following tools installed and set to your `PATH` variable.
 ```
