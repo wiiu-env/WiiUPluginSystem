@@ -11,8 +11,8 @@ topnav: topnav
 
 Code::Blocks allows you to save projects as an template for other (new projects). This page is about setting up the example plugin template.
 ## Setting up a plugin template.
-The Wii U Plugin also provides an example Code::Blocks project which can be used as a template.   
-It can be found in the following directory of this repository:  
+The Wii U Plugin System also provides an example Code::Blocks project which can be used as a template.   
+It can be found in the following directory of the [repository](https://github.com/Maschell/WiiUPluginSystem/tree/master/ide_templates/codeblocks):  
 `ide_templates\codeblocks`  
 The directory contains a project file (`windows_template.cbp`), a example source file (`src/main.cpp`) and a default Makefile (`Makefile`).
 Once you've opened the project in Code::Blocks, make sure you can compile it. Press `Ctrl + F11` to call `make clean && make`. You can also do `right click -> Rebuild` on the project.  

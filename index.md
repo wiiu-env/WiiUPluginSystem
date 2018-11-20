@@ -49,8 +49,8 @@ More information about wiiload and alternatives can be found here: http://wiibre
 
 # Download
 The plugin loader can be downloaded here:  
-Nightlies: [Download](https://github.com/Maschell/WiiUPluginSystem/releases)  
-Source: [Here](https://github.com/Maschell/WiiUPluginSystem)  
+Nightlies: [Download](https://github.com/Maschell/WiiUPluginLoader/releases)  
+Source: [Here](https://github.com/Maschell/WiiUPluginLoader)  
 Load the file with the homebrew launcher.
 
 {% include links.html %}

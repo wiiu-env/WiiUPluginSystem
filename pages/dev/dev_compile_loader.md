@@ -2,7 +2,7 @@
 title: How to compile the loader
 tags: 
 keywords: system functions, dynamic_libs, dynamic libs, wut
-last_updated: July 24, 2018
+last_updated: November 20, 2018
 sidebar: dev_sidebar
 permalink: dev_compile_loader.html
 folder: dev
@@ -10,8 +10,8 @@ topnav: topnav
 ---
 
 ## Requirements
-To be able to compile the loader, you need to already have installed the [toolchain](https://github.com/Maschell/WiiUPluginSystem/wiki/Setting-up-the-Toolchain) 
-and [required libs](https://github.com/Maschell/WiiUPluginSystem/wiki/Installing-the-required-libraries).  
+To be able to compile the loader, you need to already have installed the [toolchain](dev_toolchain_setup) 
+and [required libs](dev_required_libraries).  
 **Make sure to also install DevkitARM!**
 
 ## Compiling the loader

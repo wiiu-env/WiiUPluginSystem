@@ -18,7 +18,7 @@ The `plugin_makefile.mk` will be installed automatically into the _WUPS_DIR_ ins
 [WUPS library](https://github.com/Maschell/WiiUPluginSystem/wiki/Installing-the-required-libraries#wups-library).  
 
 The `Makefile` and `makefile.mk` can be found inside the [example plugin](https://github.com/Maschell/WiiUPluginSystem/tree/master/plugins/example_plugin). 
-When using the [Code::Blocks template](https://github.com/Maschell/WiiUPluginSystem/wiki/Using-project-templates-in-Code::Blocks), these will be provided.
+When using the [Code::Blocks template](dev_project_template_in_code_blocks), these will be provided.
 
 # makefile.mk
 The `makefile.mk` should be self explanatory, but common changes will be explained here.
