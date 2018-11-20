@@ -2,7 +2,7 @@
 title: Setting up an IDE
 tags: [ide]
 keywords: ide, codeblocks
-last_updated: September 14, 2018
+last_updated: November 20, 2018
 sidebar: dev_sidebar
 permalink: dev_ide_setup.html
 folder: dev
@@ -34,7 +34,7 @@ Once you have opened Code::Blocks, you can access the compiler options menu via 
 10. Save the settings by clicking on `OK`
 
 An example configuration can be found here:  
-![Example configuration of the compiler in Code::Blocks](https://i.imgur.com/cnfkmHR.gif)
+![Example configuration of the compiler in Code::Blocks](assets/img/cnfkmHR.gif)
 
 ### Next steps
 Now you can turn any existing project into a `Code::Blocks` project by following [this](dev_codeblocks_project_from_scratch.html) tutorial.  

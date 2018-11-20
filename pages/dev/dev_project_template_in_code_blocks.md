@@ -2,7 +2,7 @@
 title: Using project templates in Code::Blocks
 tags: [features]
 keywords: codeblocks, ide, template, plugin, example
-last_updated: July 24, 2018
+last_updated: November 20, 2018
 sidebar: dev_sidebar
 permalink: dev_project_template_in_code_blocks.html
 folder: dev
@@ -28,7 +28,7 @@ linking ... /g/Programmieren/WiiUPluginSystem/ide_templates/codeblocks/codeblock
 
 Now you are ready to save it as an user template. To do this, click on `File -> Save project as template` and enter an template name.  
 
-![Adding project as template](https://i.imgur.com/nUYEsEC.gif)
+![Adding project as template](assets/img/nUYEsEC.gif)
 
 ## Creating a plugin using the template
 1. Click on `File -> New -> From template` on the menu bar.
@@ -38,6 +38,6 @@ Now you are ready to save it as an user template. To do this, click on `File -> 
 5. Choose a name for the project
 6. Profit  
 
-![Created a project from a user template](https://i.imgur.com/KKAbz4n.gif)
+![Created a project from a user template](assets/img/KKAbz4n.gif)
 
 {% include links.html %}

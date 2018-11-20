@@ -2,7 +2,7 @@
 title: Creating a new project for an existing plugin
 tags: [features]
 keywords: codeblocks, ide, template, plugin, example, existing
-last_updated: July 24, 2018
+last_updated: November 20, 2018
 sidebar: dev_sidebar
 permalink: dev_codeblocks_project_from_scratch.html
 folder: dev
@@ -64,5 +64,5 @@ To add the source files:
 
 Now you should see your source files and can modify them. Try to build the project with `CTRL + F9`  
 
-![Creating a new project from the scratch](https://i.imgur.com/SpU4lbj.gif)
+![Creating a new project from the scratch](assets/img/SpU4lbj.gif)
 {% include links.html %}
