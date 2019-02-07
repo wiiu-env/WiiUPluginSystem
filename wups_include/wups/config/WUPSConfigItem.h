@@ -31,6 +31,8 @@
 #define WUPS_CONFIG_BUTTON_B        (1<<5)
 #define WUPS_CONFIG_BUTTON_ZL       (1<<6)
 #define WUPS_CONFIG_BUTTON_ZR       (1<<7)
+#define WUPS_CONFIG_BUTTON_L        (1<<8)
+#define WUPS_CONFIG_BUTTON_R        (1<<9)
 typedef int32_t WUPSConfigButtons;
 
 class WUPSConfigItem {
