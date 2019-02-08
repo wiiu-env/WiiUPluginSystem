@@ -46,6 +46,7 @@ typedef enum wups_loader_hook_type_t {
        
     WUPS_LOADER_HOOK_INIT_KERNEL,           /* Only for internal usage */
     WUPS_LOADER_HOOK_GET_CONFIG,            /* Called when the config-menu will be loaded */
+    WUPS_LOADER_HOOK_INIT_VID_MEM,          /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -78,6 +79,13 @@ typedef struct wups_loader_app_started_args_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_OVERLAY,init_overlay); \
     void init_overlay(wups_loader_init_overlay_args_t args){ \
         WUPS_InitOverlay(args);\
+    }
+    
+#define WUPS_USE_VIDEO_MEMORY() \
+    void init_vid_mem(wups_loader_init_vid_mem_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_VID_MEM,init_vid_mem); \
+    void init_vid_mem(wups_loader_init_vid_mem_args_t args){ \
+        WUPS_InitVidMem(args);\
     }
     
 #define WUPS_ALLOW_KERNEL() \

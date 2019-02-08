@@ -77,6 +77,14 @@ typedef struct wups_loader_init_kernel_args_t_ {
     KernelCopyDataFunction kern_copy_data_ptr;
 } wups_loader_init_kernel_args_t;
 
+typedef void* (*VideoMemoryAllocFunction)(uint32_t size, int32_t align);
+typedef void  (*VideoMemoryFreeFunction)(void *addr);
+
+typedef struct wups_loader_init_vid_mem_args_t_ {
+    VideoMemoryAllocFunction vid_mem_alloc_ptr;
+    VideoMemoryFreeFunction vid_mem_free_ptr;
+} wups_loader_init_vid_mem_args_t;
+
 /*
     Gets called by the framework
 */
@@ -99,6 +107,12 @@ void WUPS_InitOverlay(wups_loader_init_overlay_args_t args);
     If none or NULL pointers is provided, calling the corresponding function has no effect.
 **/
 void WUPS_InitKernel(wups_loader_init_kernel_args_t args);
+
+/**
+    Sets the function pointers for video mem functions.
+    If none or NULL pointers is provided, calling the corresponding function has no effect.
+**/
+void WUPS_InitVidMem(wups_loader_init_vid_mem_args_t args);
 
 /*
     Can be called by the user.
@@ -131,6 +145,12 @@ void WUPS_KernelWrite(void *addr, uint32_t value);
     The argument of the ON_APPLICATION_START hook provides the information if the plugin has kernel access which should be checked before using/relying on this function.
 **/
 void WUPS_KernelCopyDataFunction(uint32_t addr, uint32_t src, uint32_t len);
+
+void * WUPS_VideoMemAlloc(uint32_t size);
+
+void * WUPS_VideoMemMemalign(uint32_t size, int32_t align);
+
+void WUPS_VideoMemFree(void *addr);
 
 #ifdef __cplusplus
 }
