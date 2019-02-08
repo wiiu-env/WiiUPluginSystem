@@ -26,9 +26,11 @@ void OSScreenEnableEx(uint32_t bufferNum, int32_t enable);
 void OSScreenPutPixelEx(uint32_t bufferNum, uint32_t posX, uint32_t posY, uint32_t color);
 
 static OverlayOpenFunction overlayfunction_ptr __attribute__((section(".data"))) = NULL;
+static ConvertTextureFunction textureconvertfunction_ptr __attribute__((section(".data"))) = NULL;
 
 void WUPS_InitOverlay(wups_loader_init_overlay_args_t args) {
     overlayfunction_ptr = args.overlayfunction_ptr;
+    textureconvertfunction_ptr = args.textureconvertfunction_ptr;
 }
 
 void WUPS_Overlay_PrintTextOnScreen(wups_overlay_options_type_t screen, int x,int y, const char * msg, ...) {
@@ -85,6 +87,12 @@ void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callb
     }
 }
 
+bool WUPS_ConvertImageToTexture(const uint8_t *img, int32_t imgSize, void * texture) {
+    if(textureconvertfunction_ptr != NULL) {
+        return textureconvertfunction_ptr(img, imgSize, texture);
+    }
+    return false;
+}
 #ifdef __cplusplus
 }
 #endif

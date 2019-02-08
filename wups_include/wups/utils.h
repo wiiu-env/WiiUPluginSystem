@@ -36,9 +36,11 @@ wups_overlay_options_type_t;
 typedef void (*overlay_callback)(wups_overlay_options_type_t, void*);
 
 typedef void (*OverlayOpenFunction)(wups_overlay_options_type_t screen, overlay_callback callback, void*);
+typedef bool (*ConvertTextureFunction)(const uint8_t *img, int32_t imgSize, void * texture);
 
 typedef struct wups_loader_init_overlay_args_t {
     OverlayOpenFunction overlayfunction_ptr;
+    ConvertTextureFunction textureconvertfunction_ptr;
 } wups_loader_init_overlay_args_t;
 
 typedef int             (*OpenFunction)     (const char *pathname, int flags);
@@ -124,6 +126,9 @@ void WUPS_Overlay_OSScreenClear(wups_overlay_options_type_t screen);
 void WUPS_Overlay_FlipBuffers(wups_overlay_options_type_t screen);
 
 void WUPS_OpenOverlay(wups_overlay_options_type_t screen, overlay_callback callback, void* args);
+
+// texture needs to be a GX2Texture
+bool WUPS_ConvertImageToTexture(const uint8_t *img, int32_t imgSize, void * texture);
 
 /**
     Reads a 32bit value from a given address with kernel rights.
