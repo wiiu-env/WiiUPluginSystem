@@ -43,10 +43,12 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_ENDING_APPLICATION,    /* Called when an application ends */
     WUPS_LOADER_HOOK_VSYNC,                 /* Called when an application calls GX2WaitForVsync (most times each frame) */
     WUPS_LOADER_HOOK_APP_STATUS_CHANGED,    /* Called when the app status changes (foreground, background, closing) */
-       
+
     WUPS_LOADER_HOOK_INIT_KERNEL,           /* Only for internal usage */
     WUPS_LOADER_HOOK_GET_CONFIG,            /* Called when the config-menu will be loaded */
     WUPS_LOADER_HOOK_INIT_VID_MEM,          /* Only for internal usage */
+    WUPS_LOADER_HOOK_VID_DRC_DRAW,          /* Called when the DRC was rendered */
+    WUPS_LOADER_HOOK_VID_TV_DRAW,           /* Called when the TV was rendered */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -60,6 +62,13 @@ typedef enum wups_loader_app_status_t {
     WUPS_APP_STATUS_CLOSED,             /* App is going to be closed */
     WUPS_APP_STATUS_UNKNOWN,            /* Unknown status _should_ never happen.*/
 } wups_loader_app_status_t;
+
+typedef struct wups_loader_vid_buffer_t {
+    const void * color_buffer_ptr;
+    const void * tv_texture_ptr;
+    const void * drc_texture_ptr;
+    const void * sampler_ptr;
+} wups_loader_vid_buffer_t;
 
 typedef struct wups_loader_app_started_args_t {
     bool sd_mounted;
@@ -80,21 +89,21 @@ typedef struct wups_loader_app_started_args_t {
     void init_overlay(wups_loader_init_overlay_args_t args){ \
         WUPS_InitOverlay(args);\
     }
-    
+
 #define WUPS_USE_VIDEO_MEMORY() \
     void init_vid_mem(wups_loader_init_vid_mem_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_VID_MEM,init_vid_mem); \
     void init_vid_mem(wups_loader_init_vid_mem_args_t args){ \
         WUPS_InitVidMem(args);\
     }
-    
+
 #define WUPS_ALLOW_KERNEL() \
     void init_kernel(wups_loader_init_kernel_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_KERNEL,init_kernel); \
     void init_kernel(wups_loader_init_kernel_args_t args){ \
         WUPS_InitKernel(args);\
     }
-    
+
 #define INITIALIZE_PLUGIN() \
     void init_plugin(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN,init_plugin); \
@@ -129,6 +138,16 @@ typedef struct wups_loader_app_started_args_t {
     void on_app_status_changed(wups_loader_app_status_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APP_STATUS_CHANGED,on_app_status_changed); \
     void on_app_status_changed(wups_loader_app_status_t status)
+
+#define ON_DRC_TO_SCAN_BUFFER(myargs) \
+    void on_drc_to_scan_buf(wups_loader_vid_buffer_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_VID_DRC_DRAW,on_drc_to_scan_buf); \
+    void on_drc_to_scan_buf(wups_loader_vid_buffer_t myargs)
+
+#define ON_TV_TO_SCAN_BUFFER(myargs) \
+    void on_tv_to_scan_buf(wups_loader_vid_buffer_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_VID_TV_DRAW,on_tv_to_scan_buf); \
+    void on_tv_to_scan_buf(wups_loader_vid_buffer_t myargs)
 
 #ifdef __cplusplus
 }
