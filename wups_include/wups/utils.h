@@ -37,10 +37,12 @@ typedef void (*overlay_callback)(wups_overlay_options_type_t, void*);
 
 typedef void (*OverlayOpenFunction)(wups_overlay_options_type_t screen, overlay_callback callback, void*);
 typedef bool (*ConvertTextureFunction)(const uint8_t *img, int32_t imgSize, void * texture);
+typedef void (*DrawTextureFunction)(void * texture, void* sampler, float x, float y, int32_t width, int32_t height, float alpha);
 
 typedef struct wups_loader_init_overlay_args_t {
     OverlayOpenFunction overlayfunction_ptr;
     ConvertTextureFunction textureconvertfunction_ptr;
+    DrawTextureFunction drawtexturefunction_ptr;
 } wups_loader_init_overlay_args_t;
 
 typedef int             (*OpenFunction)     (const char *pathname, int flags);
@@ -93,7 +95,7 @@ typedef struct wups_loader_init_vid_mem_args_t_ {
 /**
     Sets the pointer for wrapping the fs functions.
     If NULL pointers are provided, the original function will be called.
-    The whole point of replacing the fs functions is to inherit SD/USB access. 
+    The whole point of replacing the fs functions is to inherit SD/USB access.
     The argument of the ON_APPLICATION_START hook provides information on the state of SD or USB access.
 **/
 void WUPS_InitFS(wups_loader_init_fs_args_t args);
@@ -156,6 +158,8 @@ void * WUPS_VideoMemAlloc(uint32_t size);
 void * WUPS_VideoMemMemalign(uint32_t size, int32_t align);
 
 void WUPS_VideoMemFree(void *addr);
+
+void WUPS_DrawTexture(void * texture, void* sampler, float x, float y, int32_t width, int32_t height, float alpha);
 
 #ifdef __cplusplus
 }
