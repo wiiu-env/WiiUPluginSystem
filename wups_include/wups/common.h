@@ -1,6 +1,6 @@
 /* based on blsug.h
  *   by Alex Chadwick
- * 
+ *
  * Copyright (C) 2014, Alex Chadwick
  * Modified by Maschell, 2018
  *
@@ -45,7 +45,7 @@ extern "C" {
     extern const char wups_meta_ ## id [] WUPS_SECTION("meta"); \
     const char wups_meta_ ## id [] = #id "=" value
 
-#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.1"); WUPS_META(buildtimestamp, __DATE__ " " __TIME__)
+#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.2"); WUPS_META(buildtimestamp, __DATE__ " " __TIME__)
 #define WUPS_PLUGIN_AUTHOR(x)  WUPS_META(author, x)
 #define WUPS_PLUGIN_VERSION(x) WUPS_META(version, x)
 #define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)

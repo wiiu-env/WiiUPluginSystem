@@ -99,6 +99,7 @@ typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_VPAD,
     WUPS_LOADER_LIBRARY_VPADBASE,
     WUPS_LOADER_LIBRARY_ZLIB125,
+    WUPS_LOADER_LIBRARY_OTHER,
 }
 wups_loader_library_type_t;
 
@@ -111,6 +112,8 @@ typedef enum wups_loader_entry_type_t {
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
     struct {
+        const void *physical_address;                /* (optional) Physical Address. If set, the name and lib will be ignored */
+        const void *virtual_address;                /* (optional) Physical Address. If set, the name and lib will be ignored */
         const char *name;                           /* Name of the function that will be replaced */
         const wups_loader_library_type_t library;   /**/
         const char *my_function_name;               /* Function name of your own, new function (my_XXX) */
@@ -119,14 +122,19 @@ typedef struct wups_loader_entry_t {
     } _function;
 } wups_loader_entry_t;
 
-#define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_EX(real_ ## x, lib, my_ ## x,  function_name);
+#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_ ## x, WUPS_LOADER_LIBRARY_OTHER, my_ ## x, x);
 
-#define WUPS_MUST_REPLACE_EX(original_func, rpl_type, replace_func, replace_function_name) \
+
+#define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_EX(NULL, NULL, real_ ## x, lib, my_ ## x,  function_name);
+
+#define WUPS_MUST_REPLACE_EX(pAddress, vAddress, original_func, rpl_type, replace_func, replace_function_name) \
     extern const wups_loader_entry_t wups_load_ ## replace_func \
         WUPS_SECTION("load"); \
     const wups_loader_entry_t wups_load_ ## replace_func = { \
         .type = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY, \
         ._function = { \
+                .physical_address = (const void*) pAddress, \
+                .virtual_address = (const void*) vAddress, \
                 .name = #replace_function_name, \
                 .library = rpl_type, \
                 .my_function_name = #replace_func, \
