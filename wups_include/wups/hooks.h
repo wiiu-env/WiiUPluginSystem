@@ -185,7 +185,7 @@ typedef struct wups_loader_app_started_args_t {
     void on_fini_wut_devoptab(){ \
         __fini_wut_devoptab(); \
     }\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_devoptab); 
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,on_fini_wut_devoptab); 
     
 #define WUPS_USE_WUT_NEWLIB() \
     extern "C" void __init_wut_newlib(); \
