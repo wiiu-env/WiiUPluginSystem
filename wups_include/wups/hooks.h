@@ -33,10 +33,17 @@ extern "C" {
     }
 
 typedef enum wups_loader_hook_type_t {
-    WUPS_LOADER_HOOK_INIT_FS,                       /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_OVERLAY,                  /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_KERNEL,                   /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_VID_MEM,                  /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_WUT_MALLOC,
+    WUPS_LOADER_HOOK_FINI_WUT_MALLOC,
+    WUPS_LOADER_HOOK_INIT_WUT_DEVOPTAB,
+    WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,
+    WUPS_LOADER_HOOK_INIT_WUT_NEWLIB,
+    WUPS_LOADER_HOOK_FINI_WUT_NEWLIB,
+    WUPS_LOADER_HOOK_INIT_WUT_STDCPP,
+    WUPS_LOADER_HOOK_FINI_WUT_STDCPP,
 
     WUPS_LOADER_HOOK_INIT_PLUGIN,                   /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,                 /* Called when re-entering the plugin loader */
@@ -67,17 +74,8 @@ typedef struct wups_loader_vid_buffer_t {
 } wups_loader_vid_buffer_t;
 
 typedef struct wups_loader_app_started_args_t {
-    bool sd_mounted;
-    bool usb_mounted;
     bool kernel_access;
 } wups_loader_app_started_args_t;
-
-#define WUPS_FS_ACCESS() \
-    void init_fs(wups_loader_init_fs_args_t);\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_FS,init_fs); \
-    void init_fs(wups_loader_init_fs_args_t args){ \
-        WUPS_InitFS(args);\
-    }
 
 #define WUPS_ALLOW_OVERLAY() \
     void init_overlay(wups_loader_init_overlay_args_t);\
@@ -164,6 +162,61 @@ typedef struct wups_loader_app_started_args_t {
     void on_tv_to_scan_buf(wups_loader_vid_buffer_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_VID_TV_DRAW,on_tv_to_scan_buf); \
     void on_tv_to_scan_buf(wups_loader_vid_buffer_t myargs)
+
+#define WUPS_USE_WUT_MALLOC() \
+    extern "C" void __init_wut_malloc(); \
+    void on_init_wut_malloc(){ \
+        __init_wut_malloc(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_MALLOC,on_init_wut_malloc); \
+    extern "C" void __fini_wut_malloc(); \
+    void on_fini_wut_malloc(){ \
+        __fini_wut_malloc(); \
+    } \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_malloc); \
+    
+#define WUPS_USE_WUT_DEVOPTAB() \
+    extern "C" void __init_wut_devoptab(); \
+    void on_init_wut_devoptab(){ \
+        __init_wut_devoptab(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_DEVOPTAB,on_init_wut_devoptab); \
+    extern "C" void __fini_wut_devoptab(); \
+    void on_fini_wut_devoptab(){ \
+        __fini_wut_devoptab(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_devoptab); 
+    
+#define WUPS_USE_WUT_NEWLIB() \
+    extern "C" void __init_wut_newlib(); \
+    void on_init_wut_newlib(){ \
+        __init_wut_newlib(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_NEWLIB,on_init_wut_newlib); \
+    extern "C" void __fini_wut_newlib(); \
+    void on_fini_wut_newlib(){ \
+        __fini_wut_newlib(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_NEWLIB,on_fini_wut_newlib);    
+    
+#define WUPS_USE_WUT_STDCPP() \
+    extern "C" void __init_wut_stdcpp() __attribute__((weak)); \
+    void on_init_wut_stdcpp(){ \
+        __init_wut_stdcpp(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_STDCPP,on_init_wut_stdcpp); \
+    extern "C"  void __fini_wut_stdcpp() __attribute__((weak)); \
+    void on_fini_wut_stdcpp(){ \
+        __fini_wut_stdcpp(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP,on_fini_wut_stdcpp);  
+
+#define WUPS_USE_WUT_CRT() \
+    WUPS_USE_WUT_MALLOC() \
+    WUPS_USE_WUT_DEVOPTAB() \
+    WUPS_USE_WUT_NEWLIB() \
+    WUPS_USE_WUT_STDCPP()
+    
 
 #ifdef __cplusplus
 }

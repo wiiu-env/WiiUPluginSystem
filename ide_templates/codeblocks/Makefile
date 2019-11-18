@@ -51,6 +51,8 @@ include $(WUPSDIR)/plugin_makefile.mk
 # options for code generation
 #---------------------------------------------------------------------------------
 
+MACHDEP	= -DESPRESSO -mcpu=750 -meabi -mhard-float
+
 # -Os: optimise size
 # -Wall: generate lots of warnings
 # -D__wiiu__: define the symbol __wiiu__ (used in some headers)
@@ -60,27 +62,24 @@ include $(WUPSDIR)/plugin_makefile.mk
 # -nostartfiles: Do not use the standard system startup files when linking
 # -ffunction-sections: split up functions so linker can garbage collect
 # -fdata-sections: split up data so linker can garbage collect
-COMMON_CFLAGS	:= -Os -Wall -mcpu=750 -meabi -mhard-float  -D__WIIU__ -nostartfiles -ffunction-sections -fdata-sections -Wl,-q  $(COMMON_CFLAGS)
+COMMON_CFLAGS	:= -O0 -Wall $(MACHDEP) -meabi -ffunction-sections -fdata-sections -Wl,-q  $(COMMON_CFLAGS)
+
+CFLAGS	        +=	-D__WIIU__ -D__WUT__
 
 # -x c: compile as c code
 # -std=c11: use the c11 standard
 CFLAGS	  		:= $(COMMON_CFLAGS) -x c -std=gnu11 $(CFLAGS)
 
-# -x c: compile as c++ code
+# -x c++: compile as c++ code
 # -std=gnu++11: use the c++11 standard
 CXXFLAGS  		:= $(COMMON_CFLAGS) -x c++ -std=gnu++11 $(CXXFLAGS)
-
-ifeq ($(DO_LOGGING), 1)
-   CFLAGS += -D__LOGGING__
-   CXXFLAGS += -D__LOGGING__
-endif
 
 #---------------------------------------------------------------------------------
 # any extra ld flags
 #--------------------------------------------------------------------------------
 # --gc-sections: remove unneeded symbols
 # -Map: generate a map file
-LDFLAGS +=  -Wl,-Map,$(notdir $@).map,--gc-sections
+LDFLAGS +=  $(ARCH) -Wl,-Map,$(notdir $@).map,--gc-sections,-wrap,__gxx_personality_v0
 
 
 #---------------------------------------------------------------------------------
@@ -96,33 +95,6 @@ LIBS    +=
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	+=
-
-NEEDS_WUT := 0
-                    
-ifeq ($(WUT_ENABLE_CPP), 1)
-    WUT_ENABLE_NEWLIB    := 1
-       
-    LDFLAGS              += -Wl,-whole-archive,-lwutstdc++,-no-whole-archive
-    NEEDS_WUT            := 1
-endif
-
-ifeq ($(WUT_ENABLE_NEWLIB), 1)     
-    LDFLAGS              += -Wl,-whole-archive,-lwutnewlib,-no-whole-archive
-    NEEDS_WUT            := 1
-endif
-
-ifeq ($(WUT_DEFAULT_MALLOC), 1)       
-    LDFLAGS              += -Wl,-whole-archive,-lwutmalloc,-no-whole-archive
-    NEEDS_WUT            := 1
-endif
-
-ifeq ($(NEEDS_WUT), 1)       
-    ifeq ($(strip $(WUT_ROOT)),)
-        $(error "Please set WUT_ROOT in your environment. export WUT_ROOT=<path to>wut)
-    endif
-    CFLAGS += -D__WUT__
-    CXXFLAGS += -D__WUT__
-endif
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -230,7 +202,7 @@ $(OUTPUT) : $(OFILES)
 #---------------------------------------------------------------------------------
 %.o: %.S
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(INCLUDE_FULL) -c $< -o $@ $(ERROR_FILTER)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(INCLUDE_FULL) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.png.o : %.png

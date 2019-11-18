@@ -18,10 +18,18 @@ WUPS_PLUGIN_LICENSE("BSD");
     https://github.com/Maschell/WiiUPluginSystem/wiki/Using-hooks
 **/
 
-// FS Access (replaces open/close/write/read etc. functions)
-WUPS_FS_ACCESS()
-// Overlay access
-//WUPS_ALLOW_OVERLAY()
+/**
+
+WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
+WUPS_USE_WUT_NEWLIB()       // Use serveral function implementations
+WUPS_USE_WUT_DEVOPTAB()     // Use wut devoptab for SD access
+WUPS_USE_WUT_STDCPP()       // Use wut cpp wrappers
+
+WUPS_USE_WUT_CRT()          // Use all of them
+
+**/
+
+WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
 
 // Gets called once when the loader exits.
 INITIALIZE_PLUGIN(){
@@ -38,13 +46,8 @@ ON_FUNCTIONS_PATCHED(){
 // Get called when ever GX2_VSYNC() was called (on each frame)
 ON_VYSNC(){
 }
-
-// Gets called whenever the status of the running application changes.
-ON_APP_STATUS_CHANGED(status){
-}
-
 // Called whenever an application is ending
-ON_APPLICATION_ENDING(){
+ON_APPLICATION_END(){
 }
 
 // Gets called once when the loader is loaded again at the plugins will be unloaded

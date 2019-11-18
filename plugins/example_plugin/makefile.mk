@@ -2,7 +2,7 @@
 TARGET              := $(notdir $(CURDIR)).mod
 
 # Source directories
-SOURCES             := src
+SOURCES             := src src/utils
 
 # Data directories
 DATA                :=	
@@ -31,7 +31,7 @@ LIBDIRS             := $(WUPSDIR) $(WUT_ROOT) $(PORTLIBS)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS                := -lwups -lwut
+LIBS                := -lwut -lwups 
 
 #---------------------------------------------------------------------------------
 # Will be added to the final lib paths

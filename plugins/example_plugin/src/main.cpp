@@ -1,8 +1,11 @@
 #include <wups.h>
+#include <whb/libmanager.h>
 #include <malloc.h>
 #include <string.h>
 #include <nsysnet/socket.h>
 #include <utils/logger.h>
+#include <coreinit/time.h>
+#include <coreinit/thread.h>
 #include <coreinit/filesystem.h>
 
 /**
@@ -16,25 +19,30 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("BSD");
 
 /**
-    Add this to one of your projects file to have access to SD/USB.
-**/
-WUPS_FS_ACCESS()
-/**
-    Add this to one of your projects file to be able to create overlays.
-**/
-WUPS_ALLOW_OVERLAY()
-
-/**
     All of this defines can be used in ANY file.
     It's possible to split it up into multiple files.
 
 **/
 
+
+/**
+
+WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
+WUPS_USE_WUT_NEWLIB()       // Use serveral function implementations
+WUPS_USE_WUT_DEVOPTAB()     // Use wut devoptab for SD access
+WUPS_USE_WUT_STDCPP()       // Use wut cpp wrappers
+
+WUPS_USE_WUT_CRT()          // Use all of them
+
+**/
+
+WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
+
 /**
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
 INITIALIZE_PLUGIN(){
-    socket_lib_init();
+    WHBInitializeSocketLibrary();
     log_init();
 	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!\n");
 }
@@ -43,9 +51,7 @@ INITIALIZE_PLUGIN(){
     Gets called when the plugin loader is re-entered => when the plugin is unloaded. 
 	The overridden functions are restored before this is getting called.
 **/
-DEINITIALIZE_PLUGIN(){
-    socket_lib_init();
-    log_init();
+DEINITIALIZE_PLUGIN(){   
     DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!\n");
 }
 
@@ -55,7 +61,7 @@ DEINITIALIZE_PLUGIN(){
 	Make sure to initialize all functions you're using in the overridden functions!
 **/
 ON_APPLICATION_START(){
-    socket_lib_init();
+    WHBInitializeSocketLibrary();
     log_init();
 
     DEBUG_FUNCTION_LINE("ON_APPLICATION_START of example_plugin!\n");
@@ -64,33 +70,8 @@ ON_APPLICATION_START(){
 /**
     Gets called when an application ends. A good place for freeing memory.
 **/
-ON_APPLICATION_ENDING(){
+ON_APPLICATION_END(){
     DEBUG_FUNCTION_LINE("ON_APPLICATION_ENDING of example_plugin!\n");
-}
-
-/**
-    Gets called on each frame.
-**/
-ON_VYSNC(){
-    DEBUG_FUNCTION_LINE("ON_VYSNC of example_plugin!\n");
-}
-
-/**
-Gets called whenever the application status changes.
-
-Possible values of "status":
-    WUPS_APP_STATUS_FOREGROUND,         App is now running in foreground
-    WUPS_APP_STATUS_BACKGROUND          App is now running in background
-    WUPS_APP_STATUS_CLOSED              App is going to be closed
-**/
-ON_APP_STATUS_CHANGED(status){
-	if(status == WUPS_APP_STATUS_FOREGROUND){
-		DEBUG_FUNCTION_LINE("ON_APP_STATUS_CHANGED of example_plugin! App is now in foreground\n");
-	} else if(status == WUPS_APP_STATUS_BACKGROUND){
-		DEBUG_FUNCTION_LINE("ON_APP_STATUS_CHANGED of example_plugin! App is now in background\n");
-	} else if(status == WUPS_APP_STATUS_CLOSED){
-		DEBUG_FUNCTION_LINE("ON_APP_STATUS_CHANGED of example_plugin! App is now going to be closed\n");
-	}
 }
 
 /**
