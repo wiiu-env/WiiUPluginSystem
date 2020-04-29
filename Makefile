@@ -1,70 +1,44 @@
-DO_LOGGING := 0
+TOPDIR ?= $(CURDIR)
+include $(TOPDIR)/share/wups_rules
+
+export WUT_MAJOR	:=	0
+export WUT_MINOR	:=	3
+export WUT_PATCH	:=	0
+
+VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
 
 #---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(DEVKITPPC)),)
-$(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC)
-endif
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>DEVKITPRO)
-endif
-
-export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
-export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
-
-PREFIX	:=	powerpc-eabi-
-
-export AS	:=	$(PREFIX)as
-export CC	:=	$(PREFIX)gcc
-export CXX	:=	$(PREFIX)g++
-export AR	:=	$(PREFIX)ar
-export OBJCOPY	:=	$(PREFIX)objcopy
-
-include $(DEVKITPPC)/base_rules
-
-#---------------------------------------------------------------------------------
+# TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-# DATA is a list of directories containing binary files
-# LIBDIR is where the built library will be placed
-# all directories are relative to this makefile
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
 #---------------------------------------------------------------------------------
-BUILD		?=	release
-SOURCES		:=	src \
-				src/config
-
-INCLUDES	:=	src \
-				wups_include
-DATA		:=
-LIB		:=	lib
+TARGET		:=	wups
+#BUILD		:=	build
+SOURCES		:=	libraries/libwups/
+DATA		:=	data
+INCLUDES	:=	include
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	= -g -Os -Wall -D__wiiu__ -D_GNU_SOURCE $(MACHDEP) $(INCLUDE)
-CXXFLAGS	=	$(CFLAGS)
+CFLAGS	:=	-g -Wall -Werror -save-temps \
+			-ffunction-sections -fdata-sections \
+			$(MACHDEP) \
+			$(BUILD_CFLAGS)
 
-ifeq ($(DO_LOGGING), 1)
-   CFLAGS += -D__LOGGING__
-   CXXFLAGS += -D__LOGGING__
-endif
+CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__
 
-ASFLAGS	:=	-mregnames
+CXXFLAGS	:= $(CFLAGS) -std=gnu++17
 
-export WIIUBIN	:=	$(LIB)/libwups.a
-
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project
-#---------------------------------------------------------------------------------
-LIBS	:=  
+ASFLAGS	:=	-g $(MACHDEP)
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=  
+LIBDIRS	:=
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -73,56 +47,87 @@ LIBDIRS	:=
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TOPDIR ?= $(CURDIR)/..
-export DEPSDIR := $(CURDIR)/$(BUILD)
-
-export INCLUDEDIR := $(PORTLIBS)/include/
+export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
+SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+DEFFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.def)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
-export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) $(sFILES:.s=.o)
+export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
+export OFILES_SRC	:=	$(DEFFILES:.def=.o) $(SFILES:.s=.o) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
+export HFILES	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-            -I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include
+			-I.
 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-.PHONY: $(BUILD) clean
+.PHONY: all dist-bin dist-src dist install clean
 
 #---------------------------------------------------------------------------------
-$(BUILD):
+all: lib/libwups.a lib/libwupsd.a
+
+dist-bin: all
+	@tar --exclude=*~ -cjf wups-$(VERSION).tar.bz2 include lib share
+
+dist-src:
+	@tar --exclude=*~ -cjf wups-src-$(VERSION).tar.bz2 include libraries share Makefile
+
+dist: dist-src dist-bin
+
+install: dist-bin
+	mkdir -p $(DESTDIR)$(DEVKITPRO)/wups
+	bzip2 -cd wups-$(VERSION).tar.bz2 | tar -xf - -C $(DESTDIR)$(DEVKITPRO)/wups
+
+lib:
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
+release:
+	@[ -d $@ ] || mkdir -p $@
+
+debug:
+	@[ -d $@ ] || mkdir -p $@
+
+lib/libwups.a : lib release $(SOURCES) $(INCLUDES)
+	@$(MAKE) BUILD=release OUTPUT=$(CURDIR)/$@ \
+	BUILD_CFLAGS="-DNDEBUG=1 -O2" \
+	DEPSDIR=$(CURDIR)/release \
+	--no-print-directory -C release \
+	-f $(CURDIR)/Makefile
+
+lib/libwupsd.a : lib debug $(SOURCES) $(INCLUDES)
+	@$(MAKE) BUILD=debug OUTPUT=$(CURDIR)/$@ \
+	BUILD_CFLAGS="-DDEBUG=1 -Og" \
+	DEPSDIR=$(CURDIR)/debug \
+	--no-print-directory -C debug \
+	-f $(CURDIR)/Makefile
+
+# Cancel .a rule from devkitPPC/base_rules
+%.a:
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr debug release $(LIB) include
-
-all: $(WIIUBIN)
-
-WUPSDIR := $(DEVKITPRO)/wups
-
-# Rule to install wups.
-PHONY += install
-install :  wups.ld
-	$(addprefix $Qrm -rf ,$(wildcard $(WUPSDIR)))
-	$Qmkdir $(WUPSDIR)
-	$Qmkdir $(WUPSDIR)/lib/
-	$Qcp -r wups_include $(WUPSDIR)/include
-	$Qcp -r wups.ld $(WUPSDIR)
-	$Qcp -r plugin_makefile.mk $(WUPSDIR)
-	@cp $(BUILD)/lib/libwups.a $(WUPSDIR)/lib/
+	@rm -rf release debug lib
 
 #---------------------------------------------------------------------------------
 else
@@ -132,17 +137,19 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(WIIUBIN)	:	$(OFILES) $(LIB)
-	@rm -f "$(WIIUBIN)"
-	@$(AR) rcs "$(WIIUBIN)" $(OFILES) 
-	@echo built ... $(notdir $@)
-	
-$(LIB):
-	mkdir $(LIB)
+$(OUTPUT)	:	$(OFILES)
+
+$(OFILES_SRC)	: $(HFILES)
+
+#---------------------------------------------------------------------------------
+%_bin.h %.bin.o	:	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
 
 -include $(DEPENDS)
 
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------
-

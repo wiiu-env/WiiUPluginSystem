@@ -45,31 +45,6 @@ typedef struct wups_loader_init_overlay_args_t {
     DrawTextureFunction drawtexturefunction_ptr;
 } wups_loader_init_overlay_args_t;
 
-typedef int             (*OpenFunction)     (const char *pathname, int flags);
-typedef ssize_t         (*WriteFunction)    (int fd, const void *buf, size_t count);
-typedef int             (*CloseFunction)    (int fd);
-typedef ssize_t         (*ReadFunction)     (int fd, void *buf, size_t count);
-typedef off_t           (*LSeekFunction)    (int fd, off_t offset, int whence);
-typedef int             (*StatFunction)     (const char *pathname, struct stat *statbuf);
-typedef int             (*FStatFunction)    (int fd, struct stat *statbuf);
-typedef DIR*            (*OpenDirFunction)  (const char * arg);
-typedef int             (*CloseDirFunction) (DIR *dirp);
-typedef struct dirent * (*ReadDirFunction)  (DIR *dirp);
-typedef int             (*MKDirFunction)    (const char *path, mode_t mode);
-
-typedef struct wups_loader_init_fs_args_t {
-    OpenFunction open_repl;
-    CloseFunction close_repl;
-    WriteFunction write_repl;
-    ReadFunction read_repl;
-    LSeekFunction lseek_repl;
-    StatFunction stat_repl;
-    FStatFunction fstat_repl;
-    OpenDirFunction opendir_repl;
-    CloseDirFunction closedir_repl;
-    ReadDirFunction readdir_repl;
-    MKDirFunction mkdir_repl;
-} wups_loader_init_fs_args_t;
 
 typedef uint32_t (*KernelReadFunction)(const void *addr);
 typedef void     (*KernelWriteFunction)(void *addr, uint32_t value);
@@ -98,7 +73,7 @@ typedef struct wups_loader_init_vid_mem_args_t_ {
     The whole point of replacing the fs functions is to inherit SD/USB access.
     The argument of the ON_APPLICATION_START hook provides information on the state of SD or USB access.
 **/
-void WUPS_InitFS(wups_loader_init_fs_args_t args);
+//void WUPS_InitFS(wups_loader_init_fs_args_t args);
 
 /**
     Sets the function pointer for opening the overlay.

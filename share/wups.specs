@@ -1,0 +1,4 @@
+%rename link old_link
+
+*link:
+%(old_link) -T %:getenv(DEVKITPRO /wups/share/wups.ld) --gc-sections --emit-relocs -z nocopyreloc -wrap __gxx_personality_v0 --entry=__wups_start

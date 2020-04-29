@@ -20,3 +20,10 @@ release/*
 *.layout
 wups.cbp
 tools/udp_debug_reader/GeckoLog.txt
+*.bz2
+debug/
+*.elf
+*.wps
+*.save-failed
+*.jekyll-metadata
+*.cbp
