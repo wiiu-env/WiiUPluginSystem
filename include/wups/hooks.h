@@ -202,7 +202,9 @@ typedef struct wups_loader_app_started_args_t {
 #define WUPS_USE_WUT_STDCPP() \
     extern "C" void __init_wut_stdcpp() __attribute__((weak)); \
     void on_init_wut_stdcpp(){ \
+        if (__init_wut_stdcpp) { \
         __init_wut_stdcpp(); \
+        } \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_STDCPP,on_init_wut_stdcpp); \
     extern "C"  void __fini_wut_stdcpp() __attribute__((weak)); \
