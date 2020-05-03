@@ -36,7 +36,7 @@ WUPS_USE_WUT_CRT()          // Use all of them
 
 **/
 
-WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
+WUPS_USE_WUT_CRT()       // Use the wut malloc wrapper
 
 /**
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
