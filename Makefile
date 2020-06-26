@@ -16,7 +16,7 @@ VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	wups
 #BUILD		:=	build
-SOURCES		:=	libraries/libwups/
+SOURCES		:=	libraries/libwups/ libraries/libwups/config
 DATA		:=	data
 INCLUDES	:=	include
 
