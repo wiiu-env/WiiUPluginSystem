@@ -27,3 +27,4 @@ debug/
 *.save-failed
 *.jekyll-metadata
 *.cbp
+lib/
