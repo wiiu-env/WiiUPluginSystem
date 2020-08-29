@@ -21,6 +21,6 @@ WUPSSPECS	:=	-T$(WUPS_ROOT)/share/wups.ld -specs=$(WUPS_ROOT)/share/wups.specs
 	@cp $< $*.strip.elf
 	@$(STRIP) -g $*.strip.elf
 	@elf2rpl $*.strip.elf $@
-	@printf '\xDE\xAD' | dd of=$@ bs=1 seek=9 count=2 conv=notrunc status=none
+	@echo 'PL' | dd of=$@ bs=1 seek=9 count=2 conv=notrunc status=none
 	@rm $*.strip.elf
 	@echo built ... $(notdir $@)
