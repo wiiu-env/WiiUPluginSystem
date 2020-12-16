@@ -7,6 +7,7 @@
 #include <coreinit/time.h>
 #include <coreinit/thread.h>
 #include <coreinit/filesystem.h>
+#include <whb/log_udp.h>
 
 /**
     Mandatory plugin information.
@@ -42,17 +43,16 @@ WUPS_USE_WUT_CRT()       // Use the wut malloc wrapper
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
 INITIALIZE_PLUGIN(){
-    WHBInitializeSocketLibrary();
-    log_init();
-	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!\n");
+    WHBLogUdpInit();
+	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
 }
 
 /**
     Gets called when the plugin loader is re-entered => when the plugin is unloaded. 
 	The overridden functions are restored before this is getting called.
 **/
-DEINITIALIZE_PLUGIN(){   
-    DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!\n");
+DEINITIALIZE_PLUGIN(){
+    DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!");
 }
 
 /**
@@ -61,17 +61,16 @@ DEINITIALIZE_PLUGIN(){
 	Make sure to initialize all functions you're using in the overridden functions!
 **/
 ON_APPLICATION_START(){
-    WHBInitializeSocketLibrary();
-    log_init();
+    WHBLogUdpInit();    
 
-    DEBUG_FUNCTION_LINE("ON_APPLICATION_START of example_plugin!\n");
+    DEBUG_FUNCTION_LINE("ON_APPLICATION_START of example_plugin!");
 } 
 
 /**
     Gets called when an application ends. A good place for freeing memory.
 **/
 ON_APPLICATION_END(){
-    DEBUG_FUNCTION_LINE("ON_APPLICATION_ENDING of example_plugin!\n");
+    DEBUG_FUNCTION_LINE("ON_APPLICATION_ENDING of example_plugin!");
 }
 
 /**
