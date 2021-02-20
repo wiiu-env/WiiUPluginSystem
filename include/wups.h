@@ -30,5 +30,6 @@
 #include "wups/function_patching.h"
 #include "wups/hooks.h"
 #include "wups/utils.h"
+#include "wups/storage.h"
 
 #endif /* WUPS_WUPS_H_ */

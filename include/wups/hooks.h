@@ -36,6 +36,7 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_OVERLAY,                  /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_KERNEL,                   /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_VID_MEM,                  /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_STORAGE,                  /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_WUT_MALLOC,
     WUPS_LOADER_HOOK_FINI_WUT_MALLOC,
     WUPS_LOADER_HOOK_INIT_WUT_DEVOPTAB,
@@ -96,6 +97,13 @@ typedef struct wups_loader_app_started_args_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_KERNEL,init_kernel); \
     void init_kernel(wups_loader_init_kernel_args_t args){ \
         WUPS_InitKernel(args);\
+    }
+
+#define WUPS_USE_STORAGE() \
+    void init_storage(wups_loader_init_storage_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_STORAGE,init_storage); \
+    void init_storage(wups_loader_init_storage_args_t args){ \
+        WUPS_InitStorage(args);\
     }
 
 #define INITIALIZE_PLUGIN() \
