@@ -2,7 +2,7 @@ TOPDIR ?= $(CURDIR)
 include $(TOPDIR)/share/wups_rules
 
 export WUT_MAJOR	:=	0
-export WUT_MINOR	:=	3
+export WUT_MINOR	:=	4
 export WUT_PATCH	:=	0
 
 VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
@@ -16,7 +16,7 @@ VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	wups
 #BUILD		:=	build
-SOURCES		:=	libraries/libwups/ libraries/libwups/config
+SOURCES		:=	libraries/libwups/
 DATA		:=	data
 INCLUDES	:=	include
 

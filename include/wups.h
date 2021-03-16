@@ -27,8 +27,8 @@
 #define WUPS_H_
 
 #include "wups/common.h"
+#include "wups/meta.h"
 #include "wups/function_patching.h"
 #include "wups/hooks.h"
-#include "wups/utils.h"
 
 #endif /* WUPS_WUPS_H_ */

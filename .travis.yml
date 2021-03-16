@@ -1,7 +1,0 @@
-sudo: required
-
-services:
-  - docker
-    
-script:
-- docker run -it --rm -v ${PWD}:/project wiiulegacy/core:0.1 /bin/bash -c "(cd project && make clean && make)"

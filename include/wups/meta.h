@@ -23,27 +23,23 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_COMMON_DEF_H_
-#define WUPS_COMMON_DEF_H_
+#ifndef WUPS_META_DEF_H_
+#define WUPS_META_DEF_H_
 
-#include <stddef.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <stdbool.h>
+#include "common.h"
+#include "hooks.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define WUPS_SECTION(x) __attribute__((__section__ (".wups." x)))
-
-#define WUPS_META(id, value) \
-    extern const char wups_meta_ ## id [] WUPS_SECTION("meta"); \
-    const char wups_meta_ ## id [] = #id "=" value
+#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.4"); WUPS_USE_WUT_MALLOC() WUPS_USE_WUT_NEWLIB() WUPS_USE_WUT_STDCPP() WUPS_META(buildtimestamp, __DATE__ " " __TIME__); 
+#define WUPS_PLUGIN_AUTHOR(x)  WUPS_META(author, x)
+#define WUPS_PLUGIN_VERSION(x) WUPS_META(version, x)
+#define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)
+#define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
+#define WUPS_PLUGIN_ID(x)      WUPS_META(id, x)
+#define WUPS_PLUGIN_CONFIG_REVISION(x) WUPS_META(config_revision, #x)
 
 #ifdef __cplusplus
 }
