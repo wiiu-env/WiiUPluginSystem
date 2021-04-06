@@ -102,49 +102,56 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_VSYNC,on_vsync); \
     void on_vsync(void)
 
+
+#ifdef __cplusplus
+#define __EXTERN_C_MACRO extern "C" 
+#else
+#define __EXTERN_C_MACRO
+#endif
+
 #define WUPS_USE_WUT_MALLOC() \
-    extern "C" void __init_wut_malloc(); \
+    __EXTERN_C_MACRO void __init_wut_malloc(); \
     void on_init_wut_malloc(){ \
         __init_wut_malloc(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_MALLOC,on_init_wut_malloc); \
-    extern "C" void __fini_wut_malloc(); \
+    __EXTERN_C_MACRO void __fini_wut_malloc(); \
     void on_fini_wut_malloc(){ \
         __fini_wut_malloc(); \
     } \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_malloc); \
-    
+
 #define WUPS_USE_WUT_DEVOPTAB() \
-    extern "C" void __init_wut_devoptab(); \
+    __EXTERN_C_MACRO void __init_wut_devoptab(); \
     void on_init_wut_devoptab(){ \
         __init_wut_devoptab(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_DEVOPTAB,on_init_wut_devoptab); \
-    extern "C" void __fini_wut_devoptab(); \
+    __EXTERN_C_MACRO void __fini_wut_devoptab(); \
     void on_fini_wut_devoptab(){ \
         __fini_wut_devoptab(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,on_fini_wut_devoptab);
 
 #define WUPS_USE_WUT_NEWLIB() \
-    extern "C" void __init_wut_newlib(); \
+    __EXTERN_C_MACRO void __init_wut_newlib(); \
     void on_init_wut_newlib(){ \
         __init_wut_newlib(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_NEWLIB,on_init_wut_newlib); \
-    extern "C" void __fini_wut_newlib(); \
+    __EXTERN_C_MACRO void __fini_wut_newlib(); \
     void on_fini_wut_newlib(){ \
         __fini_wut_newlib(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_NEWLIB,on_fini_wut_newlib);    
     
 #define WUPS_USE_WUT_STDCPP() \
-    extern "C" void __init_wut_stdcpp(); \
+    __EXTERN_C_MACRO void __init_wut_stdcpp(); \
     void on_init_wut_stdcpp(){ \
         __init_wut_stdcpp(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_STDCPP,on_init_wut_stdcpp); \
-    extern "C"  void __fini_wut_stdcpp(); \
+    __EXTERN_C_MACRO  void __fini_wut_stdcpp(); \
     void on_fini_wut_stdcpp(){ \
         __fini_wut_stdcpp(); \
     }\
