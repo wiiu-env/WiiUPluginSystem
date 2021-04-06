@@ -25,19 +25,7 @@ WUPS_PLUGIN_LICENSE("BSD");
 
 **/
 
-
-/**
-
-WUPS_USE_WUT_MALLOC()       // Use the wut malloc wrapper
-WUPS_USE_WUT_NEWLIB()       // Use serveral function implementations
-WUPS_USE_WUT_DEVOPTAB()     // Use wut devoptab for SD access
-WUPS_USE_WUT_STDCPP()       // Use wut cpp wrappers
-
-WUPS_USE_WUT_CRT()          // Use all of them
-
-**/
-
-WUPS_USE_WUT_CRT()       // Use the wut malloc wrapper
+WUPS_USE_WUT_DEVOPTAB()       // Use the wut devoptabs
 
 /**
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
@@ -67,10 +55,10 @@ ON_APPLICATION_START(){
 } 
 
 /**
-    Gets called when an application ends. A good place for freeing memory.
+    Gets called when an application request to exit.
 **/
-ON_APPLICATION_END(){
-    DEBUG_FUNCTION_LINE("ON_APPLICATION_ENDING of example_plugin!");
+ON_APPLICATION_REQUESTS_EXIT(){
+    DEBUG_FUNCTION_LINE("ON_APPLICATION_REQUESTS_EXIT of example_plugin!");
 }
 
 /**
