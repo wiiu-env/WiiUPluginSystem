@@ -40,6 +40,8 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_FINI_WUT_STDCPP,
     WUPS_LOADER_HOOK_INIT_WUT_DEVOPTAB,
     WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,
+    WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,
+    WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,
 
     WUPS_LOADER_HOOK_INIT_PLUGIN,                   /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,                 /* Called when re-entering the plugin loader */
@@ -157,6 +159,18 @@ typedef struct wups_loader_hook_t {
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP,on_fini_wut_stdcpp);  
 
+#define WUPS_USE_WUT_SOCKETS() \
+    __EXTERN_C_MACRO void __attribute__((weak)) __init_wut_socket(); \
+    void on_init_wut_sockets(){ \
+        if (&__init_wut_socket) __init_wut_socket(); \
+    } \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,on_init_wut_sockets); \
+    __EXTERN_C_MACRO void __attribute__((weak)) __fini_wut_socket(); \
+    void on_fini_wut_sockets(){ \
+        if (&__fini_wut_socket) __fini_wut_socket(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,on_fini_wut_sockets);  
+    
 #ifdef __cplusplus
 }
 #endif
