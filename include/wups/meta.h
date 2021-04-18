@@ -23,9 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_META_DEF_H_
-#define WUPS_META_DEF_H_
-
+#pragma once
 #include "common.h"
 #include "hooks.h"
 
@@ -33,7 +31,7 @@
 extern "C" {
 #endif
 
-#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.5"); WUPS_USE_WUT_MALLOC() WUPS_USE_WUT_SOCKETS() WUPS_USE_WUT_NEWLIB() WUPS_USE_WUT_STDCPP() WUPS_META(buildtimestamp, __DATE__ " " __TIME__); 
+#define WUPS_PLUGIN_NAME(x)    WUPS_META(name, x); WUPS_META(wups, "0.6"); WUPS_USE_WUT_MALLOC() WUPS_USE_WUT_SOCKETS() WUPS_USE_WUT_NEWLIB() WUPS_USE_WUT_STDCPP() WUPS_META(buildtimestamp, __DATE__ " " __TIME__);
 #define WUPS_PLUGIN_AUTHOR(x)  WUPS_META(author, x)
 #define WUPS_PLUGIN_VERSION(x) WUPS_META(version, x)
 #define WUPS_PLUGIN_LICENSE(x) WUPS_META(license, x)
@@ -44,5 +42,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_COMMON_DEF_H_ */

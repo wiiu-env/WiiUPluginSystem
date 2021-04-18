@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_FUNCTION_PATCHING_DEF_H_
-#define WUPS_FUNCTION_PATCHING_DEF_H_
+#pragma once
 
 #include "common.h"
 
@@ -173,5 +172,3 @@ typedef struct wups_loader_entry_t {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_FUNCTION_PATCHING_DEF_H_ */

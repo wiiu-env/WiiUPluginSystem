@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_COMMON_DEF_H_
-#define WUPS_COMMON_DEF_H_
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -48,5 +47,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_COMMON_DEF_H_ */

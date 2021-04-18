@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 Maschell
+ * Copyright (C) 2018-2021 Maschell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef WUPS_HOOKS_DEF_H_
-#define WUPS_HOOKS_DEF_H_
+#pragma once
 
 #include "common.h"
 
@@ -42,6 +41,9 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,
     WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,
     WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,
+
+    WUPS_LOADER_HOOK_GET_CONFIG,
+    WUPS_LOADER_HOOK_CLEANUP_CONFIG,
 
     WUPS_LOADER_HOOK_INIT_PLUGIN,                   /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,                 /* Called when re-entering the plugin loader */
@@ -104,6 +106,15 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_VSYNC,on_vsync); \
     void on_vsync(void)
 
+#define WUPS_GET_CONFIG() \
+    WUPSConfigHandle on_get_wups_config(void);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_GET_CONFIG,on_get_wups_config); \
+    WUPSConfigHandle on_get_wups_config(void)
+
+#define WUPS_CLEANUP_CONFIG() \
+    void on_cleanup_wups_config(void);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_CLEANUP_CONFIG,on_cleanup_wups_config); \
+    void on_cleanup_wups_config(void)
 
 #ifdef __cplusplus
 #define __EXTERN_C_MACRO extern "C" 
@@ -174,5 +185,3 @@ typedef struct wups_loader_hook_t {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_WUPS_H_ */
