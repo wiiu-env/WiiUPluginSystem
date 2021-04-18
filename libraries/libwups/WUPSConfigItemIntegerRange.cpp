@@ -60,7 +60,9 @@ void WUPSConfigItemIntegerRange_onDelete(void *context) {
     free(item);
 }
 
-void WUPSConfigItemIntegerRange_onDelete(void *context);
+void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
+
+}
 
 extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue, IntegerRangeValueChangedCallback callback) {
     if (cat == 0) {
@@ -77,15 +79,16 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     item->maxValue = maxValue;
     item->callback = (void *) callback;
 
-    WUPSConfigCallbacks_t callbacks{};
-
-    callbacks.getCurrentValueDisplay = &WUPSConfigItemIntegerRange_getCurrentValueDisplay;
-    callbacks.callCallback = &WUPSConfigItemIntegerRange_callCallback;
-    callbacks.getCurrentValueSelectedDisplay = &WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay;
-    callbacks.isMovementAllowed = &WUPSConfigItemIntegerRange_isMovementAllowed;
-    callbacks.onButtonPressed = &WUPSConfigItemIntegerRange_onButtonPressed;
-    callbacks.restoreDefault = &WUPSConfigItemIntegerRange_restoreDefault;
-    callbacks.onDelete = &WUPSConfigItemIntegerRange_onDelete;
+    WUPSConfigCallbacks_t callbacks = {
+            .getCurrentValueDisplay = &WUPSConfigItemIntegerRange_getCurrentValueDisplay,
+            .getCurrentValueSelectedDisplay = &WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay,
+            .onSelected = &WUPSConfigItemIntegerRange_onSelected,
+            .restoreDefault = &WUPSConfigItemIntegerRange_restoreDefault,
+            .isMovementAllowed = &WUPSConfigItemIntegerRange_isMovementAllowed,
+            .callCallback = &WUPSConfigItemIntegerRange_callCallback,
+            .onButtonPressed = &WUPSConfigItemIntegerRange_onButtonPressed,
+            .onDelete = &WUPSConfigItemIntegerRange_onDelete
+    };
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);

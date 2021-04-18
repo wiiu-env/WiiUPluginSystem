@@ -56,6 +56,9 @@ void WUPSConfigItemBoolean_restoreDefault(void *context) {
     item->value = item->defaultValue;
 }
 
+void WUPSConfigItemBoolean_onSelected(void *context, bool isSelected) {
+}
+
 extern "C" bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue, const char *falseValue) {
     if (cat == 0) {
         return false;
@@ -71,15 +74,16 @@ extern "C" bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle c
     snprintf(item->trueValue, sizeof(item->trueValue), "%s", trueValue);
     snprintf(item->falseValue, sizeof(item->falseValue), "%s", falseValue);
 
-    WUPSConfigCallbacks_t callbacks{};
-
-    callbacks.getCurrentValueDisplay = &WUPSConfigItemBoolean_getCurrentValueDisplay;
-    callbacks.callCallback = &WUPSConfigItemBoolean_callCallback;
-    callbacks.getCurrentValueSelectedDisplay = &WUPSConfigItemBoolean_getCurrentValueSelectedDisplay;
-    callbacks.isMovementAllowed = &WUPSConfigItemBoolean_isMovementAllowed;
-    callbacks.onButtonPressed = &WUPSConfigItemBoolean_onButtonPressed;
-    callbacks.restoreDefault = &WUPSConfigItemBoolean_restoreDefault;
-    callbacks.onDelete = &WUPSConfigItemBoolean_onDelete;
+    WUPSConfigCallbacks_t callbacks = {
+            .getCurrentValueDisplay = &WUPSConfigItemBoolean_getCurrentValueDisplay,
+            .getCurrentValueSelectedDisplay = &WUPSConfigItemBoolean_getCurrentValueSelectedDisplay,
+            .onSelected = &WUPSConfigItemBoolean_onSelected,
+            .restoreDefault = &WUPSConfigItemBoolean_restoreDefault,
+            .isMovementAllowed = &WUPSConfigItemBoolean_isMovementAllowed,
+            .callCallback = &WUPSConfigItemBoolean_callCallback,
+            .onButtonPressed = &WUPSConfigItemBoolean_onButtonPressed,
+            .onDelete = &WUPSConfigItemBoolean_onDelete
+    };
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);
