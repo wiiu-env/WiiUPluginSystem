@@ -66,7 +66,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     if (cat == 0) {
         return false;
     }
-    auto *item = (ConfigItemIntegerRange *) malloc(sizeof(ConfigItemIntegerRange *));
+    auto *item = (ConfigItemIntegerRange *) malloc(sizeof(ConfigItemIntegerRange));
     if (item == nullptr) {
         return false;
     }
