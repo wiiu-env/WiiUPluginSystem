@@ -8,10 +8,11 @@ void WUPSConfigItemBoolean_onDelete(void *context);
 int32_t WUPSConfigItemBoolean_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemBoolean *) context;
     if (item->value) {
-        return snprintf(out_buf, out_size, "  %s", item->trueValue);
+        snprintf(out_buf, out_size, "  %s", item->trueValue);
     } else {
-        return snprintf(out_buf, out_size, "  %s", item->falseValue);
+        snprintf(out_buf, out_size, "  %s", item->falseValue);
     }
+    return 0;
 }
 
 void toggleValue(ConfigItemBoolean *item) {
@@ -45,10 +46,11 @@ bool WUPSConfigItemBoolean_isMovementAllowed(void *context) {
 int32_t WUPSConfigItemBoolean_getCurrentValueSelectedDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemBoolean *) context;
     if (item->value) {
-        return snprintf(out_buf, out_size, "  %s >", item->trueValue);
+        snprintf(out_buf, out_size, "  %s >", item->trueValue);
     } else {
-        return snprintf(out_buf, out_size, "< %s", item->falseValue);
+        snprintf(out_buf, out_size, "< %s", item->falseValue);
     }
+    return 0;
 }
 
 void WUPSConfigItemBoolean_restoreDefault(void *context) {

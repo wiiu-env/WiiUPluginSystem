@@ -5,7 +5,8 @@
 
 int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemIntegerRange *) context;
-    return snprintf(out_buf, out_size, "%d", item->value);
+    snprintf(out_buf, out_size, "%d", item->value);
+    return 0;
 }
 
 bool WUPSConfigItemIntegerRange_callCallback(void *context) {
@@ -43,11 +44,12 @@ bool WUPSConfigItemIntegerRange_isMovementAllowed(void *context) {
 int32_t WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemIntegerRange *) context;
     if (item->value == item->minValue) {
-        return snprintf(out_buf, out_size, "  %d >", item->value);
+        snprintf(out_buf, out_size, "  %d >", item->value);
     } else if (item->value == item->maxValue) {
-        return snprintf(out_buf, out_size, "<  %d", item->value);
+        snprintf(out_buf, out_size, "<  %d", item->value);
     }
-    return snprintf(out_buf, out_size, "< %d >", item->value);
+    snprintf(out_buf, out_size, "< %d >", item->value);
+    return 0;
 }
 
 void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
@@ -90,7 +92,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
             .onDelete = &WUPSConfigItemIntegerRange_onDelete
     };
 
-    if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
+    if (WUPSConfigItem_Create(&(item->handle), configID, displayName, callbacks, item) < 0) {
         free(item);
         return false;
     };
