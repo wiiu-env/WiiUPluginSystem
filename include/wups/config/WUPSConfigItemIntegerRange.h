@@ -15,7 +15,7 @@ typedef struct ConfigItemIntegerRange {
 
 typedef void (*IntegerRangeValueChangedCallback)(ConfigItemIntegerRange *, int32_t);
 
-WUPSConfigItemHandle WUPSConfigItemIntegerRange_Create(const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue, IntegerRangeValueChangedCallback callback);
+bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue, IntegerRangeValueChangedCallback callback);
 
 void WUPSConfigItemIntegerRange_CleanUp();
 

@@ -46,6 +46,8 @@ typedef struct {
     bool (*callCallback)(void *context);
 
     void (*onButtonPressed)(void *context, WUPSConfigButtons button);
+
+    void (*onDelete)(void *context);
 } WUPSConfigCallbacks_t;
 
 typedef uint32_t WUPSConfigItemHandle;

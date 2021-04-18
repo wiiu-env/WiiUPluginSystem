@@ -1,7 +1,6 @@
 #include <wups.h>
 #include <cstdio>
 #include <cstdlib>
-#include "LinkedList.h"
 #include "wups/config/WUPSConfigItemIntegerRange.h"
 
 int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
@@ -56,12 +55,20 @@ void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
     item->value = item->defaultValue;
 }
 
-LinkedList<ConfigItemIntegerRange *> wups_configItemIntegerRangeItems;
+void WUPSConfigItemIntegerRange_onDelete(void *context) {
+    auto *item = (ConfigItemIntegerRange *) context;
+    free(item);
+}
 
-extern "C" WUPSConfigItemHandle WUPSConfigItemIntegerRange_Create(const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue, IntegerRangeValueChangedCallback callback) {
+void WUPSConfigItemIntegerRange_onDelete(void *context);
+
+extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue, IntegerRangeValueChangedCallback callback) {
+    if (cat == 0) {
+        return false;
+    }
     auto *item = (ConfigItemIntegerRange *) malloc(sizeof(ConfigItemIntegerRange *));
     if (item == nullptr) {
-        return 0;
+        return false;
     }
 
     item->defaultValue = defaultValue;
@@ -78,21 +85,15 @@ extern "C" WUPSConfigItemHandle WUPSConfigItemIntegerRange_Create(const char *co
     callbacks.isMovementAllowed = &WUPSConfigItemIntegerRange_isMovementAllowed;
     callbacks.onButtonPressed = &WUPSConfigItemIntegerRange_onButtonPressed;
     callbacks.restoreDefault = &WUPSConfigItemIntegerRange_restoreDefault;
+    callbacks.onDelete = &WUPSConfigItemIntegerRange_onDelete;
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);
-        return 0;
+        return false;
     };
 
-    wups_configItemIntegerRangeItems.add(item);
-
-    return item->handle;
-}
-
-extern "C" void WUPSConfigItemIntegerRange_CleanUp() {
-    int size = wups_configItemIntegerRangeItems.size();
-    for (int i = 0; i < size; i++) {
-        delete wups_configItemIntegerRangeItems[i];
+    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
+        return false;
     }
-    wups_configItemIntegerRangeItems.clear();
+    return true;
 }

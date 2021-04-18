@@ -15,8 +15,8 @@ typedef struct ConfigItemBoolean {
 
 typedef void (*BooleanValueChangedCallback)(ConfigItemBoolean *, bool);
 
-WUPSConfigItemHandle WUPSConfigItemBoolean_Create(const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback);
-WUPSConfigItemHandle WUPSConfigItemBoolean_CreateEx(const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue, const char *falseValue);
+bool WUPSConfigItemBoolean_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback);
+bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue, const char *falseValue);
 
 void WUPSConfigItemBoolean_CleanUp();
 

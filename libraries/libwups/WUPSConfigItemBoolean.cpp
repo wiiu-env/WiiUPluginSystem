@@ -1,11 +1,9 @@
 #include <wups.h>
 #include <cstdio>
 #include <cstdlib>
-#include "LinkedList.h"
 #include "wups/config/WUPSConfigItemBoolean.h"
 
-
-LinkedList<ConfigItemBoolean *> wups_configItemBooleanItems;
+void WUPSConfigItemBoolean_onDelete(void *context);
 
 int32_t WUPSConfigItemBoolean_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemBoolean *) context;
@@ -58,10 +56,13 @@ void WUPSConfigItemBoolean_restoreDefault(void *context) {
     item->value = item->defaultValue;
 }
 
-extern "C" WUPSConfigItemHandle WUPSConfigItemBoolean_CreateEx(const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue, const char *falseValue) {
+extern "C" bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue, const char *falseValue) {
+    if (cat == 0) {
+        return false;
+    }
     auto *item = (ConfigItemBoolean *) malloc(sizeof(ConfigItemBoolean));
     if (item == nullptr) {
-        return 0;
+        return false;
     }
 
     item->defaultValue = defaultValue;
@@ -78,25 +79,24 @@ extern "C" WUPSConfigItemHandle WUPSConfigItemBoolean_CreateEx(const char *confi
     callbacks.isMovementAllowed = &WUPSConfigItemBoolean_isMovementAllowed;
     callbacks.onButtonPressed = &WUPSConfigItemBoolean_onButtonPressed;
     callbacks.restoreDefault = &WUPSConfigItemBoolean_restoreDefault;
+    callbacks.onDelete = &WUPSConfigItemBoolean_onDelete;
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);
-        return 0;
+        return false;
     }
 
-    wups_configItemBooleanItems.add(item);
-
-    return item->handle;
-}
-
-extern "C" WUPSConfigItemHandle WUPSConfigItemBoolean_Create(const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback) {
-    return WUPSConfigItemBoolean_CreateEx(configID, displayName, defaultValue, callback, "true", "false");
-}
-
-extern "C" void WUPSConfigItemBoolean_CleanUp() {
-    int size = wups_configItemBooleanItems.size();
-    for (int i = 0; i < size; i++) {
-        delete wups_configItemBooleanItems[i];
+    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
+        return false;
     }
-    wups_configItemBooleanItems.clear();
+    return true;
+}
+
+void WUPSConfigItemBoolean_onDelete(void *context) {
+    auto *item = (ConfigItemBoolean *) context;
+    free(item);
+}
+
+extern "C" bool WUPSConfigItemBoolean_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback) {
+    return WUPSConfigItemBoolean_AddToCategoryEx(cat, configID, displayName, defaultValue, callback, "true", "false");
 }
