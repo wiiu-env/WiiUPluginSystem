@@ -30,3 +30,4 @@
 #include "wups/function_patching.h"
 #include "wups/config.h"
 #include "wups/hooks.h"
+#include "wups/config_imports.h"

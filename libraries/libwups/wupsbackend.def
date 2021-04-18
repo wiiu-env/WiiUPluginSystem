@@ -1,0 +1,19 @@
+:NAME homebrew_wupsbackend
+
+:TEXT
+WUPSConfigItem_Create
+WUPSConfigItem_SetDisplayName
+WUPSConfigItem_GetDisplayName
+WUPSConfigItem_SetConfigID
+WUPSConfigItem_GetConfigID
+
+WUPSConfig_Create
+WUPSConfig_Destroy
+WUPSConfig_GetName
+WUPSConfig_AddCategoryByName
+WUPSConfig_AddCategory
+
+WUPSConfigCategory_Create
+WUPSConfigCategory_Destroy
+WUPSConfigCategory_GetName
+WUPSConfigCategory_AddItem

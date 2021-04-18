@@ -25,12 +25,13 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 CFLAGS	:=	-g -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
+			-fno-exceptions -fno-rtti \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
 
 CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__
 
-CXXFLAGS	:= $(CFLAGS) -std=gnu++17
+CXXFLAGS	:= $(CFLAGS) -std=gnu++20
 
 ASFLAGS	:=	-g $(MACHDEP)
 
