@@ -2,7 +2,7 @@ TOPDIR ?= $(CURDIR)
 include $(TOPDIR)/share/wups_rules
 
 export WUT_MAJOR	:=	0
-export WUT_MINOR	:=	5
+export WUT_MINOR	:=	6
 export WUT_PATCH	:=	0
 
 VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
@@ -16,7 +16,8 @@ VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	wups
 #BUILD		:=	build
-SOURCES		:=	libraries/libwups/
+SOURCES		:=	libraries/libwups/ \
+				libraries/libwups/utils
 DATA		:=	data
 INCLUDES	:=	include
 
@@ -25,12 +26,13 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 CFLAGS	:=	-g -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
+			-fno-exceptions -fno-rtti \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
 
 CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__
 
-CXXFLAGS	:= $(CFLAGS) -std=gnu++17
+CXXFLAGS	:= $(CFLAGS) -std=gnu++20
 
 ASFLAGS	:=	-g $(MACHDEP)
 

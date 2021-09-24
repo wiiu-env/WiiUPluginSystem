@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 Maschell
+ * Copyright (C) 2018-2021 Maschell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef WUPS_HOOKS_DEF_H_
-#define WUPS_HOOKS_DEF_H_
+#pragma once
 
 #include "common.h"
 
@@ -24,7 +23,7 @@
 extern "C" {
 #endif
 
-#define WUPS_HOOK_EX(type_def,original_func) \
+#define WUPS_HOOK_EX(type_def, original_func) \
     extern const wups_loader_hook_t wups_hooks_ ## original_func WUPS_SECTION("hooks"); \
     const wups_loader_hook_t wups_hooks_ ## original_func = { \
         .type = type_def, \
@@ -43,6 +42,11 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,
     WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,
 
+    WUPS_LOADER_HOOK_GET_CONFIG,
+    WUPS_LOADER_HOOK_CONFIG_CLOSED,
+
+    WUPS_LOADER_HOOK_INIT_STORAGE,                  /* Only for internal usage */
+
     WUPS_LOADER_HOOK_INIT_PLUGIN,                   /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,                 /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_APPLICATION_STARTS,            /* Called when an application gets started */
@@ -51,7 +55,6 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,           /* Called when an foreground is acquired */
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT,     /* Called when an application wants to exit */
     WUPS_LOADER_HOOK_APPLICATION_ENDS,              /* Called when an application ends */
-    WUPS_LOADER_HOOK_VSYNC,                         /* Called when an application calls GX2WaitForVsync (most times each frame) */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -88,7 +91,7 @@ typedef struct wups_loader_hook_t {
     void on_acquired_foreground(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,on_acquired_foreground); \
     void on_acquired_foreground(void)
-    
+
 #define ON_APPLICATION_REQUESTS_EXIT() \
     void on_app_requests_exit(void);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT,on_app_requests_exit); \
@@ -99,14 +102,25 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_ENDS,on_app_ending); \
     void on_app_ending(void)
 
-#define ON_VYSNC() \
-    void on_vsync(void);\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_VSYNC,on_vsync); \
-    void on_vsync(void)
+#define WUPS_GET_CONFIG() \
+    WUPSConfigHandle on_get_wups_config(void);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_GET_CONFIG,on_get_wups_config); \
+    WUPSConfigHandle on_get_wups_config(void)
 
+#define WUPS_CONFIG_CLOSED() \
+    void on_wups_config_closed(void);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED,on_wups_config_closed); \
+    void on_wups_config_closed(void)
+
+#define WUPS_USE_STORAGE() \
+    void init_storage(wups_loader_init_storage_args_t);\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_STORAGE,init_storage); \
+    void init_storage(wups_loader_init_storage_args_t args){ \
+        WUPS_InitStorage(args);\
+    }
 
 #ifdef __cplusplus
-#define __EXTERN_C_MACRO extern "C" 
+#define __EXTERN_C_MACRO extern "C"
 #else
 #define __EXTERN_C_MACRO
 #endif
@@ -121,7 +135,7 @@ typedef struct wups_loader_hook_t {
     void on_fini_wut_malloc(){ \
         __fini_wut_malloc(); \
     } \
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_malloc); \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC,on_fini_wut_malloc)
 
 #define WUPS_USE_WUT_DEVOPTAB() \
     __EXTERN_C_MACRO void __init_wut_devoptab(); \
@@ -133,7 +147,7 @@ typedef struct wups_loader_hook_t {
     void on_fini_wut_devoptab(){ \
         __fini_wut_devoptab(); \
     }\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,on_fini_wut_devoptab);
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB,on_fini_wut_devoptab)
 
 #define WUPS_USE_WUT_NEWLIB() \
     __EXTERN_C_MACRO void __init_wut_newlib(); \
@@ -145,8 +159,8 @@ typedef struct wups_loader_hook_t {
     void on_fini_wut_newlib(){ \
         __fini_wut_newlib(); \
     }\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_NEWLIB,on_fini_wut_newlib);    
-    
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_NEWLIB,on_fini_wut_newlib)
+
 #define WUPS_USE_WUT_STDCPP() \
     __EXTERN_C_MACRO void __init_wut_stdcpp(); \
     void on_init_wut_stdcpp(){ \
@@ -157,7 +171,7 @@ typedef struct wups_loader_hook_t {
     void on_fini_wut_stdcpp(){ \
         __fini_wut_stdcpp(); \
     }\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP,on_fini_wut_stdcpp);  
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP,on_fini_wut_stdcpp)
 
 #define WUPS_USE_WUT_SOCKETS() \
     __EXTERN_C_MACRO void __attribute__((weak)) __init_wut_socket(); \
@@ -169,10 +183,8 @@ typedef struct wups_loader_hook_t {
     void on_fini_wut_sockets(){ \
         if (&__fini_wut_socket) __fini_wut_socket(); \
     }\
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,on_fini_wut_sockets);  
-    
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,on_fini_wut_sockets)
+
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_WUPS_H_ */

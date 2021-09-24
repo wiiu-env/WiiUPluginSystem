@@ -2,17 +2,18 @@
 #include <whb/libmanager.h>
 #include <malloc.h>
 #include <string.h>
-#include <nsysnet/socket.h>
 #include <utils/logger.h>
 #include <coreinit/time.h>
 #include <coreinit/thread.h>
 #include <coreinit/filesystem.h>
 #include <whb/log_udp.h>
+#include <wups/config/WUPSConfigItemBoolean.h>
 
 /**
     Mandatory plugin information.
     If not set correctly, the loader will refuse to use the plugin.
 **/
+WUPS_PLUGIN_ID("example_plugin");
 WUPS_PLUGIN_NAME("Example plugin");
 WUPS_PLUGIN_DESCRIPTION("This is just an example plugin and will log the FSOpenFile function.");
 WUPS_PLUGIN_VERSION("v1.0");
@@ -25,7 +26,10 @@ WUPS_PLUGIN_LICENSE("BSD");
 
 **/
 
-WUPS_USE_WUT_DEVOPTAB()       // Use the wut devoptabs
+WUPS_USE_WUT_DEVOPTAB();      // Use the wut devoptabs
+WUPS_USE_STORAGE();           // Use the storage API
+
+bool logFSOpen = true;
 
 /**
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
@@ -33,6 +37,18 @@ WUPS_USE_WUT_DEVOPTAB()       // Use the wut devoptabs
 INITIALIZE_PLUGIN(){
     WHBLogUdpInit();
 	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
+    
+    // Open storage to read values
+    WUPS_OpenStorage();
+    
+    // Try to get value from storage
+    if(WUPS_GetBool(nullptr, "logFSOpen", &logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS){
+        // Add the value to the storage if it's missing.
+        WUPS_StoreBool(nullptr, "logFSOpen", logFSOpen);
+    }
+    
+    // Close storage
+    WUPS_CloseStorage();
 }
 
 /**
@@ -59,6 +75,33 @@ ON_APPLICATION_START(){
 **/
 ON_APPLICATION_REQUESTS_EXIT(){
     DEBUG_FUNCTION_LINE("ON_APPLICATION_REQUESTS_EXIT of example_plugin!");
+}
+
+void logFSOpenChanged(ConfigItemBoolean *item, bool newValue) {
+    DEBUG_FUNCTION_LINE("New value in logFSOpenChanged: %d", newValue);
+    logFSOpen = newValue;
+    // If the value has changed, we store it in the storage.
+    WUPS_StoreInt(nullptr, "logFSOpen", logFSOpen);
+}
+
+WUPS_GET_CONFIG() {
+    // We open the storage so we can persist the configuration the user did.
+    WUPS_OpenStorage();  
+
+    WUPSConfigHandle config;
+    WUPSConfig_CreateHandled(&config, "Example Plugin");
+
+    WUPSConfigCategoryHandle cat;
+    WUPSConfig_AddCategoryByNameHandled(config, "Logging", &cat);
+
+    WUPSConfigItemBoolean_AddToCategoryHandled(config, cat, "logFSOpen", "Log FSOpen calls", logFSOpen, &logFSOpenChanged);
+
+    return config;
+}
+
+WUPS_CONFIG_CLOSED() {
+    // Save all changes
+    WUPS_CloseStorage();
 }
 
 /**
@@ -91,8 +134,9 @@ ON_APPLICATION_REQUESTS_EXIT(){
 **/
 DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error) {
     int result = real_FSOpenFile(pClient, pCmd, path, mode, handle, error);
-    
-    DEBUG_FUNCTION_LINE("FSOpenFile called for folder %s! Result %d\n",path,result);
+    if (logFSOpen) {
+        DEBUG_FUNCTION_LINE("FSOpenFile called for folder %s! Result %d",path,result);
+    }
     return result;
 }
 

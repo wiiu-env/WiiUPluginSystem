@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_FUNCTION_PATCHING_DEF_H_
-#define WUPS_FUNCTION_PATCHING_DEF_H_
+#pragma once
 
 #include "common.h"
 
@@ -100,8 +99,7 @@ typedef enum wups_loader_library_type_t {
     WUPS_LOADER_LIBRARY_VPADBASE,
     WUPS_LOADER_LIBRARY_ZLIB125,
     WUPS_LOADER_LIBRARY_OTHER,
-}
-wups_loader_library_type_t;
+} wups_loader_library_type_t;
 
 typedef enum wups_loader_entry_type_t {
     WUPS_LOADER_ENTRY_FUNCTION,
@@ -143,11 +141,11 @@ typedef struct wups_loader_entry_t {
     } _function;
 } wups_loader_entry_t;
 
-#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address) WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU);
-#define WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, targetProcess) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_ ## x, WUPS_LOADER_LIBRARY_OTHER, my_ ## x, x, targetProcess);
+#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address) WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+#define WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, targetProcess) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_ ## x, WUPS_LOADER_LIBRARY_OTHER, my_ ## x, x, targetProcess)
 
-#define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU);
-#define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess) WUPS_MUST_REPLACE_EX(NULL, NULL, real_ ## x, lib, my_ ## x,  function_name, targetProcess);
+#define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+#define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess) WUPS_MUST_REPLACE_EX(NULL, NULL, real_ ## x, lib, my_ ## x,  function_name, targetProcess)
 
 #define WUPS_MUST_REPLACE_EX(pAddress, vAddress, original_func, rpl_type, replace_func, replace_function_name, process) \
     extern const wups_loader_entry_t wups_load_ ## replace_func \
@@ -173,5 +171,3 @@ typedef struct wups_loader_entry_t {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* WUPS_FUNCTION_PATCHING_DEF_H_ */

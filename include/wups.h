@@ -2,7 +2,7 @@
  *   by Alex Chadwick
  * 
  * Copyright (C) 2014, Alex Chadwick
- * Modified by Maschell, 2018
+ * Modified by Maschell, 2018-2021
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@
  * SOFTWARE.
  */
 
-#ifndef WUPS_H_
-#define WUPS_H_
+#pragma once
 
 #include "wups/common.h"
 #include "wups/meta.h"
 #include "wups/function_patching.h"
+#include "wups/config.h"
 #include "wups/hooks.h"
-
-#endif /* WUPS_WUPS_H_ */
+#include "wups/config_imports.h"
+#include "wups/storage.h"
