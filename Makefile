@@ -3,7 +3,7 @@ include $(TOPDIR)/share/wups_rules
 
 export WUT_MAJOR	:=	0
 export WUT_MINOR	:=	6
-export WUT_PATCH	:=	0
+export WUT_PATCH	:=	1
 
 VERSION	:=	$(WUT_MAJOR).$(WUT_MINOR).$(WUT_PATCH)
 

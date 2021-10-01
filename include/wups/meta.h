@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 #define WUPS_PLUGIN_NAME(x)             WUPS_META(name, x); \
-                                        WUPS_META(wups, "0.6"); \
+                                        WUPS_META(wups, "0.6.1"); \
                                         WUPS_USE_WUT_MALLOC(); \
                                         WUPS_USE_WUT_SOCKETS(); \
                                         WUPS_USE_WUT_NEWLIB(); \
@@ -44,7 +44,6 @@ extern "C" {
 #define WUPS_PLUGIN_VERSION(x)          WUPS_META(version, x)
 #define WUPS_PLUGIN_LICENSE(x)          WUPS_META(license, x)
 #define WUPS_PLUGIN_DESCRIPTION(x)      WUPS_META(description, x)
-#define WUPS_PLUGIN_ID(x)               WUPS_META(id, x)
 #define WUPS_PLUGIN_CONFIG_REVISION(x)  WUPS_META(config_revision, #x)
 
 #ifdef __cplusplus

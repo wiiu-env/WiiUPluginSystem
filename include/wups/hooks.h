@@ -112,7 +112,8 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED,on_wups_config_closed); \
     void on_wups_config_closed(void)
 
-#define WUPS_USE_STORAGE() \
+#define WUPS_USE_STORAGE(x) \
+    WUPS_META(storage_id, x); \
     void init_storage(wups_loader_init_storage_args_t);\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_STORAGE,init_storage); \
     void init_storage(wups_loader_init_storage_args_t args){ \

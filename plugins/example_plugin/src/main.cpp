@@ -13,7 +13,6 @@
     Mandatory plugin information.
     If not set correctly, the loader will refuse to use the plugin.
 **/
-WUPS_PLUGIN_ID("example_plugin");
 WUPS_PLUGIN_NAME("Example plugin");
 WUPS_PLUGIN_DESCRIPTION("This is just an example plugin and will log the FSOpenFile function.");
 WUPS_PLUGIN_VERSION("v1.0");
@@ -26,8 +25,8 @@ WUPS_PLUGIN_LICENSE("BSD");
 
 **/
 
-WUPS_USE_WUT_DEVOPTAB();      // Use the wut devoptabs
-WUPS_USE_STORAGE();           // Use the storage API
+WUPS_USE_WUT_DEVOPTAB();            // Use the wut devoptabs
+WUPS_USE_STORAGE("example_plugin"); // Use the storage API
 
 bool logFSOpen = true;
 
