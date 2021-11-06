@@ -6,6 +6,8 @@
 #include <coreinit/time.h>
 #include <coreinit/thread.h>
 #include <coreinit/filesystem.h>
+#include <whb/log_cafe.h>
+#include <whb/log_module.h>
 #include <whb/log_udp.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 
@@ -34,7 +36,10 @@ bool logFSOpen = true;
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
 INITIALIZE_PLUGIN(){
-    WHBLogUdpInit();
+    if (!WHBLogModuleInit()) {
+        WHBLogCafeInit();
+        WHBLogUdpInit();
+    }
 	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
     
     // Open storage to read values
@@ -64,7 +69,10 @@ DEINITIALIZE_PLUGIN(){
 	Make sure to initialize all functions you're using in the overridden functions!
 **/
 ON_APPLICATION_START(){
-    WHBLogUdpInit();    
+    if (!WHBLogModuleInit()) {
+        WHBLogCafeInit();
+        WHBLogUdpInit();
+    }  
 
     DEBUG_FUNCTION_LINE("ON_APPLICATION_START of example_plugin!");
 } 
