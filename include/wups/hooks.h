@@ -42,6 +42,9 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,
     WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,
 
+    WUPS_LOADER_HOOK_INIT_WRAPPER,                  /* Calls __init */
+    WUPS_LOADER_HOOK_FINI_WRAPPER,                  /* Calls __fini */
+
     WUPS_LOADER_HOOK_GET_CONFIG,
     WUPS_LOADER_HOOK_CONFIG_CLOSED,
 
@@ -173,6 +176,20 @@ typedef struct wups_loader_hook_t {
         __fini_wut_stdcpp(); \
     }\
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP,on_fini_wut_stdcpp)
+
+#define WUPS___INIT_WRAPPER() \
+    __EXTERN_C_MACRO void __init(); \
+    void __init_wrapper(){ \
+        __init(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WRAPPER,__init_wrapper);
+
+#define WUPS___FINI_WRAPPER() \
+    __EXTERN_C_MACRO void __fini(); \
+    void __fini_wrapper(){ \
+        __fini(); \
+    }\
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WRAPPER,__fini_wrapper);
 
 #define WUPS_USE_WUT_SOCKETS() \
     __EXTERN_C_MACRO void __attribute__((weak)) __init_wut_socket(); \
