@@ -26,9 +26,9 @@
 #pragma once
 
 #include "wups/common.h"
-#include "wups/meta.h"
-#include "wups/function_patching.h"
 #include "wups/config.h"
-#include "wups/hooks.h"
 #include "wups/config_imports.h"
+#include "wups/function_patching.h"
+#include "wups/hooks.h"
+#include "wups/meta.h"
 #include "wups/storage.h"

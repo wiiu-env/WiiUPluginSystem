@@ -26,8 +26,8 @@ char *b64_encode(const uint8_t *in, size_t len) {
     if (in == NULL || len == 0)
         return NULL;
 
-    elen = b64_encoded_size(len);
-    out = (char *) malloc(elen + 1);
+    elen      = b64_encoded_size(len);
+    out       = (char *) malloc(elen + 1);
     out[elen] = '\0';
 
     for (i = 0, j = 0; i < len; i += 3, j += 4) {
@@ -35,7 +35,7 @@ char *b64_encode(const uint8_t *in, size_t len) {
         v = i + 1 < len ? v << 8 | in[i + 1] : v << 8;
         v = i + 2 < len ? v << 8 | in[i + 2] : v << 8;
 
-        out[j] = b64chars[(v >> 18) & 0x3F];
+        out[j]     = b64chars[(v >> 18) & 0x3F];
         out[j + 1] = b64chars[(v >> 12) & 0x3F];
         if (i + 1 < len) {
             out[j + 2] = b64chars[(v >> 6) & 0x3F];
@@ -77,8 +77,7 @@ size_t b64_decoded_size(const char *in) {
 static const int b64invs[] = {
         62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3,
         4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
-        -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
-};
+        -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51};
 
 static int b64_isvalidchar(char c) {
     if (c >= '0' && c <= '9')

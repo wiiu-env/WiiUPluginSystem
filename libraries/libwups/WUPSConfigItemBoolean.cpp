@@ -1,7 +1,7 @@
-#include <wups.h>
+#include "wups/config/WUPSConfigItemBoolean.h"
 #include <cstdio>
 #include <cstdlib>
-#include "wups/config/WUPSConfigItemBoolean.h"
+#include <wups.h>
 
 void WUPSConfigItemBoolean_onDelete(void *context);
 
@@ -50,7 +50,7 @@ int32_t WUPSConfigItemBoolean_getCurrentValueSelectedDisplay(void *context, char
 }
 
 void WUPSConfigItemBoolean_restoreDefault(void *context) {
-    auto *item = (ConfigItemBoolean *) context;
+    auto *item  = (ConfigItemBoolean *) context;
     item->value = item->defaultValue;
 }
 
@@ -69,21 +69,20 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
     }
 
     item->defaultValue = defaultValue;
-    item->value = defaultValue;
-    item->callback = (void *) callback;
+    item->value        = defaultValue;
+    item->callback     = (void *) callback;
     snprintf(item->trueValue, sizeof(item->trueValue), "%s", trueValue);
     snprintf(item->falseValue, sizeof(item->falseValue), "%s", falseValue);
 
     WUPSConfigCallbacks_t callbacks = {
-            .getCurrentValueDisplay = &WUPSConfigItemBoolean_getCurrentValueDisplay,
+            .getCurrentValueDisplay         = &WUPSConfigItemBoolean_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemBoolean_getCurrentValueSelectedDisplay,
-            .onSelected = &WUPSConfigItemBoolean_onSelected,
-            .restoreDefault = &WUPSConfigItemBoolean_restoreDefault,
-            .isMovementAllowed = &WUPSConfigItemBoolean_isMovementAllowed,
-            .callCallback = &WUPSConfigItemBoolean_callCallback,
-            .onButtonPressed = &WUPSConfigItemBoolean_onButtonPressed,
-            .onDelete = &WUPSConfigItemBoolean_onDelete
-    };
+            .onSelected                     = &WUPSConfigItemBoolean_onSelected,
+            .restoreDefault                 = &WUPSConfigItemBoolean_restoreDefault,
+            .isMovementAllowed              = &WUPSConfigItemBoolean_isMovementAllowed,
+            .callCallback                   = &WUPSConfigItemBoolean_callCallback,
+            .onButtonPressed                = &WUPSConfigItemBoolean_onButtonPressed,
+            .onDelete                       = &WUPSConfigItemBoolean_onDelete};
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);

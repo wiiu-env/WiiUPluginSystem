@@ -1,8 +1,8 @@
-#include <wups.h>
+#include "wups/config/WUPSConfigItemMultipleValues.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include "wups/config/WUPSConfigItemMultipleValues.h"
+#include <wups.h>
 
 void WUPSConfigItemMultipleValues_onDelete(void *context);
 
@@ -65,7 +65,7 @@ int32_t WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay(void *contex
 }
 
 void WUPSConfigItemMultipleValues_restoreDefault(void *context) {
-    auto *item = (ConfigItemMultipleValues *) context;
+    auto *item       = (ConfigItemMultipleValues *) context;
     item->valueIndex = item->defaultValueIndex;
 }
 
@@ -92,35 +92,34 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
             values[i].valueName = nullptr;
             continue;
         }
-        auto bufLen = strlen(possibleValues[i].valueName) + 1;
+        auto bufLen         = strlen(possibleValues[i].valueName) + 1;
         values[i].valueName = (char *) malloc(bufLen);
         strncpy(values[i].valueName, possibleValues[i].valueName, bufLen);
     }
 
-    item->valueCount = pairCount;
-    item->values = values;
-    item->valueIndex = defaultValueIndex;
+    item->valueCount        = pairCount;
+    item->values            = values;
+    item->valueIndex        = defaultValueIndex;
     item->defaultValueIndex = defaultValueIndex;
-    item->callback = (void *) callback;
+    item->callback          = (void *) callback;
 
     if (configID != nullptr) {
         auto configIDLen = strlen(configID) + 1;
-        item->configID = (char *) malloc(configIDLen);
+        item->configID   = (char *) malloc(configIDLen);
         strncpy(item->configID, configID, configIDLen);
     } else {
         item->configID = nullptr;
     }
 
     WUPSConfigCallbacks_t callbacks = {
-            .getCurrentValueDisplay = &WUPSConfigItemMultipleValues_getCurrentValueDisplay,
+            .getCurrentValueDisplay         = &WUPSConfigItemMultipleValues_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay,
-            .onSelected = &WUPSConfigItemMultipleValues_onSelected,
-            .restoreDefault = &WUPSConfigItemMultipleValues_restoreDefault,
-            .isMovementAllowed = &WUPSConfigItemMultipleValues_isMovementAllowed,
-            .callCallback = &WUPSConfigItemMultipleValues_callCallback,
-            .onButtonPressed = &WUPSConfigItemMultipleValues_onButtonPressed,
-            .onDelete = &WUPSConfigItemMultipleValues_onDelete
-    };
+            .onSelected                     = &WUPSConfigItemMultipleValues_onSelected,
+            .restoreDefault                 = &WUPSConfigItemMultipleValues_restoreDefault,
+            .isMovementAllowed              = &WUPSConfigItemMultipleValues_isMovementAllowed,
+            .callCallback                   = &WUPSConfigItemMultipleValues_callCallback,
+            .onButtonPressed                = &WUPSConfigItemMultipleValues_onButtonPressed,
+            .onDelete                       = &WUPSConfigItemMultipleValues_onDelete};
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
         free(item);

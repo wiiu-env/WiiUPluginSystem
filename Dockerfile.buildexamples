@@ -5,5 +5,11 @@ COPY . .
 RUN make clean && make && mkdir -p /artifacts/wups && cp -r lib /artifacts/wups && cp -r include /artifacts/wups && cp -r share /artifacts/wups
 WORKDIR /artifacts
 
-FROM scratch
+FROM scratch as libwups
 COPY --from=0 /artifacts /artifacts
+
+FROM wiiuenv/devkitppc:20211229
+
+COPY --from=libwups /artifacts $DEVKITPRO
+
+WORKDIR project

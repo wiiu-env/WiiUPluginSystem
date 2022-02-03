@@ -56,6 +56,10 @@ This has been created by @dimok789 and can be found in the tools folder.
 # Future and contribution
 On the Discord you can more information about open tasks and how to contribute: https://discord.gg/bZ2rep2
 
+## Format the code via docker
+
+`docker run --rm -v ${PWD}:/src wiiuenv/clang-format:13.0.0-2 -r ./include ./libraries ./plugins/example_plugin/src -i`
+
 # Credits
 Some files are based on brainslug by Chadderz:  
 https://github.com/Chadderz121/brainslug-wii  

@@ -25,24 +25,24 @@
 
 #pragma once
 
+#include <dirent.h>
+#include <fcntl.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <dirent.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define WUPS_SECTION(x) __attribute__((__section__ (".wups." x)))
+#define WUPS_SECTION(x) __attribute__((__section__(".wups." x)))
 
-#define WUPS_META(id, value) \
-    extern const char wups_meta_ ## id [] WUPS_SECTION("meta"); \
-    const char wups_meta_ ## id [] = #id "=" value
+#define WUPS_META(id, value)                                 \
+    extern const char wups_meta_##id[] WUPS_SECTION("meta"); \
+    const char wups_meta_##id[] = #id "=" value
 
 #ifdef __cplusplus
 }

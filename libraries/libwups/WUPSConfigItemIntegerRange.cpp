@@ -1,7 +1,7 @@
-#include <wups.h>
+#include "wups/config/WUPSConfigItemIntegerRange.h"
 #include <cstdio>
 #include <cstdlib>
-#include "wups/config/WUPSConfigItemIntegerRange.h"
+#include <wups.h>
 
 int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemIntegerRange *) context;
@@ -54,7 +54,7 @@ int32_t WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay(void *context,
 }
 
 void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
-    auto *item = (ConfigItemIntegerRange *) context;
+    auto *item  = (ConfigItemIntegerRange *) context;
     item->value = item->defaultValue;
 }
 
@@ -64,7 +64,6 @@ void WUPSConfigItemIntegerRange_onDelete(void *context) {
 }
 
 void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
-
 }
 
 extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue,
@@ -78,21 +77,20 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     }
 
     item->defaultValue = defaultValue;
-    item->value = defaultValue;
-    item->minValue = minValue;
-    item->maxValue = maxValue;
-    item->callback = (void *) callback;
+    item->value        = defaultValue;
+    item->minValue     = minValue;
+    item->maxValue     = maxValue;
+    item->callback     = (void *) callback;
 
     WUPSConfigCallbacks_t callbacks = {
-            .getCurrentValueDisplay = &WUPSConfigItemIntegerRange_getCurrentValueDisplay,
+            .getCurrentValueDisplay         = &WUPSConfigItemIntegerRange_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay,
-            .onSelected = &WUPSConfigItemIntegerRange_onSelected,
-            .restoreDefault = &WUPSConfigItemIntegerRange_restoreDefault,
-            .isMovementAllowed = &WUPSConfigItemIntegerRange_isMovementAllowed,
-            .callCallback = &WUPSConfigItemIntegerRange_callCallback,
-            .onButtonPressed = &WUPSConfigItemIntegerRange_onButtonPressed,
-            .onDelete = &WUPSConfigItemIntegerRange_onDelete
-    };
+            .onSelected                     = &WUPSConfigItemIntegerRange_onSelected,
+            .restoreDefault                 = &WUPSConfigItemIntegerRange_restoreDefault,
+            .isMovementAllowed              = &WUPSConfigItemIntegerRange_isMovementAllowed,
+            .callCallback                   = &WUPSConfigItemIntegerRange_callCallback,
+            .onButtonPressed                = &WUPSConfigItemIntegerRange_onButtonPressed,
+            .onDelete                       = &WUPSConfigItemIntegerRange_onDelete};
 
     if (WUPSConfigItem_Create(&(item->handle), configID, displayName, callbacks, item) < 0) {
         free(item);

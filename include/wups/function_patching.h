@@ -108,65 +108,63 @@ typedef enum wups_loader_entry_type_t {
 } wups_loader_entry_type_t;
 
 typedef enum WUPSFPTargetProcess {
-    WUPS_FP_TARGET_PROCESS_ALL                   = 0xFF,
-    WUPS_FP_TARGET_PROCESS_ROOT_RPX              = 1,
-    WUPS_FP_TARGET_PROCESS_WII_U_MENU            = 2,
-    WUPS_FP_TARGET_PROCESS_TVII                  = 3,
-    WUPS_FP_TARGET_PROCESS_E_MANUAL              = 4,
-    WUPS_FP_TARGET_PROCESS_HOME_MENU             = 5,
-    WUPS_FP_TARGET_PROCESS_ERROR_DISPLAY         = 6,
-    WUPS_FP_TARGET_PROCESS_MINI_MIIVERSE         = 7,   
-    WUPS_FP_TARGET_PROCESS_BROWSER               = 8,
-    WUPS_FP_TARGET_PROCESS_MIIVERSE              = 9,
-    WUPS_FP_TARGET_PROCESS_ESHOP                 = 10,
-    WUPS_FP_TARGET_PROCESS_PFID_11               = 11,
-    WUPS_FP_TARGET_PROCESS_DOWNLOAD_MANAGER      = 12,
-    WUPS_FP_TARGET_PROCESS_PFID_13               = 13,
-    WUPS_FP_TARGET_PROCESS_PFID_14               = 14,
-    WUPS_FP_TARGET_PROCESS_GAME                  = 15,
-    WUPS_FP_TARGET_PROCESS_GAME_AND_MENU         = 16,
+    WUPS_FP_TARGET_PROCESS_ALL              = 0xFF,
+    WUPS_FP_TARGET_PROCESS_ROOT_RPX         = 1,
+    WUPS_FP_TARGET_PROCESS_WII_U_MENU       = 2,
+    WUPS_FP_TARGET_PROCESS_TVII             = 3,
+    WUPS_FP_TARGET_PROCESS_E_MANUAL         = 4,
+    WUPS_FP_TARGET_PROCESS_HOME_MENU        = 5,
+    WUPS_FP_TARGET_PROCESS_ERROR_DISPLAY    = 6,
+    WUPS_FP_TARGET_PROCESS_MINI_MIIVERSE    = 7,
+    WUPS_FP_TARGET_PROCESS_BROWSER          = 8,
+    WUPS_FP_TARGET_PROCESS_MIIVERSE         = 9,
+    WUPS_FP_TARGET_PROCESS_ESHOP            = 10,
+    WUPS_FP_TARGET_PROCESS_PFID_11          = 11,
+    WUPS_FP_TARGET_PROCESS_DOWNLOAD_MANAGER = 12,
+    WUPS_FP_TARGET_PROCESS_PFID_13          = 13,
+    WUPS_FP_TARGET_PROCESS_PFID_14          = 14,
+    WUPS_FP_TARGET_PROCESS_GAME             = 15,
+    WUPS_FP_TARGET_PROCESS_GAME_AND_MENU    = 16,
 } WUPSFPTargetProcess;
 
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
     struct {
-        const void *                        physical_address;   /* (optional) Physical Address. If set, the name and lib will be ignored */
-        const void *                        virtual_address;    /* (optional) Physical Address. If set, the name and lib will be ignored */
-        const char *                        name;               /* Name of the function that will be replaced */
-        const wups_loader_library_type_t    library;            /**/
-        const char *                        my_function_name;   /* Function name of your own, new function (my_XXX) */
-        const void *                        target;             /* Address of our own, new function (my_XXX)*/
-        const void *                        call_addr;          /* Address for calling the real function.(real_XXX) */
-        const WUPSFPTargetProcess           targetProcess;      /* Target process*/
+        const void *physical_address;             /* (optional) Physical Address. If set, the name and lib will be ignored */
+        const void *virtual_address;              /* (optional) Physical Address. If set, the name and lib will be ignored */
+        const char *name;                         /* Name of the function that will be replaced */
+        const wups_loader_library_type_t library; /**/
+        const char *my_function_name;             /* Function name of your own, new function (my_XXX) */
+        const void *target;                       /* Address of our own, new function (my_XXX)*/
+        const void *call_addr;                    /* Address for calling the real function.(real_XXX) */
+        const WUPSFPTargetProcess targetProcess;  /* Target process*/
     } _function;
 } wups_loader_entry_t;
 
-#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address) WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
-#define WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, targetProcess) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_ ## x, WUPS_LOADER_LIBRARY_OTHER, my_ ## x, x, targetProcess)
+#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address)                            WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+#define WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, targetProcess) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_##x, WUPS_LOADER_LIBRARY_OTHER, my_##x, x, targetProcess)
 
-#define WUPS_MUST_REPLACE(x, lib, function_name) WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
-#define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess) WUPS_MUST_REPLACE_EX(NULL, NULL, real_ ## x, lib, my_ ## x,  function_name, targetProcess)
+#define WUPS_MUST_REPLACE(x, lib, function_name)                                                    WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+#define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess)                         WUPS_MUST_REPLACE_EX(NULL, NULL, real_##x, lib, my_##x, function_name, targetProcess)
 
 #define WUPS_MUST_REPLACE_EX(pAddress, vAddress, original_func, rpl_type, replace_func, replace_function_name, process) \
-    extern const wups_loader_entry_t wups_load_ ## replace_func \
-        WUPS_SECTION("load"); \
-    const wups_loader_entry_t wups_load_ ## replace_func = { \
-        .type = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY, \
-        ._function = { \
-                .physical_address = (const void*) pAddress, \
-                .virtual_address = (const void*) vAddress, \
-                .name = #replace_function_name, \
-                .library = rpl_type, \
-                .my_function_name = #replace_func, \
-                .target = (const void*)&(replace_func), \
-                .call_addr = (const void*)&(original_func), \
-                .targetProcess =  process\
-            } \
-    }
+    extern const wups_loader_entry_t wups_load_##replace_func                                                           \
+            WUPS_SECTION("load");                                                                                       \
+    const wups_loader_entry_t wups_load_##replace_func = {                                                              \
+            .type      = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY,                                                          \
+            ._function = {                                                                                              \
+                    .physical_address = (const void *) pAddress,                                                        \
+                    .virtual_address  = (const void *) vAddress,                                                        \
+                    .name             = #replace_function_name,                                                         \
+                    .library          = rpl_type,                                                                       \
+                    .my_function_name = #replace_func,                                                                  \
+                    .target           = (const void *) &(replace_func),                                                 \
+                    .call_addr        = (const void *) &(original_func),                                                \
+                    .targetProcess    = process}}
 
-#define DECL_FUNCTION(res, name, ...) \
-        res (* real_ ## name)(__VA_ARGS__) __attribute__((section(".data"))); \
-        res my_ ## name(__VA_ARGS__)
+#define DECL_FUNCTION(res, name, ...)                                  \
+    res (*real_##name)(__VA_ARGS__) __attribute__((section(".data"))); \
+    res my_##name(__VA_ARGS__)
 
 #ifdef __cplusplus
 }

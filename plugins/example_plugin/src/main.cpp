@@ -1,14 +1,14 @@
-#include <wups.h>
-#include <whb/libmanager.h>
+#include <coreinit/filesystem.h>
+#include <coreinit/thread.h>
+#include <coreinit/time.h>
 #include <malloc.h>
 #include <string.h>
 #include <utils/logger.h>
-#include <coreinit/time.h>
-#include <coreinit/thread.h>
-#include <coreinit/filesystem.h>
+#include <whb/libmanager.h>
 #include <whb/log_cafe.h>
 #include <whb/log_module.h>
 #include <whb/log_udp.h>
+#include <wups.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 
 /**
@@ -35,22 +35,22 @@ bool logFSOpen = true;
 /**
     Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
-INITIALIZE_PLUGIN(){
+INITIALIZE_PLUGIN() {
     if (!WHBLogModuleInit()) {
         WHBLogCafeInit();
         WHBLogUdpInit();
     }
-	DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
-    
+    DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
+
     // Open storage to read values
     WUPS_OpenStorage();
-    
+
     // Try to get value from storage
-    if(WUPS_GetBool(nullptr, "logFSOpen", &logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS){
+    if (WUPS_GetBool(nullptr, "logFSOpen", &logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
         // Add the value to the storage if it's missing.
         WUPS_StoreBool(nullptr, "logFSOpen", logFSOpen);
     }
-    
+
     // Close storage
     WUPS_CloseStorage();
 }
@@ -59,7 +59,7 @@ INITIALIZE_PLUGIN(){
     Gets called when the plugin loader is re-entered => when the plugin is unloaded. 
 	The overridden functions are restored before this is getting called.
 **/
-DEINITIALIZE_PLUGIN(){
+DEINITIALIZE_PLUGIN() {
     DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!");
 }
 
@@ -68,19 +68,19 @@ DEINITIALIZE_PLUGIN(){
 	This is called BEFORE the functions are overridden.
 	Make sure to initialize all functions you're using in the overridden functions!
 **/
-ON_APPLICATION_START(){
+ON_APPLICATION_START() {
     if (!WHBLogModuleInit()) {
         WHBLogCafeInit();
         WHBLogUdpInit();
-    }  
+    }
 
     DEBUG_FUNCTION_LINE("ON_APPLICATION_START of example_plugin!");
-} 
+}
 
 /**
     Gets called when an application request to exit.
 **/
-ON_APPLICATION_REQUESTS_EXIT(){
+ON_APPLICATION_REQUESTS_EXIT() {
     DEBUG_FUNCTION_LINE("ON_APPLICATION_REQUESTS_EXIT of example_plugin!");
 }
 
@@ -93,7 +93,7 @@ void logFSOpenChanged(ConfigItemBoolean *item, bool newValue) {
 
 WUPS_GET_CONFIG() {
     // We open the storage so we can persist the configuration the user did.
-    WUPS_OpenStorage();  
+    WUPS_OpenStorage();
 
     WUPSConfigHandle config;
     WUPSConfig_CreateHandled(&config, "Example Plugin");
@@ -142,7 +142,7 @@ WUPS_CONFIG_CLOSED() {
 DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error) {
     int result = real_FSOpenFile(pClient, pCmd, path, mode, handle, error);
     if (logFSOpen) {
-        DEBUG_FUNCTION_LINE("FSOpenFile called for folder %s! Result %d",path,result);
+        DEBUG_FUNCTION_LINE("FSOpenFile called for folder %s! Result %d", path, result);
     }
     return result;
 }
@@ -155,4 +155,4 @@ WUPS_MUST_REPLACE(FUNCTION_NAME_IN_THIS_FILE,   NAME_OF_LIB_WHICH_CONTAINS_THIS_
 
 Define this for each function you want to override.
 **/
-WUPS_MUST_REPLACE(FSOpenFile,                   WUPS_LOADER_LIBRARY_COREINIT,               FSOpenFile);
+WUPS_MUST_REPLACE(FSOpenFile, WUPS_LOADER_LIBRARY_COREINIT, FSOpenFile);
