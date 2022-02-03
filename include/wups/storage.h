@@ -15,7 +15,7 @@ typedef enum wups_storage_type_t_ {
 } wups_storage_type_t;
 
 enum {
-    WUPS_STORAGE_ERROR_SUCCESS                =  0,
+    WUPS_STORAGE_ERROR_SUCCESS                = 0,
     WUPS_STORAGE_ERROR_NOT_OPENED             = -1,
     WUPS_STORAGE_ERROR_ALREADY_OPENED         = -2,
     WUPS_STORAGE_ERROR_INVALID_ARGS           = -3,

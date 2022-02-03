@@ -1,12 +1,12 @@
-#include <wups.h>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <wups.h>
 
 #include "utils/base64.h"
 
-static OpenStorageFunction openfunction_ptr __attribute__((section(".data"))) = nullptr;
+static OpenStorageFunction openfunction_ptr __attribute__((section(".data")))   = nullptr;
 static CloseStorageFunction closefunction_ptr __attribute__((section(".data"))) = nullptr;
-static const char *plugin_id __attribute__((section(".data"))) = nullptr;
+static const char *plugin_id __attribute__((section(".data")))                  = nullptr;
 
 static uint32_t storage_initialized __attribute__((section(".data"))) = false;
 static uint32_t isOpened __attribute__((section(".data")));
@@ -14,19 +14,19 @@ static uint32_t isDirty __attribute__((section(".data")));
 static wups_storage_item_t rootItem __attribute__((section(".data")));
 
 void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
-    openfunction_ptr = args.open_storage_ptr;
+    openfunction_ptr  = args.open_storage_ptr;
     closefunction_ptr = args.close_storage_ptr;
-    plugin_id = args.plugin_id;
+    plugin_id         = args.plugin_id;
 
     storage_initialized = true;
-    isOpened = false;
-    isDirty = false;
+    isOpened            = false;
+    isDirty             = false;
 
-    rootItem.key = nullptr;
-    rootItem.data = nullptr;
-    rootItem.data_size = 0;
+    rootItem.key            = nullptr;
+    rootItem.data           = nullptr;
+    rootItem.data_size      = 0;
     rootItem.pending_delete = false;
-    rootItem.type = WUPS_STORAGE_TYPE_ITEM;
+    rootItem.type           = WUPS_STORAGE_TYPE_ITEM;
 }
 
 int32_t WUPS_OpenStorage(void) {
@@ -42,7 +42,7 @@ int32_t WUPS_OpenStorage(void) {
 
     if (result == WUPS_STORAGE_ERROR_SUCCESS || result == WUPS_STORAGE_ERROR_INVALID_JSON) {
         isOpened = true;
-        isDirty = false;
+        isDirty  = false;
     }
 
     return result;
@@ -80,12 +80,12 @@ int32_t WUPS_CloseStorage(void) {
 
     if (result == 0) {
         isOpened = false;
-        isDirty = false;
+        isDirty  = false;
 
         closeItem(&rootItem);
         free(rootItem.data);
         rootItem.data_size = 0;
-        rootItem.data = nullptr;
+        rootItem.data      = nullptr;
     }
 
     return result;
@@ -183,10 +183,10 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
         strcpy(foundItem->key, key);
     }
 
-    foundItem->type = type;
+    foundItem->type           = type;
     foundItem->pending_delete = false;
-    foundItem->data = nullptr;
-    foundItem->data_size = 0;
+    foundItem->data           = nullptr;
+    foundItem->data_size      = 0;
     return foundItem;
 }
 
@@ -269,8 +269,8 @@ int32_t WUPS_StoreString(wups_storage_item_t *parent, const char *key, const cha
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
 
-    uint32_t size = strlen(string) + 1;
-    item->data = malloc(size);
+    uint32_t size   = strlen(string) + 1;
+    item->data      = malloc(size);
     item->data_size = size;
     strcpy((char *) item->data, string);
 
@@ -302,8 +302,8 @@ int32_t WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int32_t valu
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_INT);
 
-    item->data = malloc(sizeof(int32_t));
-    item->data_size = sizeof(int32_t);
+    item->data              = malloc(sizeof(int32_t));
+    item->data_size         = sizeof(int32_t);
     *(int32_t *) item->data = value;
 
     return WUPS_STORAGE_ERROR_SUCCESS;
@@ -328,7 +328,7 @@ int32_t WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, const voi
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
 
-    item->data = b64_encode((const uint8_t *) data, size);
+    item->data      = b64_encode((const uint8_t *) data, size);
     item->data_size = strlen((char *) data) + 1;
 
     return WUPS_STORAGE_ERROR_SUCCESS;

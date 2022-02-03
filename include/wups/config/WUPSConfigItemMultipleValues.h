@@ -25,12 +25,12 @@ bool WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, co
                                                 int pairCount, MultipleValuesChangedCallback callback);
 
 #define WUPSConfigItemMultipleValues_AddToCategoryHandled(__config__, __cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__) \
-    do { \
-        if(!WUPSConfigItemMultipleValues_AddToCategory(__cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__)) { \
-            WUPSConfig_Destroy(__config__); \
-            return 0; \
-        } \
-    } while(0)
+    do {                                                                                                                                                                              \
+        if (!WUPSConfigItemMultipleValues_AddToCategory(__cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__)) {            \
+            WUPSConfig_Destroy(__config__);                                                                                                                                           \
+            return 0;                                                                                                                                                                 \
+        }                                                                                                                                                                             \
+    } while (0)
 
 #ifdef __cplusplus
 }

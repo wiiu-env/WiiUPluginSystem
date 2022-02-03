@@ -1,7 +1,7 @@
 #pragma once
 
-#include "stdint.h"
 #include "config.h"
+#include "stdint.h"
 
 extern "C" int32_t WUPSConfigItem_Create(WUPSConfigItemHandle *out, const char *configID, const char *displayName, WUPSConfigCallbacks_t callbacks, void *context);
 
@@ -37,17 +37,17 @@ extern "C" int32_t WUPSConfigCategory_GetName(WUPSConfigCategoryHandle handle, c
 
 extern "C" int32_t WUPSConfigCategory_AddItem(WUPSConfigCategoryHandle handle, WUPSConfigItemHandle item_Handle);
 
-#define WUPSConfig_AddCategoryByNameHandled(__config__, __categoryName__, __out__) \
-    do { \
+#define WUPSConfig_AddCategoryByNameHandled(__config__, __categoryName__, __out__)     \
+    do {                                                                               \
         if (WUPSConfig_AddCategoryByName(__config__, __categoryName__, __out__) < 0) { \
-            WUPSConfig_Destroy(__config__); \
-            return 0;\
-        } \
-    } while(0)
+            WUPSConfig_Destroy(__config__);                                            \
+            return 0;                                                                  \
+        }                                                                              \
+    } while (0)
 
-#define WUPSConfig_CreateHandled(__config__, __configName__) \
-    do { \
+#define WUPSConfig_CreateHandled(__config__, __configName__)     \
+    do {                                                         \
         if (WUPSConfig_Create(__config__, __configName__) < 0) { \
-            return 0; \
-        } \
-    } while(0)
+            return 0;                                            \
+        }                                                        \
+    } while (0)
