@@ -29,18 +29,31 @@
 #include "hooks.h"
 
 #ifdef __cplusplus
+#define __EXTERN_C_MACRO extern "C"
+#else
+#define __EXTERN_C_MACRO
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-#define WUPS_PLUGIN_NAME(x)   \
-    WUPS_META(name, x);       \
-    WUPS_META(wups, "0.7.0"); \
-    WUPS_USE_WUT_MALLOC();    \
-    WUPS_USE_WUT_SOCKETS();   \
-    WUPS_USE_WUT_NEWLIB();    \
-    WUPS_USE_WUT_STDCPP();    \
-    WUPS___INIT_WRAPPER();    \
-    WUPS___FINI_WRAPPER();    \
+#define WUPS_PLUGIN_NAME(x)                                 \
+    WUPS_META(name, x);                                     \
+    WUPS_META(wups, "0.7.1");                               \
+    WUPS_USE_WUT_MALLOC();                                  \
+    WUPS_USE_WUT_SOCKETS();                                 \
+    WUPS_USE_WUT_NEWLIB();                                  \
+    WUPS_USE_WUT_STDCPP();                                  \
+    WUPS___INIT_WRAPPER();                                  \
+    WUPS___FINI_WRAPPER();                                  \
+    __EXTERN_C_MACRO void abort();                          \
+    __EXTERN_C_MACRO void OSFatal(const char *msg);         \
+    void abort() {                                          \
+        OSFatal(x ": abort() called. Uncaught exception?"); \
+        while (1)                                           \
+            ;                                               \
+    }                                                       \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);
 
 #define WUPS_PLUGIN_AUTHOR(x)          WUPS_META(author, x)
