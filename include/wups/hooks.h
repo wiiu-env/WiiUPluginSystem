@@ -52,7 +52,6 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_PLUGIN,               /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,             /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_APPLICATION_STARTS,        /* Called when an application gets started */
-    WUPS_LOADER_HOOK_FUNCTIONS_PATCHED,         /* Called when the functions where patched */
     WUPS_LOADER_HOOK_RELEASE_FOREGROUND,        /* Called when an foreground is going to be released */
     WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,       /* Called when an foreground is acquired */
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, /* Called when an application wants to exit */
@@ -78,11 +77,6 @@ typedef struct wups_loader_hook_t {
     void on_app_starting();                                             \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_STARTS, on_app_starting); \
     void on_app_starting()
-
-#define ON_FUNCTIONS_PATCHED()                                              \
-    void on_functions_patched();                                            \
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_FUNCTIONS_PATCHED, on_functions_patched); \
-    void on_functions_patched()
 
 #define ON_RELEASE_FOREGROUND()                                               \
     void on_release_foreground(void);                                         \
