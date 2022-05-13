@@ -30,3 +30,4 @@ debug/
 lib/
 cmake-build-debug/
 CMakeLists.txt
+_site/
