@@ -29,6 +29,34 @@ void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     rootItem.type           = WUPS_STORAGE_TYPE_ITEM;
 }
 
+const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
+    switch (status) {
+        case WUPS_STORAGE_ERROR_SUCCESS:
+            return "WUPS_STORAGE_ERROR_SUCCESS";
+        case WUPS_STORAGE_ERROR_NOT_OPENED:
+            return "WUPS_STORAGE_ERROR_NOT_OPENED";
+        case WUPS_STORAGE_ERROR_ALREADY_OPENED:
+            return "WUPS_STORAGE_ERROR_ALREADY_OPENED";
+        case WUPS_STORAGE_ERROR_INVALID_ARGS:
+            return "WUPS_STORAGE_ERROR_INVALID_ARGS";
+        case WUPS_STORAGE_ERROR_NOT_FOUND:
+            return "WUPS_STORAGE_ERROR_NOT_FOUND";
+        case WUPS_STORAGE_ERROR_NOT_INITIALIZED:
+            return "WUPS_STORAGE_ERROR_NOT_INITIALIZED";
+        case WUPS_STORAGE_ERROR_INVALID_BACKEND_PARAMS:
+            return "WUPS_STORAGE_ERROR_INVALID_BACKEND_PARAMS";
+        case WUPS_STORAGE_ERROR_INVALID_JSON:
+            return "WUPS_STORAGE_ERROR_INVALID_JSON";
+        case WUPS_STORAGE_ERROR_IO:
+            return "WUPS_STORAGE_ERROR_IO";
+        case WUPS_STORAGE_ERROR_B64_DECODE_FAILED:
+            return "WUPS_STORAGE_ERROR_B64_DECODE_FAILED";
+        case WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL:
+            return "WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL";
+    }
+    return "WUPS_STORAGE_ERROR_UNKNOWN";
+}
+
 WUPSStorageError WUPS_OpenStorage(void) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;

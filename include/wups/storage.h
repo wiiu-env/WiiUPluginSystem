@@ -48,6 +48,8 @@ typedef struct wups_loader_init_storage_args_t_ {
 /* called by backend */
 void WUPS_InitStorage(wups_loader_init_storage_args_t args);
 
+const char *WUPS_GetStorageStatusStr(WUPSStorageError status);
+
 /* opens storage for reading and writing */
 WUPSStorageError WUPS_OpenStorage(void);
 
