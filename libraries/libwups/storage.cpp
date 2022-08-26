@@ -29,7 +29,7 @@ void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     rootItem.type           = WUPS_STORAGE_TYPE_ITEM;
 }
 
-int32_t WUPS_OpenStorage(void) {
+WUPSStorageError WUPS_OpenStorage(void) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -38,7 +38,7 @@ int32_t WUPS_OpenStorage(void) {
         return WUPS_STORAGE_ERROR_ALREADY_OPENED;
     }
 
-    int32_t result = openfunction_ptr(plugin_id, &rootItem);
+    WUPSStorageError result = openfunction_ptr(plugin_id, &rootItem);
 
     if (result == WUPS_STORAGE_ERROR_SUCCESS || result == WUPS_STORAGE_ERROR_INVALID_JSON) {
         isOpened = true;
@@ -64,7 +64,7 @@ static void closeItem(wups_storage_item_t *item) {
     }
 }
 
-int32_t WUPS_CloseStorage(void) {
+WUPSStorageError WUPS_CloseStorage(void) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -73,12 +73,12 @@ int32_t WUPS_CloseStorage(void) {
         return WUPS_STORAGE_ERROR_NOT_OPENED;
     }
 
-    int32_t result = 0;
+    WUPSStorageError result = WUPS_STORAGE_ERROR_SUCCESS;
     if (isDirty) {
         result = closefunction_ptr(plugin_id, &rootItem);
     }
 
-    if (result == 0) {
+    if (result == WUPS_STORAGE_ERROR_SUCCESS) {
         isOpened = false;
         isDirty  = false;
 
@@ -91,7 +91,7 @@ int32_t WUPS_CloseStorage(void) {
     return result;
 }
 
-int32_t WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
+WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -190,7 +190,7 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
     return foundItem;
 }
 
-int32_t WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key, wups_storage_item_t **outItem) {
+WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key, wups_storage_item_t **outItem) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -215,7 +215,7 @@ int32_t WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key, wups_st
     return WUPS_STORAGE_ERROR_SUCCESS;
 }
 
-int32_t WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, wups_storage_item_t **outItem) {
+WUPSStorageError WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, wups_storage_item_t **outItem) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -248,7 +248,7 @@ int32_t WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, wups_stora
     return WUPS_STORAGE_ERROR_NOT_FOUND;
 }
 
-int32_t WUPS_StoreString(wups_storage_item_t *parent, const char *key, const char *string) {
+WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, const char *string) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -277,11 +277,11 @@ int32_t WUPS_StoreString(wups_storage_item_t *parent, const char *key, const cha
     return WUPS_STORAGE_ERROR_SUCCESS;
 }
 
-int32_t WUPS_StoreBool(wups_storage_item_t *parent, const char *key, bool value) {
+WUPSStorageError WUPS_StoreBool(wups_storage_item_t *parent, const char *key, bool value) {
     return WUPS_StoreInt(parent, key, (int32_t) value);
 }
 
-int32_t WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int32_t value) {
+WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int32_t value) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -309,7 +309,7 @@ int32_t WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int32_t valu
     return WUPS_STORAGE_ERROR_SUCCESS;
 }
 
-int32_t WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, const void *data, uint32_t size) {
+WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, const void *data, uint32_t size) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -334,7 +334,7 @@ int32_t WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, const voi
     return WUPS_STORAGE_ERROR_SUCCESS;
 }
 
-int32_t WUPS_GetString(wups_storage_item_t *parent, const char *key, char *outString, uint32_t maxSize) {
+WUPSStorageError WUPS_GetString(wups_storage_item_t *parent, const char *key, char *outString, uint32_t maxSize) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -366,9 +366,9 @@ int32_t WUPS_GetString(wups_storage_item_t *parent, const char *key, char *outSt
     return WUPS_STORAGE_ERROR_NOT_FOUND;
 }
 
-int32_t WUPS_GetBool(wups_storage_item_t *parent, const char *key, bool *outBool) {
+WUPSStorageError WUPS_GetBool(wups_storage_item_t *parent, const char *key, bool *outBool) {
     int32_t out;
-    int32_t result = WUPS_GetInt(parent, key, &out);
+    WUPSStorageError result = WUPS_GetInt(parent, key, &out);
     if (result != WUPS_STORAGE_ERROR_SUCCESS) {
         return result;
     }
@@ -378,7 +378,7 @@ int32_t WUPS_GetBool(wups_storage_item_t *parent, const char *key, bool *outBool
     return WUPS_STORAGE_ERROR_SUCCESS;
 }
 
-int32_t WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32_t *outInt) {
+WUPSStorageError WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32_t *outInt) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
@@ -411,7 +411,7 @@ int32_t WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32_t *outIn
     return WUPS_STORAGE_ERROR_NOT_FOUND;
 }
 
-int32_t WUPS_GetBinary(wups_storage_item_t *parent, const char *key, void *outData, uint32_t maxSize) {
+WUPSStorageError WUPS_GetBinary(wups_storage_item_t *parent, const char *key, void *outData, uint32_t maxSize) {
     if (!storage_initialized) {
         return WUPS_STORAGE_ERROR_NOT_INITIALIZED;
     }
