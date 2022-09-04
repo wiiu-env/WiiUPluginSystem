@@ -5,14 +5,14 @@ on:
       - master
 jobs:
   clang-format-lib:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: clang-format
       run: |
         docker run --rm -v ${PWD}:/src  wiiuenv/clang-format:13.0.0-2 -r ./include ./libraries
   build-lib:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     needs: clang-format-lib
     steps:
     - uses: actions/checkout@v2
@@ -21,14 +21,14 @@ jobs:
         docker build . -f Dockerfile.buildlocal -t builder
         docker run --rm -v ${PWD}:/project builder make
   clang-format-examples:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: clang-format
       run: |
         docker run --rm -v ${PWD}:/src  wiiuenv/clang-format:13.0.0-2 -r ./plugins/example_plugin/src
   build-examples:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     needs: clang-format-examples
     steps:
     - uses: actions/checkout@v2
