@@ -28,7 +28,7 @@ WUPS_PLUGIN_LICENSE("BSD");
 **/
 
 WUPS_USE_WUT_DEVOPTAB();            // Use the wut devoptabs
-WUPS_USE_STORAGE("example_plugin"); // Use the storage API
+WUPS_USE_STORAGE("example_plugin"); // Unqiue id for the storage api
 
 bool logFSOpen = true;
 
@@ -43,16 +43,25 @@ INITIALIZE_PLUGIN() {
     DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
 
     // Open storage to read values
-    WUPS_OpenStorage();
+    WUPSStorageError storageRes = WUPS_OpenStorage();
+    if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE("Failed to open storage %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
+    } else {
+        // Try to get value from storage
+        if ((storageRes = WUPS_GetBool(nullptr, "logFSOpen", &logFSOpen)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
+            // Add the value to the storage if it's missing.
+            if (WUPS_StoreBool(nullptr, "logFSOpen", logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
+                DEBUG_FUNCTION_LINE("Failed to store bool");
+            }
+        } else if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
+            DEBUG_FUNCTION_LINE("Failed to get bool %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
+        }
 
-    // Try to get value from storage
-    if (WUPS_GetBool(nullptr, "logFSOpen", &logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
-        // Add the value to the storage if it's missing.
-        WUPS_StoreBool(nullptr, "logFSOpen", logFSOpen);
+        // Close storage
+        if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
+            DEBUG_FUNCTION_LINE("Failed to close storage");
+        }
     }
-
-    // Close storage
-    WUPS_CloseStorage();
 }
 
 /**
@@ -93,7 +102,10 @@ void logFSOpenChanged(ConfigItemBoolean *item, bool newValue) {
 
 WUPS_GET_CONFIG() {
     // We open the storage so we can persist the configuration the user did.
-    WUPS_OpenStorage();
+    if (WUPS_OpenStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE("Failed to open storage");
+        return 0;
+    }
 
     WUPSConfigHandle config;
     WUPSConfig_CreateHandled(&config, "Example Plugin");
@@ -108,7 +120,9 @@ WUPS_GET_CONFIG() {
 
 WUPS_CONFIG_CLOSED() {
     // Save all changes
-    WUPS_CloseStorage();
+    if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE("Failed to close storage");
+    }
 }
 
 /**
