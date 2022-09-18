@@ -2,6 +2,7 @@
 
 :TEXT
 WUPSConfigItem_Create
+WUPSConfigItem_Destroy
 WUPSConfigItem_SetDisplayName
 WUPSConfigItem_GetDisplayName
 WUPSConfigItem_SetConfigID

@@ -90,6 +90,7 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
     }
 
     if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
+        WUPSConfigItem_Destroy(item->handle);
         return false;
     }
     return true;
