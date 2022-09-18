@@ -5,6 +5,8 @@
 
 extern "C" int32_t WUPSConfigItem_Create(WUPSConfigItemHandle *out, const char *configID, const char *displayName, WUPSConfigCallbacks_t callbacks, void *context);
 
+extern "C" int32_t WUPSConfigItem_Destroy(WUPSConfigItemHandle handle);
+
 extern "C" int32_t WUPSConfig_Destroy(WUPSConfigHandle handle);
 
 extern "C" int32_t WUPSConfigItem_SetDisplayName(WUPSConfigItemHandle handle, const char *displayName);

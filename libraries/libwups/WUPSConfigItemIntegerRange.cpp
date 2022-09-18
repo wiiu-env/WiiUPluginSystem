@@ -98,6 +98,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     };
 
     if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
+        WUPSConfigItem_Destroy(item->handle);
         return false;
     }
     return true;

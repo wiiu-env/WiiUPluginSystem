@@ -127,6 +127,7 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
     }
 
     if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
+        WUPSConfigItem_Destroy(item->handle);
         return false;
     }
     return true;
