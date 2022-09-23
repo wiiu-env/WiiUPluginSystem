@@ -19,17 +19,23 @@
 
 #include <stdint.h>
 
-#define WUPS_CONFIG_BUTTON_NONE  0
-#define WUPS_CONFIG_BUTTON_LEFT  (1 << 0)
-#define WUPS_CONFIG_BUTTON_RIGHT (1 << 1)
-#define WUPS_CONFIG_BUTTON_UP    (1 << 2)
-#define WUPS_CONFIG_BUTTON_DOWN  (1 << 3)
-#define WUPS_CONFIG_BUTTON_A     (1 << 4)
-#define WUPS_CONFIG_BUTTON_B     (1 << 5)
-#define WUPS_CONFIG_BUTTON_ZL    (1 << 6)
-#define WUPS_CONFIG_BUTTON_ZR    (1 << 7)
-#define WUPS_CONFIG_BUTTON_L     (1 << 8)
-#define WUPS_CONFIG_BUTTON_R     (1 << 9)
+#define WUPS_CONFIG_BUTTON_NONE    0
+#define WUPS_CONFIG_BUTTON_LEFT    (1 << 0)
+#define WUPS_CONFIG_BUTTON_RIGHT   (1 << 1)
+#define WUPS_CONFIG_BUTTON_UP      (1 << 2)
+#define WUPS_CONFIG_BUTTON_DOWN    (1 << 3)
+#define WUPS_CONFIG_BUTTON_A       (1 << 4)
+#define WUPS_CONFIG_BUTTON_B       (1 << 5)
+#define WUPS_CONFIG_BUTTON_ZL      (1 << 6)
+#define WUPS_CONFIG_BUTTON_ZR      (1 << 7)
+#define WUPS_CONFIG_BUTTON_L       (1 << 8)
+#define WUPS_CONFIG_BUTTON_R       (1 << 9)
+#define WUPS_CONFIG_BUTTON_X       (1 << 10)
+#define WUPS_CONFIG_BUTTON_Y       (1 << 11)
+#define WUPS_CONFIG_BUTTON_STICK_L (1 << 12)
+#define WUPS_CONFIG_BUTTON_STICK_R (1 << 13)
+#define WUPS_CONFIG_BUTTON_PLUS    (1 << 14)
+#define WUPS_CONFIG_BUTTON_MINUS   (1 << 15)
 typedef int32_t WUPSConfigButtons;
 
 typedef struct {
