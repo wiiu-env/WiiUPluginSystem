@@ -1,6 +1,6 @@
 # Example plugin
 
-This is just a simple example plugin which can be used as a template.
+This is just a simple example plugin using `cmake` which can be used as a template.
 
 ## Building
 
