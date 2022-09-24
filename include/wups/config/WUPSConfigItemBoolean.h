@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 typedef struct ConfigItemBoolean {
+    char *configId;
     WUPSConfigItemHandle handle;
     bool defaultValue;
     bool value;
@@ -15,13 +16,13 @@ typedef struct ConfigItemBoolean {
 
 typedef void (*BooleanValueChangedCallback)(ConfigItemBoolean *, bool);
 
-bool WUPSConfigItemBoolean_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback);
-bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
+bool WUPSConfigItemBoolean_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback);
+bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
                                            const char *falseValue);
 
-#define WUPSConfigItemBoolean_AddToCategoryHandled(__config__, __cat__, __configID__, __displayName__, __defaultValue__, __callback__) \
+#define WUPSConfigItemBoolean_AddToCategoryHandled(__config__, __cat__, __configIs__, __displayName__, __defaultValue__, __callback__) \
     do {                                                                                                                               \
-        if (!WUPSConfigItemBoolean_AddToCategory(__cat__, __configID__, __displayName__, __defaultValue__, __callback__)) {            \
+        if (!WUPSConfigItemBoolean_AddToCategory(__cat__, __configIs__, __displayName__, __defaultValue__, __callback__)) {            \
             WUPSConfig_Destroy(__config__);                                                                                            \
             return 0;                                                                                                                  \
         }                                                                                                                              \

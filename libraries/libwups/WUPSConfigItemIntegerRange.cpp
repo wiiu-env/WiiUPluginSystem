@@ -1,6 +1,7 @@
 #include "wups/config/WUPSConfigItemIntegerRange.h"
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <wups.h>
 
 int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
@@ -60,13 +61,14 @@ void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
 
 void WUPSConfigItemIntegerRange_onDelete(void *context) {
     auto *item = (ConfigItemIntegerRange *) context;
+    free(item->configId);
     free(item);
 }
 
 void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
 }
 
-extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue,
+extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue,
                                                          IntegerRangeValueChangedCallback callback) {
     if (cat == 0) {
         return false;
@@ -74,6 +76,12 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     auto *item = (ConfigItemIntegerRange *) malloc(sizeof(ConfigItemIntegerRange));
     if (item == nullptr) {
         return false;
+    }
+
+    if (configId != nullptr) {
+        item->configId = strdup(configId);
+    } else {
+        item->configId = nullptr;
     }
 
     item->defaultValue = defaultValue;
@@ -92,7 +100,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
             .onButtonPressed                = &WUPSConfigItemIntegerRange_onButtonPressed,
             .onDelete                       = &WUPSConfigItemIntegerRange_onDelete};
 
-    if (WUPSConfigItem_Create(&(item->handle), configID, displayName, callbacks, item) < 0) {
+    if (WUPSConfigItem_Create(&(item->handle), configId, displayName, callbacks, item) < 0) {
         free(item);
         return false;
     };
