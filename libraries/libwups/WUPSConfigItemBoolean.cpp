@@ -1,6 +1,7 @@
 #include "wups/config/WUPSConfigItemBoolean.h"
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <wups.h>
 
 void WUPSConfigItemBoolean_onDelete(void *context);
@@ -58,7 +59,7 @@ void WUPSConfigItemBoolean_onSelected(void *context, bool isSelected) {
 }
 
 extern "C" bool
-WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
+WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
                                       const char *falseValue) {
     if (cat == 0) {
         return false;
@@ -66,6 +67,12 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
     auto *item = (ConfigItemBoolean *) malloc(sizeof(ConfigItemBoolean));
     if (item == nullptr) {
         return false;
+    }
+
+    if (configId != nullptr) {
+        item->configId = strdup(configId);
+    } else {
+        item->configId = nullptr;
     }
 
     item->defaultValue = defaultValue;
@@ -84,7 +91,7 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
             .onButtonPressed                = &WUPSConfigItemBoolean_onButtonPressed,
             .onDelete                       = &WUPSConfigItemBoolean_onDelete};
 
-    if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
+    if (WUPSConfigItem_Create(&item->handle, configId, displayName, callbacks, item) < 0) {
         free(item);
         return false;
     }
@@ -98,6 +105,7 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
 
 void WUPSConfigItemBoolean_onDelete(void *context) {
     auto *item = (ConfigItemBoolean *) context;
+    free(item->configId);
     free(item);
 }
 
