@@ -10,7 +10,7 @@ typedef struct ConfigItemMultipleValuesPair {
 } ConfigItemMultipleValuesPair;
 
 typedef struct ConfigItemMultipleValues {
-    char *configID;
+    char *configId;
     WUPSConfigItemHandle handle;
     int32_t defaultValueIndex;
     int32_t valueIndex;
@@ -21,7 +21,7 @@ typedef struct ConfigItemMultipleValues {
 
 typedef void (*MultipleValuesChangedCallback)(ConfigItemMultipleValues *, uint32_t);
 
-bool WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName, int defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
+bool WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, int defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
                                                 int pairCount, MultipleValuesChangedCallback callback);
 
 #define WUPSConfigItemMultipleValues_AddToCategoryHandled(__config__, __cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__) \

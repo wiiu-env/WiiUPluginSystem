@@ -73,7 +73,7 @@ void WUPSConfigItemMultipleValues_onSelected(void *context, bool isSelected) {
 }
 
 extern "C" bool
-WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName,
+WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName,
                                            int32_t defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
                                            int pairCount, MultipleValuesChangedCallback callback) {
     if (cat == 0 || displayName == nullptr || possibleValues == nullptr || pairCount < 0) {
@@ -103,12 +103,10 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
     item->defaultValueIndex = defaultValueIndex;
     item->callback          = (void *) callback;
 
-    if (configID != nullptr) {
-        auto configIDLen = strlen(configID) + 1;
-        item->configID   = (char *) malloc(configIDLen);
-        strncpy(item->configID, configID, configIDLen);
+    if (configId != nullptr) {
+        item->configId = strdup(configId);
     } else {
-        item->configID = nullptr;
+        item->configId = nullptr;
     }
 
     WUPSConfigCallbacks_t callbacks = {
@@ -121,7 +119,7 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
             .onButtonPressed                = &WUPSConfigItemMultipleValues_onButtonPressed,
             .onDelete                       = &WUPSConfigItemMultipleValues_onDelete};
 
-    if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
+    if (WUPSConfigItem_Create(&item->handle, configId, displayName, callbacks, item) < 0) {
         free(item);
         return false;
     }
@@ -140,7 +138,7 @@ void WUPSConfigItemMultipleValues_onDelete(void *context) {
         free(item->values[i].valueName);
     }
 
-    free(item->configID);
+    free(item->configId);
     free(item->values);
 
     free(item);
