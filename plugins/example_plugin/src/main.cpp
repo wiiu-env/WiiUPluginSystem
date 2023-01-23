@@ -33,7 +33,7 @@ WUPS_USE_STORAGE("example_plugin"); // Unqiue id for the storage api
 bool logFSOpen = true;
 
 /**
-    Get's called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
+    Gets called ONCE when the loader exits, but BEFORE the ON_APPLICATION_START gets called or functions are overridden.
 **/
 INITIALIZE_PLUGIN() {
     if (!WHBLogModuleInit()) {
@@ -128,7 +128,7 @@ WUPS_CONFIG_CLOSED() {
 /**
     This defines a function replacement.
     It allows to replace the system function with an own function. 
-    So whenever a game / application calles an overridden function, your function gets called instead.
+    So whenever a game / application calls an overridden function, your function gets called instead.
     
     Currently it's only possible to override functions that are loaded from .rpl files of OSv10 (00050010-1000400A).
     
