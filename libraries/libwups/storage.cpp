@@ -245,13 +245,12 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
 
         parent->data_size += INCREASE_SIZE_BY;
 
-        foundItem->key = (char *) malloc(strlen(key) + 1);
+        foundItem->key = strdup(key);
         if (foundItem->key == nullptr) {
             foundItem->pending_delete = true;
             *error                    = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
-        strcpy(foundItem->key, key);
     }
 
     foundItem->type           = type;
