@@ -116,6 +116,7 @@ WUPSStorageError WUPS_CloseStorage(void) {
         closeItem(&rootItem);
         rootItem.data_size = 0;
         rootItem.data      = nullptr;
+        rootItem.key       = nullptr;
     }
 
     return result;
