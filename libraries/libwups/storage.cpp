@@ -81,15 +81,14 @@ static void closeItem(wups_storage_item_t *item) {
         return;
     }
 
-    auto *items = (wups_storage_item_t *) item->data;
-
-    for (uint32_t i = 0; i < item->data_size; i++) {
-        if (items[i].type == WUPS_STORAGE_TYPE_ITEM) {
+    if (item->type == WUPS_STORAGE_TYPE_ITEM) {
+        auto *items = (wups_storage_item_t *) item->data;
+        for (uint32_t i = 0; i < item->data_size; i++) {
             closeItem(&items[i]);
         }
-        free(items[i].data);
-        free(items[i].key);
     }
+    free(item->data);
+    free(item->key);
 }
 
 WUPSStorageError WUPS_CloseStorage(void) {
@@ -111,7 +110,6 @@ WUPSStorageError WUPS_CloseStorage(void) {
         isDirty  = false;
 
         closeItem(&rootItem);
-        free(rootItem.data);
         rootItem.data_size = 0;
         rootItem.data      = nullptr;
     }
