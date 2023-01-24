@@ -53,6 +53,8 @@ const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
             return "WUPS_STORAGE_ERROR_B64_DECODE_FAILED";
         case WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL:
             return "WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL";
+        case WUPS_STORAGE_ERROR_MALLOC_FAILED:
+            return "WUPS_STORAGE_ERROR_MALLOC_FAILED";
     }
     return "WUPS_STORAGE_ERROR_UNKNOWN";
 }
@@ -192,8 +194,13 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
         if (item->pending_delete) {
             free(item->data);
             free(item->key);
+            item->data = nullptr;
+            item->key  = nullptr;
 
             item->key = (char *) malloc(strlen(key) + 1);
+            if (item->key == nullptr) {
+                return nullptr;
+            }
             strcpy(item->key, key);
 
             foundItem = item;
@@ -202,12 +209,22 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
     }
 
     if (!foundItem) {
+        auto *newPtr = (wups_storage_item_t *) realloc(parent->data, (parent->data_size + 1) * sizeof(wups_storage_item_t));
+        if (newPtr == nullptr) {
+            return nullptr;
+        }
+        parent->data = newPtr;
+
         parent->data_size++;
-        parent->data = (wups_storage_item_t *) realloc(parent->data, parent->data_size * sizeof(wups_storage_item_t));
 
         foundItem = &((wups_storage_item_t *) parent->data)[parent->data_size - 1];
+        memset(foundItem, 0, sizeof(wups_storage_item_t));
 
         foundItem->key = (char *) malloc(strlen(key) + 1);
+        if (foundItem->key == nullptr) {
+            foundItem->pending_delete = true;
+            return nullptr;
+        }
         strcpy(foundItem->key, key);
     }
 
@@ -240,6 +257,9 @@ WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key
     isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_ITEM);
+    if (item == nullptr) {
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
 
     *outItem = item;
     return WUPS_STORAGE_ERROR_SUCCESS;
@@ -302,9 +322,17 @@ WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, 
     isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
+    if (item == nullptr) {
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
 
-    uint32_t size   = strlen(string) + 1;
-    item->data      = malloc(size);
+    uint32_t size = strlen(string) + 1;
+    item->data    = malloc(size);
+    if (item->data == nullptr) {
+        item->key            = nullptr;
+        item->pending_delete = true;
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
     item->data_size = size;
     strcpy((char *) item->data, string);
 
@@ -337,8 +365,16 @@ WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int
     isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_INT);
+    if (item == nullptr) {
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
 
-    item->data              = malloc(sizeof(int32_t));
+    item->data = malloc(sizeof(int32_t));
+    if (item->data == nullptr) {
+        item->key            = nullptr;
+        item->pending_delete = true;
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
     item->data_size         = sizeof(int32_t);
     *(int32_t *) item->data = value;
 
@@ -367,8 +403,16 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
     isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
+    if (item == nullptr) {
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
 
-    item->data      = b64_encode((const uint8_t *) data, size);
+    item->data = b64_encode((const uint8_t *) data, size);
+    if (item->data == nullptr) {
+        item->key            = nullptr;
+        item->pending_delete = true;
+        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+    }
     item->data_size = strlen((char *) data) + 1;
 
     return WUPS_STORAGE_ERROR_SUCCESS;
