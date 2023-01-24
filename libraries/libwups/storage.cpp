@@ -6,7 +6,7 @@
 
 static OpenStorageFunction openfunction_ptr __attribute__((section(".data")))   = nullptr;
 static CloseStorageFunction closefunction_ptr __attribute__((section(".data"))) = nullptr;
-static const char *plugin_id __attribute__((section(".data")))                  = nullptr;
+static char plugin_id[256] __attribute__((section(".data")));
 
 static uint32_t storage_initialized __attribute__((section(".data"))) = false;
 static uint32_t isOpened __attribute__((section(".data")));
@@ -16,7 +16,7 @@ static wups_storage_item_t rootItem __attribute__((section(".data")));
 void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     openfunction_ptr  = args.open_storage_ptr;
     closefunction_ptr = args.close_storage_ptr;
-    plugin_id         = args.plugin_id;
+    strncpy(plugin_id, args.plugin_id, sizeof(plugin_id) - 1);
 
     storage_initialized = true;
     isOpened            = false;
