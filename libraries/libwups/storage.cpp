@@ -55,6 +55,8 @@ const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
             return "WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL";
         case WUPS_STORAGE_ERROR_MALLOC_FAILED:
             return "WUPS_STORAGE_ERROR_MALLOC_FAILED";
+        case WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC:
+            return "WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC";
     }
     return "WUPS_STORAGE_ERROR_UNKNOWN";
 }
@@ -180,49 +182,73 @@ WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
 //     return WUPS_STORAGE_ERROR_NOT_FOUND;
 // }
 
-static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key, wups_storage_type_t type) {
+static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key, wups_storage_type_t type, WUPSStorageError *error) {
     wups_storage_item_t *foundItem = nullptr;
+    // First check for existing item with the same name.
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (strcmp(item->key, key) == 0) {
+        if (item->key && strcmp(item->key, key) == 0) {
             free(item->data);
-            foundItem = item;
-            break;
-        }
-
-        if (item->pending_delete) {
-            free(item->data);
-            free(item->key);
-            item->data = nullptr;
-            item->key  = nullptr;
-
-            item->key = (char *) malloc(strlen(key) + 1);
-            if (item->key == nullptr) {
-                return nullptr;
-            }
-            strcpy(item->key, key);
-
             foundItem = item;
             break;
         }
     }
 
     if (!foundItem) {
-        auto *newPtr = (wups_storage_item_t *) realloc(parent->data, (parent->data_size + 1) * sizeof(wups_storage_item_t));
+        // Then check if there are any deleted item we can override.
+        for (uint32_t i = 0; i < parent->data_size; i++) {
+            wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
+
+            if (item->pending_delete) {
+                free(item->data);
+                free(item->key);
+                item->data = nullptr;
+                item->key  = nullptr;
+
+                item->key = strdup(key);
+                if (item->key == nullptr) {
+                    return nullptr;
+                }
+
+                foundItem = item;
+                break;
+            }
+        }
+    }
+
+    if (!foundItem) {
+        // Only allow allocation for WUPS_STORAGE_TYPE_ITEM if it's the first item.
+        // The realloc would cause the outPtr of previous WUPS_CreateSubItem call to be invalid.
+        if (parent->data_size > 0 && type == WUPS_STORAGE_TYPE_ITEM) {
+            *error = WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC;
+            return nullptr;
+        }
+
+        // Increase in step of 8 to avoid realloc calls (at the costs of some memory).
+        constexpr uint32_t INCREASE_SIZE_BY = 8;
+
+        auto *newPtr = (wups_storage_item_t *) realloc(parent->data, (parent->data_size + INCREASE_SIZE_BY) * sizeof(wups_storage_item_t));
         if (newPtr == nullptr) {
+            *error = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
         parent->data = newPtr;
 
-        parent->data_size++;
+        for (uint32_t j = parent->data_size; j < INCREASE_SIZE_BY; j++) {
+            auto curItem = &((wups_storage_item_t *) parent->data)[j];
+            memset(curItem, 0, sizeof(wups_storage_item_t));
+            curItem->pending_delete = true;
+        }
 
-        foundItem = &((wups_storage_item_t *) parent->data)[parent->data_size - 1];
-        memset(foundItem, 0, sizeof(wups_storage_item_t));
+        foundItem = &((wups_storage_item_t *) parent->data)[parent->data_size];
+
+        parent->data_size += INCREASE_SIZE_BY;
 
         foundItem->key = (char *) malloc(strlen(key) + 1);
         if (foundItem->key == nullptr) {
             foundItem->pending_delete = true;
+            *error                    = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
         strcpy(foundItem->key, key);
@@ -256,9 +282,10 @@ WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key
 
     isDirty = true;
 
-    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_ITEM);
+    WUPSStorageError error;
+    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_ITEM, &error);
     if (item == nullptr) {
-        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+        return error;
     }
 
     *outItem = item;
@@ -321,9 +348,10 @@ WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, 
 
     isDirty = true;
 
-    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
+    WUPSStorageError error;
+    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING, &error);
     if (item == nullptr) {
-        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+        return error;
     }
 
     uint32_t size = strlen(string) + 1;
@@ -364,9 +392,10 @@ WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int
 
     isDirty = true;
 
-    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_INT);
+    WUPSStorageError error;
+    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_INT, &error);
     if (item == nullptr) {
-        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+        return error;
     }
 
     item->data = malloc(sizeof(int32_t));
@@ -402,9 +431,10 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
 
     isDirty = true;
 
-    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
+    WUPSStorageError error;
+    wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING, &error);
     if (item == nullptr) {
-        return WUPS_STORAGE_ERROR_MALLOC_FAILED;
+        return error;
     }
 
     item->data = b64_encode((const uint8_t *) data, size);
