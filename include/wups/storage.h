@@ -34,7 +34,7 @@ typedef struct wups_storage_item_t_ {
     char *key;
     void *data;
     uint32_t data_size;
-    uint32_t pending_delete;
+    uint32_t deleted;
     wups_storage_type_t type;
 } wups_storage_item_t;
 

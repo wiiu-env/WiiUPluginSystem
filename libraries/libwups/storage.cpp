@@ -22,11 +22,11 @@ void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     isOpened            = false;
     isDirty             = false;
 
-    rootItem.key            = nullptr;
-    rootItem.data           = nullptr;
-    rootItem.data_size      = 0;
-    rootItem.pending_delete = false;
-    rootItem.type           = WUPS_STORAGE_TYPE_ITEM;
+    rootItem.key       = nullptr;
+    rootItem.data      = nullptr;
+    rootItem.data_size = 0;
+    rootItem.deleted   = false;
+    rootItem.type      = WUPS_STORAGE_TYPE_ITEM;
 }
 
 const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
@@ -146,12 +146,16 @@ WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (item->pending_delete || item->type == WUPS_STORAGE_TYPE_INVALID) {
+        if (item->deleted || item->type == WUPS_STORAGE_TYPE_INVALID) {
             continue;
         }
 
         if (strcmp(item->key, key) == 0) {
-            item->pending_delete = true;
+            free(item->data);
+            free(item->key);
+            item->key     = nullptr;
+            item->data    = nullptr;
+            item->deleted = true;
             return WUPS_STORAGE_ERROR_SUCCESS;
         }
     }
@@ -201,7 +205,7 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
         for (uint32_t i = 0; i < parent->data_size; i++) {
             wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-            if (item->pending_delete) {
+            if (item->deleted) {
                 free(item->data);
                 free(item->key);
                 item->data = nullptr;
@@ -239,7 +243,7 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
         for (uint32_t j = parent->data_size; j < INCREASE_SIZE_BY; j++) {
             auto curItem = &((wups_storage_item_t *) parent->data)[j];
             memset(curItem, 0, sizeof(wups_storage_item_t));
-            curItem->pending_delete = true;
+            curItem->deleted = true;
         }
 
         foundItem = &((wups_storage_item_t *) parent->data)[parent->data_size];
@@ -248,16 +252,16 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
 
         foundItem->key = strdup(key);
         if (foundItem->key == nullptr) {
-            foundItem->pending_delete = true;
-            *error                    = WUPS_STORAGE_ERROR_MALLOC_FAILED;
+            foundItem->deleted = true;
+            *error             = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
     }
 
-    foundItem->type           = type;
-    foundItem->pending_delete = false;
-    foundItem->data           = nullptr;
-    foundItem->data_size      = 0;
+    foundItem->type      = type;
+    foundItem->deleted   = false;
+    foundItem->data      = nullptr;
+    foundItem->data_size = 0;
     return foundItem;
 }
 
@@ -314,7 +318,7 @@ WUPSStorageError WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, w
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (item->pending_delete || item->type != WUPS_STORAGE_TYPE_ITEM) {
+        if (item->deleted || item->type != WUPS_STORAGE_TYPE_ITEM) {
             continue;
         }
 
@@ -357,8 +361,8 @@ WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, 
     uint32_t size = strlen(string) + 1;
     item->data    = malloc(size);
     if (item->data == nullptr) {
-        item->key            = nullptr;
-        item->pending_delete = true;
+        item->key     = nullptr;
+        item->deleted = true;
         return WUPS_STORAGE_ERROR_MALLOC_FAILED;
     }
     item->data_size = size;
@@ -400,8 +404,8 @@ WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int
 
     item->data = malloc(sizeof(int32_t));
     if (item->data == nullptr) {
-        item->key            = nullptr;
-        item->pending_delete = true;
+        item->key     = nullptr;
+        item->deleted = true;
         return WUPS_STORAGE_ERROR_MALLOC_FAILED;
     }
     item->data_size         = sizeof(int32_t);
@@ -439,8 +443,8 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
 
     item->data = b64_encode((const uint8_t *) data, size);
     if (item->data == nullptr) {
-        item->key            = nullptr;
-        item->pending_delete = true;
+        item->key     = nullptr;
+        item->deleted = true;
         return WUPS_STORAGE_ERROR_MALLOC_FAILED;
     }
     item->data_size = strlen((char *) data) + 1;
@@ -470,7 +474,7 @@ WUPSStorageError WUPS_GetString(wups_storage_item_t *parent, const char *key, ch
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (item->pending_delete || item->type != WUPS_STORAGE_TYPE_STRING) {
+        if (item->deleted || item->type != WUPS_STORAGE_TYPE_STRING) {
             continue;
         }
 
@@ -516,7 +520,7 @@ WUPSStorageError WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (item->pending_delete || item->type != WUPS_STORAGE_TYPE_INT) {
+        if (item->deleted || item->type != WUPS_STORAGE_TYPE_INT) {
             continue;
         }
 
@@ -551,7 +555,7 @@ WUPSStorageError WUPS_GetBinary(wups_storage_item_t *parent, const char *key, vo
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
 
-        if (item->pending_delete || item->type != WUPS_STORAGE_TYPE_STRING) {
+        if (item->deleted || item->type != WUPS_STORAGE_TYPE_STRING) {
             continue;
         }
 
