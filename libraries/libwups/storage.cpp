@@ -354,6 +354,8 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
         parent = &rootItem;
     }
 
+    isDirty = true;
+
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
 
     item->data      = b64_encode((const uint8_t *) data, size);
