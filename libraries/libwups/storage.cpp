@@ -132,11 +132,13 @@ WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
-    isDirty = true;
-
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
+
+    isDirty = true;
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
         wups_storage_item_t *item = &((wups_storage_item_t *) parent->data)[i];
@@ -231,11 +233,13 @@ WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
-    isDirty = true;
-
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
+
+    isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_ITEM);
 
@@ -258,6 +262,8 @@ WUPSStorageError WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, w
 
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -289,11 +295,13 @@ WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, 
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
-    isDirty = true;
-
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
+
+    isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_STRING);
 
@@ -322,11 +330,13 @@ WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
-    isDirty = true;
-
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
+
+    isDirty = true;
 
     wups_storage_item_t *item = addItem(parent, key, WUPS_STORAGE_TYPE_INT);
 
@@ -352,6 +362,8 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
 
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
     isDirty = true;
@@ -379,6 +391,8 @@ WUPSStorageError WUPS_GetString(wups_storage_item_t *parent, const char *key, ch
 
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -423,6 +437,8 @@ WUPSStorageError WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32
 
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -456,6 +472,8 @@ WUPSStorageError WUPS_GetBinary(wups_storage_item_t *parent, const char *key, vo
 
     if (!parent) {
         parent = &rootItem;
+    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+        return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
