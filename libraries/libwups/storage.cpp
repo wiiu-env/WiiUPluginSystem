@@ -13,6 +13,8 @@ static uint32_t isOpened __attribute__((section(".data")));
 static uint32_t isDirty __attribute__((section(".data")));
 static wups_storage_item_t rootItem __attribute__((section(".data")));
 
+static wups_storage_item_t *sActiveSubItem __attribute__((section(".data"))) = nullptr;
+
 void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     openfunction_ptr  = args.open_storage_ptr;
     closefunction_ptr = args.close_storage_ptr;
@@ -21,6 +23,7 @@ void WUPS_InitStorage(wups_loader_init_storage_args_t args) {
     storage_initialized = true;
     isOpened            = false;
     isDirty             = false;
+    sActiveSubItem      = nullptr;
 
     rootItem.key       = nullptr;
     rootItem.data      = nullptr;
@@ -55,6 +58,8 @@ const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
             return "WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL";
         case WUPS_STORAGE_ERROR_MALLOC_FAILED:
             return "WUPS_STORAGE_ERROR_MALLOC_FAILED";
+        case WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY:
+            return "WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY";
     }
     return "WUPS_STORAGE_ERROR_UNKNOWN";
 }
@@ -116,6 +121,7 @@ WUPSStorageError WUPS_CloseStorage(void) {
         rootItem.data      = nullptr;
         rootItem.key       = nullptr;
     }
+    sActiveSubItem = nullptr;
 
     return result;
 }
@@ -135,8 +141,15 @@ WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     isDirty = true;
@@ -154,6 +167,9 @@ WUPSStorageError WUPS_DeleteItem(wups_storage_item_t *parent, const char *key) {
             item->key     = nullptr;
             item->data    = nullptr;
             item->deleted = true;
+            if (sActiveSubItem == item) {
+                sActiveSubItem = nullptr;
+            }
             return WUPS_STORAGE_ERROR_SUCCESS;
         }
     }
@@ -263,8 +279,15 @@ WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     isDirty = true;
@@ -274,6 +297,7 @@ WUPSStorageError WUPS_CreateSubItem(wups_storage_item_t *parent, const char *key
     if (item == nullptr) {
         return error;
     }
+    sActiveSubItem = item;
 
     *outItem = item;
     return WUPS_STORAGE_ERROR_SUCCESS;
@@ -294,8 +318,15 @@ WUPSStorageError WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, w
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -306,7 +337,8 @@ WUPSStorageError WUPS_GetSubItem(wups_storage_item_t *parent, const char *key, w
         }
 
         if (strcmp(item->key, key) == 0) {
-            *outItem = item;
+            sActiveSubItem = item;
+            *outItem       = item;
             return WUPS_STORAGE_ERROR_SUCCESS;
         }
     }
@@ -329,8 +361,15 @@ WUPSStorageError WUPS_StoreString(wups_storage_item_t *parent, const char *key, 
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     isDirty = true;
@@ -373,8 +412,15 @@ WUPSStorageError WUPS_StoreInt(wups_storage_item_t *parent, const char *key, int
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     isDirty = true;
@@ -412,8 +458,15 @@ WUPSStorageError WUPS_StoreBinary(wups_storage_item_t *parent, const char *key, 
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     isDirty = true;
@@ -450,8 +503,15 @@ WUPSStorageError WUPS_GetString(wups_storage_item_t *parent, const char *key, ch
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -496,8 +556,15 @@ WUPSStorageError WUPS_GetInt(wups_storage_item_t *parent, const char *key, int32
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
@@ -531,8 +598,15 @@ WUPSStorageError WUPS_GetBinary(wups_storage_item_t *parent, const char *key, vo
 
     if (!parent) {
         parent = &rootItem;
-    } else if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
-        return WUPS_STORAGE_ERROR_INVALID_ARGS;
+    } else {
+        // We can only safely process items of a parent if the parent was the last
+        // item returned by WUPS_GetSubItem or WUPS_CreateSubItem
+        if (parent != sActiveSubItem) {
+            return WUPS_STORAGE_ERROR_NOT_ACTIVE_CATEGORY;
+        }
+        if (parent->type != WUPS_STORAGE_TYPE_ITEM) {
+            return WUPS_STORAGE_ERROR_INVALID_ARGS;
+        }
     }
 
     for (uint32_t i = 0; i < parent->data_size; i++) {
