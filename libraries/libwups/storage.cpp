@@ -55,8 +55,6 @@ const char *WUPS_GetStorageStatusStr(WUPSStorageError status) {
             return "WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL";
         case WUPS_STORAGE_ERROR_MALLOC_FAILED:
             return "WUPS_STORAGE_ERROR_MALLOC_FAILED";
-        case WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC:
-            return "WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC";
     }
     return "WUPS_STORAGE_ERROR_UNKNOWN";
 }
@@ -223,37 +221,22 @@ static wups_storage_item_t *addItem(wups_storage_item_t *parent, const char *key
     }
 
     if (!foundItem) {
-        // Only allow allocation for WUPS_STORAGE_TYPE_ITEM if it's the first item.
-        // The realloc would cause the outPtr of previous WUPS_CreateSubItem call to be invalid.
-        if (parent->data_size > 0 && type == WUPS_STORAGE_TYPE_ITEM) {
-            *error = WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC;
-            return nullptr;
-        }
-
-        // Increase in step of 8 to avoid realloc calls (at the costs of some memory).
-        constexpr uint32_t INCREASE_SIZE_BY = 8;
-
-        auto *newPtr = (wups_storage_item_t *) realloc(parent->data, (parent->data_size + INCREASE_SIZE_BY) * sizeof(wups_storage_item_t));
+        auto *newPtr = (wups_storage_item_t *) realloc(parent->data, (parent->data_size + 1) * sizeof(wups_storage_item_t));
         if (newPtr == nullptr) {
             *error = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
         parent->data = newPtr;
 
-        for (uint32_t j = parent->data_size; j < INCREASE_SIZE_BY; j++) {
-            auto curItem = &((wups_storage_item_t *) parent->data)[j];
-            memset(curItem, 0, sizeof(wups_storage_item_t));
-            curItem->deleted = true;
-        }
-
         foundItem = &((wups_storage_item_t *) parent->data)[parent->data_size];
+        memset(foundItem, 0, sizeof(wups_storage_item_t));
+        foundItem->deleted = true;
 
-        parent->data_size += INCREASE_SIZE_BY;
+        parent->data_size += 1;
 
         foundItem->key = strdup(key);
         if (foundItem->key == nullptr) {
-            foundItem->deleted = true;
-            *error             = WUPS_STORAGE_ERROR_MALLOC_FAILED;
+            *error = WUPS_STORAGE_ERROR_MALLOC_FAILED;
             return nullptr;
         }
     }
