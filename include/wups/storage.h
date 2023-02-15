@@ -27,7 +27,6 @@ typedef enum {
     WUPS_STORAGE_ERROR_B64_DECODE_FAILED      = -9,
     WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL       = -10,
     WUPS_STORAGE_ERROR_MALLOC_FAILED          = -11,
-    WUPS_STORAGE_ERROR_SUB_ITEM_REALLOC       = -12,
 } WUPSStorageError;
 
 typedef struct wups_storage_item_t_ {
