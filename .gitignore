@@ -1,9 +1,6 @@
 loader/build/*
 loader/WiiUPluginLoader.cbp
 loader/*.elf
-example_plugin/bin/*
-example_plugin/build/*
-example_plugin_pic/*
 portlib_repos/*
 plugins/*/bin/*
 plugins/*/build/*
@@ -29,5 +26,4 @@ debug/
 *.cbp
 lib/
 cmake-build-debug/
-CMakeLists.txt
 _site/
