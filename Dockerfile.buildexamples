@@ -1,4 +1,4 @@
-FROM wiiuenv/devkitppc:20220806
+FROM wiiuenv/devkitppc:20230218
 
 WORKDIR tmp_build
 COPY . .
@@ -8,7 +8,7 @@ WORKDIR /artifacts
 FROM scratch as libwups
 COPY --from=0 /artifacts /artifacts
 
-FROM wiiuenv/devkitppc:20220806
+FROM wiiuenv/devkitppc:20230218
 
 COPY --from=libwups /artifacts $DEVKITPRO
 
