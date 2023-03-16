@@ -44,6 +44,7 @@ jobs:
         docker run --rm -v ${PWD}:/project builder make
   build-and-push-image:
     runs-on: ubuntu-latest
+    needs: [build-lib, build-examples]
     permissions:
       contents: read
       packages: write
