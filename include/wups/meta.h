@@ -38,23 +38,28 @@
 extern "C" {
 #endif
 
-#define WUPS_PLUGIN_NAME(x)                                 \
-    WUPS_META(name, x);                                     \
-    WUPS_META(wups, "0.7.1");                               \
-    WUPS_USE_WUT_MALLOC();                                  \
-    WUPS_USE_WUT_SOCKETS();                                 \
-    WUPS_USE_WUT_NEWLIB();                                  \
-    WUPS_USE_WUT_STDCPP();                                  \
-    WUPS___INIT_WRAPPER();                                  \
-    WUPS___FINI_WRAPPER();                                  \
-    __EXTERN_C_MACRO void abort();                          \
-    __EXTERN_C_MACRO void OSFatal(const char *msg);         \
-    void abort() {                                          \
-        OSFatal(x ": abort() called. Uncaught exception?"); \
-        while (1)                                           \
-            ;                                               \
-    }                                                       \
-    WUPS_META(buildtimestamp, __DATE__ " " __TIME__);
+#define WUPS_VERSION_STR "0.7.1"
+#define WUPS_PLUGIN_NAME(__plugin_name)                                 \
+    WUPS_META(name, __plugin_name);                                     \
+    WUPS_META(wups, WUPS_VERSION_STR);                                  \
+    WUPS_USE_WUT_MALLOC();                                              \
+    WUPS_USE_WUT_SOCKETS();                                             \
+    WUPS_USE_WUT_NEWLIB();                                              \
+    WUPS_USE_WUT_STDCPP();                                              \
+    WUPS___INIT_WRAPPER();                                              \
+    WUPS___FINI_WRAPPER();                                              \
+    __EXTERN_C_MACRO void abort();                                      \
+    __EXTERN_C_MACRO void OSFatal(const char *msg);                     \
+    void abort() {                                                      \
+        OSFatal(__plugin_name ": abort() called. Uncaught exception?"); \
+        while (1)                                                       \
+            ;                                                           \
+    }                                                                   \
+    WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                   \
+    extern const char wups_meta_info_dump[] WUPS_SECTION("meta");       \
+    const char wups_meta_info_dump[] = "(plugin: " __plugin_name ";"    \
+                                       "wups " WUPS_VERSION_STR ";"     \
+                                       "buildtime: " __DATE__ " " __TIME__ ")"
 
 #define WUPS_PLUGIN_AUTHOR(x)          WUPS_META(author, x)
 #define WUPS_PLUGIN_VERSION(x)         WUPS_META(version, x)
