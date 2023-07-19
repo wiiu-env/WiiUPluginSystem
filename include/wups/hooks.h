@@ -173,9 +173,11 @@ typedef struct wups_loader_hook_t {
 #ifdef __cplusplus
 extern "C" uint32_t __attribute__((weak)) wut_get_thread_specific(int id);
 extern "C" const char wups_meta_info_linking_order[];
+extern "C" void OSFatal(const char *msg);
 #else
 extern uint32_t __attribute__((weak)) wut_get_thread_specific(int id);
 extern const char wups_meta_info_linking_order[];
+extern void OSFatal(const char *msg);
 #endif
 
 #define WUPS___INIT_WRAPPER()                                    \
