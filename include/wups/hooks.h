@@ -170,11 +170,22 @@ typedef struct wups_loader_hook_t {
     }                                                                   \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP, on_fini_wut_stdcpp)
 
-#define WUPS___INIT_WRAPPER()       \
-    __EXTERN_C_MACRO void __init(); \
-    void __init_wrapper() {         \
-        __init();                   \
-    }                               \
+#ifdef __cplusplus
+extern "C" uint32_t __attribute__((weak)) wut_get_thread_specific(int id);
+extern "C" const char wups_meta_info_linking_order[];
+#else
+extern uint32_t __attribute__((weak)) wut_get_thread_specific(int id);
+extern const char wups_meta_info_linking_order[];
+#endif
+
+#define WUPS___INIT_WRAPPER()                                    \
+    __EXTERN_C_MACRO void __init();                              \
+    void __init_wrapper() {                                      \
+        if (wut_get_thread_specific(0x13371337) != 0x42424242) { \
+            OSFatal(wups_meta_info_linking_order);               \
+        }                                                        \
+        __init();                                                \
+    }                                                            \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WRAPPER, __init_wrapper);
 
 #define WUPS___FINI_WRAPPER()       \
