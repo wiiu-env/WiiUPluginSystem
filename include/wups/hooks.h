@@ -47,7 +47,7 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_GET_CONFIG,
     WUPS_LOADER_HOOK_CONFIG_CLOSED,
 
-    WUPS_LOADER_HOOK_INIT_STORAGE, /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_STORAGE_DEPRECATED, /* Deprecated implementation */
 
     WUPS_LOADER_HOOK_INIT_PLUGIN,               /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,             /* Called when re-entering the plugin loader */
@@ -56,6 +56,8 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,       /* Called when an foreground is acquired */
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, /* Called when an application wants to exit */
     WUPS_LOADER_HOOK_APPLICATION_ENDS,          /* Called when an application ends */
+
+    WUPS_LOADER_HOOK_INIT_STORAGE, /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
