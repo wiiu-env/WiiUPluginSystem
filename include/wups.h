@@ -27,8 +27,17 @@
 
 #include "wups/common.h"
 #include "wups/config.h"
-#include "wups/config_imports.h"
+#include "wups/config_api.h"
 #include "wups/function_patching.h"
 #include "wups/hooks.h"
 #include "wups/meta.h"
 #include "wups/storage.h"
+#ifdef DEBUG
+#include <coreinit/debug.h>
+#endif
+
+#ifdef DEBUG
+#define WUPS_DEBUG_REPORT(fmt, ...) OSReport(fmt, ##__VA_ARGS__)
+#else
+#define WUPS_DEBUG_REPORT(fmt, ...)
+#endif

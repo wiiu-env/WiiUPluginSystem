@@ -44,20 +44,21 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_WRAPPER, /* Calls __init */
     WUPS_LOADER_HOOK_FINI_WRAPPER, /* Calls __fini */
 
-    WUPS_LOADER_HOOK_GET_CONFIG,
-    WUPS_LOADER_HOOK_CONFIG_CLOSED,
+    WUPS_LOADER_HOOK_GET_CONFIG_DEPRECATED,    /* Deprecated implementation */
+    WUPS_LOADER_HOOK_CONFIG_CLOSED_DEPRECATED, /* Deprecated implementation */
 
     WUPS_LOADER_HOOK_INIT_STORAGE_DEPRECATED, /* Deprecated implementation */
 
     WUPS_LOADER_HOOK_INIT_PLUGIN,               /* Called when exiting the plugin loader */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,             /* Called when re-entering the plugin loader */
     WUPS_LOADER_HOOK_APPLICATION_STARTS,        /* Called when an application gets started */
-    WUPS_LOADER_HOOK_RELEASE_FOREGROUND,        /* Called when an foreground is going to be released */
-    WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,       /* Called when an foreground is acquired */
+    WUPS_LOADER_HOOK_RELEASE_FOREGROUND,        /* Called when a foreground is going to be released */
+    WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,       /* Called when a foreground is acquired */
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, /* Called when an application wants to exit */
     WUPS_LOADER_HOOK_APPLICATION_ENDS,          /* Called when an application ends */
 
     WUPS_LOADER_HOOK_INIT_STORAGE, /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_CONFIG,  /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -100,15 +101,11 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_ENDS, on_app_ending); \
     void on_app_ending(void)
 
-#define WUPS_GET_CONFIG()                                          \
-    WUPSConfigHandle on_get_wups_config(void);                     \
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_GET_CONFIG, on_get_wups_config); \
-    WUPSConfigHandle on_get_wups_config(void)
+#define WUPS_GET_CONFIG(x) \
+    static_assert(false, "Please use \"WUPSConfigAPI_Init\" inside \"INITIALIZE_PLUGIN\" to provide a callback instead");
 
-#define WUPS_CONFIG_CLOSED()                                             \
-    void on_wups_config_closed(void);                                    \
-    WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED, on_wups_config_closed); \
-    void on_wups_config_closed(void)
+#define WUPS_CONFIG_CLOSED() \
+    static_assert(false, "Please use \"WUPSConfigAPI_Init\" inside \"INITIALIZE_PLUGIN\" to provide a callback instead");
 
 #define WUPS_USE_STORAGE(x)                                    \
     WUPS_META(storage_id, x);                                  \
@@ -118,11 +115,20 @@ typedef struct wups_loader_hook_t {
         WUPS_InitStorage(args);                                \
     }
 
+
 #ifdef __cplusplus
 #define __EXTERN_C_MACRO extern "C"
 #else
 #define __EXTERN_C_MACRO
 #endif
+
+#define WUPS_INIT_CONFIG_FUNCTIONS()                                                                              \
+    __EXTERN_C_MACRO WUPSConfigAPIStatus WUPSConfigAPI_InitLibrary_Internal(wups_loader_init_config_args_t args); \
+    void wups_init_config_functions(wups_loader_init_config_args_t);                                              \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_CONFIG, wups_init_config_functions);                                       \
+    void wups_init_config_functions(wups_loader_init_config_args_t args) {                                        \
+        WUPSConfigAPI_InitLibrary_Internal(args);                                                                 \
+    }
 
 #define WUPS_USE_WUT_MALLOC()                                           \
     __EXTERN_C_MACRO void __init_wut_malloc();                          \
