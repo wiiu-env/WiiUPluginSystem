@@ -38,6 +38,26 @@
 #define WUPS_CONFIG_BUTTON_MINUS   (1 << 15)
 typedef int32_t WUPSConfigButtons;
 
+typedef enum WUPSConfigAPIStatus {
+    WUPSCONFIG_API_RESULT_SUCCESS                   = 0,
+    WUPSCONFIG_API_RESULT_INVALID_ARGUMENT          = -0x01,
+    WUPSCONFIG_API_RESULT_OUT_OF_MEMORY             = -0x03,
+    WUPSCONFIG_API_RESULT_NOT_FOUND                 = -0x06,
+    WUPSCONFIG_API_RESULT_INVALID_PLUGIN_IDENTIFIER = -0x70,
+    WUPSCONFIG_API_RESULT_MISSING_CALLBACK          = -0x71,
+    WUPSCONFIG_API_RESULT_MODULE_NOT_FOUND          = -0x80,
+    WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT     = -0x81,
+    WUPSCONFIG_API_RESULT_UNSUPPORTED_VERSION       = -0x82,
+    WUPSCONFIG_API_RESULT_UNSUPPORTED_COMMAND       = -0x83,
+    WUPSCONFIG_API_RESULT_LIB_UNINITIALIZED         = -0x84,
+    WUPSCONFIG_API_RESULT_UNKNOWN_ERROR             = -0x100,
+} WUPSConfigAPIStatus;
+
+typedef enum WUPSConfigAPICallbackStatus {
+    WUPSCONFIG_API_CALLBACK_RESULT_SUCCESS = 0,
+    WUPSCONFIG_API_CALLBACK_RESULT_ERROR   = -1,
+} WUPSConfigAPICallbackStatus;
+
 typedef struct {
     int32_t (*getCurrentValueDisplay)(void *context, char *out_buf, int32_t out_size);
 
@@ -54,8 +74,101 @@ typedef struct {
     void (*onButtonPressed)(void *context, WUPSConfigButtons button);
 
     void (*onDelete)(void *context);
-} WUPSConfigCallbacks_t;
+} WUPSConfigAPIItemCallbacksV1;
 
-typedef uint32_t WUPSConfigItemHandle;
-typedef uint32_t WUPSConfigHandle;
-typedef uint32_t WUPSConfigCategoryHandle;
+#define WUPS_API_ITEM_OPTION_VERSION_V1 1
+typedef struct WUPSConfigAPIItemOptionsV1 {
+    const char *displayName;
+    void *context;
+    WUPSConfigAPIItemCallbacksV1 callbacks;
+} WUPSConfigAPIItemOptionsV1;
+
+typedef struct WUPSConfigAPICreateItemOptions {
+    uint32_t version;
+    union {
+        WUPSConfigAPIItemOptionsV1 v1;
+    } data;
+} WUPSConfigAPICreateItemOptions;
+
+typedef uint32_t WUPSConfigAPIVersion;
+
+typedef struct WUPSConfigItemHandle {
+    void *handle;
+#ifdef __cplusplus
+    WUPSConfigItemHandle() {
+        handle = nullptr;
+    }
+    explicit WUPSConfigItemHandle(void *handle) : handle(handle) {}
+    bool operator==(const WUPSConfigItemHandle other) const {
+        return handle == other.handle;
+    }
+    bool operator==(const void *other) const {
+        return handle == other;
+    }
+#endif
+} WUPSConfigItemHandle;
+
+typedef struct WUPSConfigHandle {
+    void *handle;
+#ifdef __cplusplus
+    WUPSConfigHandle() {
+        handle = nullptr;
+    }
+    explicit WUPSConfigHandle(void *handle) : handle(handle) {}
+    bool operator==(const WUPSConfigHandle other) const {
+        return handle == other.handle;
+    }
+    bool operator==(const void *other) const {
+        return handle == other;
+    }
+#endif
+} WUPSConfigHandle;
+
+typedef struct WUPSConfigCategoryHandle {
+    void *handle;
+#ifdef __cplusplus
+    WUPSConfigCategoryHandle() {
+        handle = nullptr;
+    }
+    explicit WUPSConfigCategoryHandle(void *handle) : handle(handle) {}
+    bool operator==(const WUPSConfigCategoryHandle other) const {
+        return handle == other.handle;
+    }
+    bool operator==(const void *other) const {
+        return handle == other;
+    }
+#endif
+} WUPSConfigCategoryHandle;
+
+#define WUPS_API_CATEGORY_OPTION_VERSION_V1 1
+
+typedef struct WUPSConfigAPICreateCategoryOptionsV1 {
+    const char *name;
+} WUPSConfigAPICreateCategoryOptionsV1;
+
+typedef struct WUPSConfigAPICreateCategoryOptions {
+    uint32_t version;
+    union {
+        WUPSConfigAPICreateCategoryOptionsV1 v1;
+    } data;
+} WUPSConfigAPICreateCategoryOptions;
+
+#define WUPS_API_CONFIG_API_OPTION_VERSION_V1 1
+
+typedef struct WUPSConfigAPIOptionsV1 {
+    const char *name;
+} WUPSConfigAPIOptionsV1;
+
+typedef struct WUPSConfigAPIOptions {
+    uint32_t version;
+    union {
+        WUPSConfigAPIOptionsV1 v1;
+    } data;
+} WUPSConfigAPIOptions;
+
+#define WUPS_CONFIG_API_VERSION_ERROR 0xFFFFFFFF
+
+typedef struct wups_loader_init_config_args_t {
+    uint32_t arg_version;
+    uint32_t plugin_identifier;
+} wups_loader_init_config_args_t;

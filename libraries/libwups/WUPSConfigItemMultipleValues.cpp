@@ -126,7 +126,7 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
         item->configId = nullptr;
     }
 
-    WUPSConfigCallbacks_t callbacks = {
+    WUPSConfigAPIItemCallbacksV1 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemMultipleValues_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay,
             .onSelected                     = &WUPSConfigItemMultipleValues_onSelected,
@@ -136,13 +136,19 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
             .onButtonPressed                = &WUPSConfigItemMultipleValues_onButtonPressed,
             .onDelete                       = &WUPSConfigItemMultipleValues_onDelete};
 
-    if (WUPSConfigItem_Create(&item->handle, configId, displayName, callbacks, item) < 0) {
+    WUPSConfigAPIItemOptionsV1 options = {
+            .displayName = displayName,
+            .context     = item,
+            .callbacks   = callbacks,
+    };
+
+    if (WUPSConfigAPI_Item_Create(options, &item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemMultipleValues_Cleanup(item);
         return false;
     }
 
-    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
-        WUPSConfigItem_Destroy(item->handle);
+    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(item->handle);
         return false;
     }
     return true;

@@ -20,22 +20,6 @@ bool WUPSConfigItemBoolean_AddToCategory(WUPSConfigCategoryHandle cat, const cha
 bool WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
                                            const char *falseValue);
 
-#define WUPSConfigItemBoolean_AddToCategoryHandled(__config__, __cat__, __configIs__, __displayName__, __defaultValue__, __callback__) \
-    do {                                                                                                                               \
-        if (!WUPSConfigItemBoolean_AddToCategory(__cat__, __configIs__, __displayName__, __defaultValue__, __callback__)) {            \
-            WUPSConfig_Destroy(__config__);                                                                                            \
-            return 0;                                                                                                                  \
-        }                                                                                                                              \
-    } while (0)
-
-#define WUPSConfigItemBoolean_AddToCategoryHandledEx(__config__, __cat__, __configID__, __displayName__, __defaultValue__, __callback__, __trueValue__, __falseValue__) \
-    do {                                                                                                                                                                \
-        if (!WUPSConfigItemBoolean_AddToCategoryEx(__cat__, __configID__, __displayName__, __defaultValue__, __callback__, __trueValue__, __falseValue__)) {            \
-            WUPSConfig_Destroy(__config__);                                                                                                                             \
-            return 0;                                                                                                                                                   \
-        }                                                                                                                                                               \
-    } while (0)
-
 #ifdef __cplusplus
 }
 #endif

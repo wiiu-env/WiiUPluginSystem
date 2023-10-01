@@ -48,6 +48,7 @@ extern "C" {
     WUPS_USE_WUT_STDCPP();                                                                                          \
     WUPS___INIT_WRAPPER();                                                                                          \
     WUPS___FINI_WRAPPER();                                                                                          \
+    WUPS_INIT_CONFIG_FUNCTIONS();                                                                                   \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                                                               \
     extern const char wups_meta_plugin_name[] WUPS_SECTION("meta");                                                 \
     const char wups_meta_plugin_name[] = __plugin_name;                                                             \

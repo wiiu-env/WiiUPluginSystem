@@ -71,7 +71,7 @@ void WUPSConfigItemBoolean_onDelete(void *context) {
 extern "C" bool
 WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, bool defaultValue, BooleanValueChangedCallback callback, const char *trueValue,
                                       const char *falseValue) {
-    if (cat == 0) {
+    if (cat == nullptr) {
         return false;
     }
     auto *item = (ConfigItemBoolean *) malloc(sizeof(ConfigItemBoolean));
@@ -91,7 +91,7 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
     snprintf(item->trueValue, sizeof(item->trueValue), "%s", trueValue);
     snprintf(item->falseValue, sizeof(item->falseValue), "%s", falseValue);
 
-    WUPSConfigCallbacks_t callbacks = {
+    WUPSConfigAPIItemCallbacksV1 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemBoolean_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemBoolean_getCurrentValueSelectedDisplay,
             .onSelected                     = &WUPSConfigItemBoolean_onSelected,
@@ -101,13 +101,19 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *
             .onButtonPressed                = &WUPSConfigItemBoolean_onButtonPressed,
             .onDelete                       = &WUPSConfigItemBoolean_onDelete};
 
-    if (WUPSConfigItem_Create(&item->handle, configId, displayName, callbacks, item) < 0) {
+    WUPSConfigAPIItemOptionsV1 options = {
+            .displayName = displayName,
+            .context     = item,
+            .callbacks   = callbacks,
+    };
+
+    if (WUPSConfigAPI_Item_Create(options, &item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemBoolean_Cleanup(item);
         return false;
     }
 
-    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
-        WUPSConfigItem_Destroy(item->handle);
+    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(item->handle);
         return false;
     }
     return true;

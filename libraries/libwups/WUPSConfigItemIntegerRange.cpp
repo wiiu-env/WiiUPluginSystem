@@ -96,7 +96,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
     item->maxValue     = maxValue;
     item->callback     = (void *) callback;
 
-    WUPSConfigCallbacks_t callbacks = {
+    WUPSConfigAPIItemCallbacksV1 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemIntegerRange_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay,
             .onSelected                     = &WUPSConfigItemIntegerRange_onSelected,
@@ -106,13 +106,19 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
             .onButtonPressed                = &WUPSConfigItemIntegerRange_onButtonPressed,
             .onDelete                       = &WUPSConfigItemIntegerRange_onDelete};
 
-    if (WUPSConfigItem_Create(&(item->handle), configId, displayName, callbacks, item) < 0) {
+    WUPSConfigAPIItemOptionsV1 options = {
+            .displayName = displayName,
+            .context     = item,
+            .callbacks   = callbacks,
+    };
+
+    if (WUPSConfigAPI_Item_Create(options, &(item->handle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemIntegerRange_Cleanup(item);
         return false;
     };
 
-    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
-        WUPSConfigItem_Destroy(item->handle);
+    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(item->handle);
         return false;
     }
     return true;
