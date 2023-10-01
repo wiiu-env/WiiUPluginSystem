@@ -51,7 +51,7 @@ WUPSConfigItemStub_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *con
         return false;
     }
 
-    WUPSConfigCallbacks_t callbacks = {
+    WUPSConfigAPIItemCallbacksV1 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemStub_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemStub_getCurrentValueSelectedDisplay,
             .onSelected                     = &WUPSConfigItemStub_onSelected,
@@ -61,13 +61,19 @@ WUPSConfigItemStub_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *con
             .onButtonPressed                = &WUPSConfigItemStub_onButtonPressed,
             .onDelete                       = &WUPSConfigItemStub_onDelete};
 
-    if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
+    WUPSConfigAPIItemOptionsV1 options = {
+            .displayName = displayName,
+            .context     = item,
+            .callbacks   = callbacks,
+    };
+
+    if (WUPSConfigAPI_Item_Create(options, &item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemStub_Cleanup(item);
         return false;
     }
 
-    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
-        WUPSConfigItem_Destroy(item->handle);
+    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(item->handle);
         return false;
     }
     return true;

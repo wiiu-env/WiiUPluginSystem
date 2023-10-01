@@ -1,4 +1,6 @@
-#include <wups.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <wups/config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,14 +25,6 @@ typedef void (*MultipleValuesChangedCallback)(ConfigItemMultipleValues *, uint32
 
 bool WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, int defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
                                                 int pairCount, MultipleValuesChangedCallback callback);
-
-#define WUPSConfigItemMultipleValues_AddToCategoryHandled(__config__, __cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__) \
-    do {                                                                                                                                                                              \
-        if (!WUPSConfigItemMultipleValues_AddToCategory(__cat__, __configID__, __displayName__, __defaultValueIndex__, __possibleValues__, __pairCount__, __callback__)) {            \
-            WUPSConfig_Destroy(__config__);                                                                                                                                           \
-            return 0;                                                                                                                                                                 \
-        }                                                                                                                                                                             \
-    } while (0)
 
 #ifdef __cplusplus
 }

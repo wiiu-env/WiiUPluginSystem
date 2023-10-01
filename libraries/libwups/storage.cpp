@@ -1,6 +1,5 @@
-#include <cstdlib>
 #include <cstring>
-#include <wups.h>
+#include <wups/storage.h>
 
 struct wups_internal_functions_t {
     OpenStorageFunction openfunction_ptr               = nullptr;
@@ -18,7 +17,7 @@ struct wups_internal_functions_t {
 static wups_internal_functions_t __internal_functions __attribute__((section(".data"))) = {};
 
 WUPSStorageError WUPS_InitStorage(wups_loader_init_storage_args_t args) {
-    if (args.version != WUPS_STORAGE_CUR_API_VERSION) {
+    if (args.version > WUPS_STORAGE_CUR_API_VERSION) {
         __internal_functions = {};
         return WUPS_STORAGE_ERROR_INVALID_VERSION;
     }
