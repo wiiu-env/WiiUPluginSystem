@@ -3,7 +3,7 @@ include $(TOPDIR)/share/wups_rules
 
 export WUPS_MAJOR	:=	0
 export WUPS_MINOR	:=	7
-export WUPS_PATCH	:=	1
+export WUPS_PATCH	:=	2
 
 VERSION	:=	$(WUPS_MAJOR).$(WUPS_MINOR).$(WUPS_PATCH)
 
@@ -16,8 +16,7 @@ VERSION	:=	$(WUPS_MAJOR).$(WUPS_MINOR).$(WUPS_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	wups
 #BUILD		:=	build
-SOURCES		:=	libraries/libwups/ \
-				libraries/libwups/utils
+SOURCES		:=	libraries/libwups/
 DATA		:=	data
 INCLUDES	:=	include
 
@@ -104,10 +103,10 @@ lib:
 	@[ -d $@ ] || mkdir -p $@
 
 release:
-	@[ -d $@ ] || mkdir -p $@
+	@$(shell [ ! -d 'release' ] && mkdir -p 'release')
 
 debug:
-	@[ -d $@ ] || mkdir -p $@
+	@$(shell [ ! -d 'debug' ] && mkdir -p 'debug')
 
 lib/libwups.a : lib release $(SOURCES) $(INCLUDES)
 	@$(MAKE) BUILD=release OUTPUT=$(CURDIR)/$@ \
