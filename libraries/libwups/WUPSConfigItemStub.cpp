@@ -4,8 +4,6 @@
 #include <cstring>
 #include <wups.h>
 
-void WUPSConfigItemStub_onDelete(void *context);
-
 int32_t WUPSConfigItemStub_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     memset(out_buf, 0, out_size);
     return 0;
@@ -33,6 +31,15 @@ void WUPSConfigItemStub_restoreDefault(void *context) {
 void WUPSConfigItemStub_onSelected(void *context, bool isSelected) {
 }
 
+static void WUPSConfigItemStub_Cleanup(ConfigItemStub *item) {
+    free(item);
+}
+
+void WUPSConfigItemStub_onDelete(void *context) {
+    WUPSConfigItemStub_Cleanup((ConfigItemStub *) context);
+}
+
+
 extern "C" bool
 WUPSConfigItemStub_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName) {
     if (cat == 0) {
@@ -55,7 +62,7 @@ WUPSConfigItemStub_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *con
             .onDelete                       = &WUPSConfigItemStub_onDelete};
 
     if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
-        free(item);
+        WUPSConfigItemStub_Cleanup(item);
         return false;
     }
 
@@ -64,11 +71,6 @@ WUPSConfigItemStub_AddToCategoryEx(WUPSConfigCategoryHandle cat, const char *con
         return false;
     }
     return true;
-}
-
-void WUPSConfigItemStub_onDelete(void *context) {
-    auto *item = (ConfigItemStub *) context;
-    free(item);
 }
 
 extern "C" bool WUPSConfigItemStub_AddToCategory(WUPSConfigCategoryHandle cat, const char *configID, const char *displayName) {
