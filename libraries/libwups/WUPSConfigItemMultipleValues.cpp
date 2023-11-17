@@ -4,8 +4,6 @@
 #include <cstring>
 #include <wups.h>
 
-void WUPSConfigItemMultipleValues_onDelete(void *context);
-
 int32_t WUPSConfigItemMultipleValues_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemMultipleValues *) context;
 
@@ -72,6 +70,27 @@ void WUPSConfigItemMultipleValues_restoreDefault(void *context) {
 void WUPSConfigItemMultipleValues_onSelected(void *context, bool isSelected) {
 }
 
+static void WUPSConfigItemMultipleValues_Cleanup(ConfigItemMultipleValues *item) {
+    if (!item) {
+        return;
+    }
+
+    for (int i = 0; i < item->valueCount; ++i) {
+        free(item->values[i].valueName);
+    }
+
+    free(item->configId);
+    free(item->values);
+
+    free(item);
+}
+
+void WUPSConfigItemMultipleValues_onDelete(void *context) {
+    auto *item = (ConfigItemMultipleValues *) context;
+
+    WUPSConfigItemMultipleValues_Cleanup(item);
+}
+
 extern "C" bool
 WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName,
                                            int32_t defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
@@ -92,9 +111,7 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
             values[i].valueName = nullptr;
             continue;
         }
-        auto bufLen         = strlen(possibleValues[i].valueName) + 1;
-        values[i].valueName = (char *) malloc(bufLen);
-        strncpy(values[i].valueName, possibleValues[i].valueName, bufLen);
+        values[i].valueName = strdup(possibleValues[i].valueName);
     }
 
     item->valueCount        = pairCount;
@@ -120,7 +137,7 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
             .onDelete                       = &WUPSConfigItemMultipleValues_onDelete};
 
     if (WUPSConfigItem_Create(&item->handle, configId, displayName, callbacks, item) < 0) {
-        free(item);
+        WUPSConfigItemMultipleValues_Cleanup(item);
         return false;
     }
 
@@ -129,17 +146,4 @@ WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const c
         return false;
     }
     return true;
-}
-
-void WUPSConfigItemMultipleValues_onDelete(void *context) {
-    auto *item = (ConfigItemMultipleValues *) context;
-
-    for (int i = 0; i < item->valueCount; ++i) {
-        free(item->values[i].valueName);
-    }
-
-    free(item->configId);
-    free(item->values);
-
-    free(item);
 }

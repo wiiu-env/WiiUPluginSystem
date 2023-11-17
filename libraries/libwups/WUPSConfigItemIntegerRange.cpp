@@ -59,13 +59,19 @@ void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
     item->value = item->defaultValue;
 }
 
-void WUPSConfigItemIntegerRange_onDelete(void *context) {
-    auto *item = (ConfigItemIntegerRange *) context;
+void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
+}
+
+static void WUPSConfigItemIntegerRange_Cleanup(ConfigItemIntegerRange *item) {
+    if (!item) {
+        return;
+    }
     free(item->configId);
     free(item);
 }
 
-void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
+void WUPSConfigItemIntegerRange_onDelete(void *context) {
+    WUPSConfigItemIntegerRange_Cleanup((ConfigItemIntegerRange *) context);
 }
 
 extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue,
@@ -101,7 +107,7 @@ extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandl
             .onDelete                       = &WUPSConfigItemIntegerRange_onDelete};
 
     if (WUPSConfigItem_Create(&(item->handle), configId, displayName, callbacks, item) < 0) {
-        free(item);
+        WUPSConfigItemIntegerRange_Cleanup(item);
         return false;
     };
 
