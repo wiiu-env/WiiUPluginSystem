@@ -48,14 +48,9 @@ extern "C" {
     WUPS_USE_WUT_STDCPP();                                                                                          \
     WUPS___INIT_WRAPPER();                                                                                          \
     WUPS___FINI_WRAPPER();                                                                                          \
-    __EXTERN_C_MACRO void abort();                                                                                  \
-    __EXTERN_C_MACRO void OSFatal(const char *msg);                                                                 \
-    void abort() {                                                                                                  \
-        OSFatal(__plugin_name ": abort() called. Uncaught exception?");                                             \
-        while (1)                                                                                                   \
-            ;                                                                                                       \
-    }                                                                                                               \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                                                               \
+    extern const char wups_meta_plugin_name[] WUPS_SECTION("meta");                                                 \
+    const char wups_meta_plugin_name[] = __plugin_name;                                                             \
     extern const char wups_meta_info_dump[] WUPS_SECTION("meta");                                                   \
     const char wups_meta_info_dump[] = "(plugin: " __plugin_name ";"                                                \
                                        "wups " WUPS_VERSION_STR ";"                                                 \
