@@ -37,8 +37,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * @defgroup meta
+ * @addtogroup meta 
+ *  @{
+ *
+*/
 
+
+/**
+ * @brief The WUPS release version
+ * 
+ */
 #define WUPS_VERSION_STR "0.7.1"
+/**
+ * @brief Sets the plugin name
+ * 
+ * @param __plugin_name The name of your plugin as a string
+ */
 #define WUPS_PLUGIN_NAME(__plugin_name)                                                                             \
     WUPS_META(name, __plugin_name);                                                                                 \
     WUPS_META(wups, WUPS_VERSION_STR);                                                                              \
@@ -64,13 +80,39 @@ extern "C" {
     const char wups_meta_info_linking_order[] = "Loading \"" __plugin_name "\" failed.\n"                           \
                                                 "Function \"wut_get_thread_specific\" returned unexpected value.\n" \
                                                 "Please check linking order (expected \"-lwups -lwut\")";
-
+/**
+ * @brief Sets the plugin author
+ * 
+ * @param x The author or authors of the plugin as a string
+ */
 #define WUPS_PLUGIN_AUTHOR(x)          WUPS_META(author, x)
+/**
+ * @brief Sets the plugin release version
+ * 
+ * Sets the revision of the plugin as it is seen in the config. 
+ * 
+ * @param x The revision of the plugin as a string
+ */
 #define WUPS_PLUGIN_VERSION(x)         WUPS_META(version, x)
+/**
+ * @brief Sets the plugin license
+ * 
+ * Sets the license that the plugin is licensed under.
+ * 
+ * @param x The license of the plugin as a string
+ */
 #define WUPS_PLUGIN_LICENSE(x)         WUPS_META(license, x)
+/**
+ * @brief Sets the description of the plugin
+ * 
+ * @param x The description of the plugin as a string
+ */
 #define WUPS_PLUGIN_DESCRIPTION(x)     WUPS_META(description, x)
 #define WUPS_PLUGIN_CONFIG_REVISION(x) WUPS_META(config_revision, #x)
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

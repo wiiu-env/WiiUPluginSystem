@@ -75,7 +75,7 @@ typedef struct wups_loader_hook_t {
     const void *target;
 } wups_loader_hook_t;
 /**
- * @def INITIALIZE_PLUGIN()
+ * 
  * @brief Called when initializing the plugin
  * 
  */
@@ -84,7 +84,7 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN, init_plugin); \
     void init_plugin()
 /**
- * @def DEINITIALIZE_PLUGIN()
+ * 
  * @brief Called when deinitializing the plugin
  * 
  */
@@ -93,7 +93,7 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_DEINIT_PLUGIN, deinit_plugin); \
     void deinit_plugin()
 /**
- * @def ON_APPLICATION_START()
+ * 
  * @brief Called when an app is being started.
  * 
  */
@@ -101,18 +101,24 @@ typedef struct wups_loader_hook_t {
     void on_app_starting();                                             \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_STARTS, on_app_starting); \
     void on_app_starting()
-
+/**
+ * @brief Called when the app leaves the foreground. 
+ * 
+ */
 #define ON_RELEASE_FOREGROUND()                                               \
     void on_release_foreground(void);                                         \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_RELEASE_FOREGROUND, on_release_foreground); \
     void on_release_foreground(void)
-
+/**
+ * @brief Called when the app (re)gains the foreground. 
+ * 
+ */
 #define ON_ACQUIRED_FOREGROUND()                                                \
     void on_acquired_foreground(void);                                          \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND, on_acquired_foreground); \
     void on_acquired_foreground(void)
 /**
- * @def ON_APPLICATION_REQUESTS_EXIT()
+ * 
  * @brief Called when an app is requesting to exit.
  * 
  */
@@ -121,7 +127,7 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, on_app_requests_exit); \
     void on_app_requests_exit(void)
 /**
- * @def ON_APPLICATION_ENDS()
+ * 
  * @brief Called when an app exits.
  * 
  */
@@ -140,7 +146,7 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED, on_wups_config_closed); \
     void on_wups_config_closed(void)
 /**
- * @def WUPS_USE_STORAGE(x)
+ * 
  * @brief Called when an app exits.
  * @param x the name of the storage you are accessing (typically, your app name)
  */
@@ -169,7 +175,10 @@ typedef struct wups_loader_hook_t {
         __fini_wut_malloc();                                            \
     }                                                                   \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_MALLOC, on_fini_wut_malloc)
-
+/**
+ * @brief Use the WUT devoptabs.
+ * 
+ */
 #define WUPS_USE_WUT_DEVOPTAB()                                             \
     __EXTERN_C_MACRO void __init_wut_devoptab();                            \
     void on_init_wut_devoptab() {                                           \
