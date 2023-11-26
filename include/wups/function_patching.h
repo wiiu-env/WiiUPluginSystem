@@ -30,8 +30,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/**
+ * @brief The WUT library being patched.
+ * 
+ * 
+ */
 typedef enum wups_loader_library_type_t {
+    //! The <a href=<"">AVM library.
     WUPS_LOADER_LIBRARY_AVM,
     WUPS_LOADER_LIBRARY_CAMERA,
     WUPS_LOADER_LIBRARY_COREINIT,
@@ -130,14 +135,22 @@ typedef enum WUPSFPTargetProcess {
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
     struct {
-        const void *physical_address;             /* (optional) Physical Address. If set, the name and lib will be ignored */
-        const void *virtual_address;              /* (optional) Physical Address. If set, the name and lib will be ignored */
-        const char *name;                         /* Name of the function that will be replaced */
-        const wups_loader_library_type_t library; /**/
-        const char *my_function_name;             /* Function name of your own, new function (my_XXX) */
-        const void *target;                       /* Address of our own, new function (my_XXX)*/
-        const void *call_addr;                    /* Address for calling the real function.(real_XXX) */
-        const WUPSFPTargetProcess targetProcess;  /* Target process*/
+        /* (optional) Physical Address. If set, the name and lib will be ignored */
+        const void *physical_address;
+        /* (optional) Physical Address. If set, the name and lib will be ignored */
+        const void *virtual_address;
+        /* Name of the function that will be replaced */
+        const char *name;
+        /* Which WUT library the function you're patching is from*/                     
+        const wups_loader_library_type_t library;
+        /* Function name of your own, new function (my_XXX) */
+        const char *my_function_name;
+        /* Address of our own, new function (my_XXX)*/           
+        const void *target;
+        /* Address for calling the real function.(real_XXX) */
+        const void *call_addr;
+        /* Target process*/
+        const WUPSFPTargetProcess targetProcess;
     } _function;
 } wups_loader_entry_t;
 

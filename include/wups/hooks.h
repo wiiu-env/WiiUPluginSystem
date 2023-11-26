@@ -41,38 +41,62 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_WUT_SOCKETS,
     WUPS_LOADER_HOOK_FINI_WUT_SOCKETS,
 
-    WUPS_LOADER_HOOK_INIT_WRAPPER, /* Calls __init */
-    WUPS_LOADER_HOOK_FINI_WRAPPER, /* Calls __fini */
+    /* Calls __init */
+    WUPS_LOADER_HOOK_INIT_WRAPPER,
+    /* Calls __fini */
+    WUPS_LOADER_HOOK_FINI_WRAPPER,
 
     WUPS_LOADER_HOOK_GET_CONFIG,
     WUPS_LOADER_HOOK_CONFIG_CLOSED,
 
-    WUPS_LOADER_HOOK_INIT_STORAGE, /* Only for internal usage */
+    /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_STORAGE, 
 
-    WUPS_LOADER_HOOK_INIT_PLUGIN,               /* Called when exiting the plugin loader */
-    WUPS_LOADER_HOOK_DEINIT_PLUGIN,             /* Called when re-entering the plugin loader */
-    WUPS_LOADER_HOOK_APPLICATION_STARTS,        /* Called when an application gets started */
-    WUPS_LOADER_HOOK_RELEASE_FOREGROUND,        /* Called when an foreground is going to be released */
-    WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,       /* Called when an foreground is acquired */
-    WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, /* Called when an application wants to exit */
-    WUPS_LOADER_HOOK_APPLICATION_ENDS,          /* Called when an application ends */
+    /* Called when re-entering the plugin loader */
+    WUPS_LOADER_HOOK_INIT_PLUGIN,
+    /* Called when exiting the plugin loader */
+    WUPS_LOADER_HOOK_DEINIT_PLUGIN,
+    /* Called when an application gets started */
+    WUPS_LOADER_HOOK_APPLICATION_STARTS,
+    /* Called when an foreground is going to be released */
+    WUPS_LOADER_HOOK_RELEASE_FOREGROUND,
+    /* Called when an foreground is acquired */
+    WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,
+    /* Called when an application wants to exit */
+    WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT,
+    /* Called when an application ends */
+    WUPS_LOADER_HOOK_APPLICATION_ENDS,
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
-    wups_loader_hook_type_t type; /*  Defines the type of the hook */
-    const void *target;           /*  Address of our own, new function */
+    /*  Defines the type of the hook */
+    wups_loader_hook_type_t type;
+    /*  Address of our own, new function */
+    const void *target;
 } wups_loader_hook_t;
-
+/**
+ * @def INITIALIZE_PLUGIN()
+ * @brief Called when initializing the plugin
+ * 
+ */
 #define INITIALIZE_PLUGIN()                                  \
     void init_plugin(void);                                  \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_PLUGIN, init_plugin); \
     void init_plugin()
-
+/**
+ * @def DEINITIALIZE_PLUGIN()
+ * @brief Called when deinitializing the plugin
+ * 
+ */
 #define DEINITIALIZE_PLUGIN()                                    \
     void deinit_plugin(void);                                    \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_DEINIT_PLUGIN, deinit_plugin); \
     void deinit_plugin()
-
+/**
+ * @def ON_APPLICATION_START()
+ * @brief Called when an app is being started.
+ * 
+ */
 #define ON_APPLICATION_START()                                          \
     void on_app_starting();                                             \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_STARTS, on_app_starting); \
@@ -87,12 +111,20 @@ typedef struct wups_loader_hook_t {
     void on_acquired_foreground(void);                                          \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND, on_acquired_foreground); \
     void on_acquired_foreground(void)
-
+/**
+ * @def ON_APPLICATION_REQUESTS_EXIT()
+ * @brief Called when an app is requesting to exit.
+ * 
+ */
 #define ON_APPLICATION_REQUESTS_EXIT()                                              \
     void on_app_requests_exit(void);                                                \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, on_app_requests_exit); \
     void on_app_requests_exit(void)
-
+/**
+ * @def ON_APPLICATION_ENDS()
+ * @brief Called when an app exits.
+ * 
+ */
 #define ON_APPLICATION_ENDS()                                       \
     void on_app_ending(void);                                       \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_ENDS, on_app_ending); \
@@ -107,7 +139,11 @@ typedef struct wups_loader_hook_t {
     void on_wups_config_closed(void);                                    \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED, on_wups_config_closed); \
     void on_wups_config_closed(void)
-
+/**
+ * @def WUPS_USE_STORAGE(x)
+ * @brief Called when an app exits.
+ * @param x the name of the storage you are accessing (typically, your app name)
+ */
 #define WUPS_USE_STORAGE(x)                                    \
     WUPS_META(storage_id, x);                                  \
     void init_storage(wups_loader_init_storage_args_t);        \
