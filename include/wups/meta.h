@@ -41,9 +41,7 @@ extern "C" {
  * @defgroup meta
  * @addtogroup meta 
  *  @{
- *
 */
-
 
 /**
  * @brief The WUPS release version

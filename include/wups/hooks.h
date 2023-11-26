@@ -22,7 +22,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/**
+ * @defgroup hooks
+ * Various functions called by WUPS that can be used to execute code upon certain system events. 
+ * @addtogroup hooks 
+ * @{
+ * @brief 
+ * 
+ */
 #define WUPS_HOOK_EX(type_def, original_func)                                         \
     extern const wups_loader_hook_t wups_hooks_##original_func WUPS_SECTION("hooks"); \
     const wups_loader_hook_t wups_hooks_##original_func = {                           \
@@ -253,6 +260,9 @@ extern void OSFatal(const char *msg);
         if (&__fini_wut_socket) __fini_wut_socket();                      \
     }                                                                     \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_SOCKETS, on_fini_wut_sockets)
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }

@@ -138,6 +138,11 @@ typedef enum WUPSFPTargetProcess {
     WUPS_FP_TARGET_PROCESS_GAME_AND_MENU    = 16,
 } WUPSFPTargetProcess;
 
+/**
+ * @struct wups_loader_entry_t
+ * @brief Structure for certain functions
+ * 
+ */
 typedef struct wups_loader_entry_t {
     wups_loader_entry_type_t type;
     struct {
