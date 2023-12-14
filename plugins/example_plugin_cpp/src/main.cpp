@@ -55,7 +55,7 @@ void boolItemChanged(ConfigItemBoolean *item, bool newValue) {
     if (std::string_view(LOG_FS_OPEN_CONFIG_ID) == item->identifier) {
         sLogFSOpen = newValue;
         // If the value has changed, we store it in the storage.
-        WUPS_StoreInt(nullptr, item->identifier, newValue);
+        WUPSStorageAPI::Store(item->identifier, newValue);
     } else if (std::string_view(OTHER_EXAMPLE_BOOL_CONFIG_ID) == item->identifier) {
         DEBUG_FUNCTION_LINE_ERR("Other bool value has changed to %d", newValue);
     } else if (std::string_view(OTHER_EXAMPLE2_BOOL_CONFIG_ID) == item->identifier) {
@@ -69,7 +69,7 @@ void integerRangeItemChanged(ConfigItemIntegerRange *item, int newValue) {
     if (std::string_view(LOG_FS_OPEN_CONFIG_ID) == item->identifier) {
         sIntegerRangeValue = newValue;
         // If the value has changed, we store it in the storage.
-        WUPS_StoreInt(nullptr, item->identifier, newValue);
+        WUPSStorageAPI::Store(item->identifier, newValue);
     }
 }
 
@@ -79,16 +79,11 @@ void multipleValueItemChanged(ConfigItemIntegerRange *item, uint32_t newValue) {
     if (std::string_view(MULTIPLE_VALUES_EXAMPLE_CONFIG_ID) == item->identifier) {
         sExampleOptionValue = (ExampleOptions) newValue;
         // If the value has changed, we store it in the storage.
-        WUPS_StoreInt(nullptr, item->identifier, sExampleOptionValue);
+        WUPSStorageAPI::Store(item->identifier, sExampleOptionValue);
     }
 }
 
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle) {
-    // We open the storage, so we can persist the configuration the user did.
-    if (WUPS_OpenStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE("Failed to open storage");
-        return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
-    }
     // To use the C++ API, we create new WUPSConfigCategory from the root handle!
     WUPSConfigCategory root = WUPSConfigCategory(rootHandle);
 
@@ -189,10 +184,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
 }
 
 void ConfigMenuClosedCallback() {
-    // Save all changes
-    if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE_ERR("Failed to close storage");
-    }
+    WUPSStorageAPI::SaveStorage();
 }
 
 /**
@@ -203,31 +195,19 @@ INITIALIZE_PLUGIN() {
     initLogging();
     DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
 
-    WUPSConfigAPIOptionsV1 configOptions = {.name = "example_plugin"};
+    WUPSConfigAPIOptionsV1 configOptions = {.name = "example_plugin_cpp"};
     if (WUPSConfigAPI_Init(configOptions, ConfigMenuOpenedCallback, ConfigMenuClosedCallback) != WUPSCONFIG_API_RESULT_SUCCESS) {
         DEBUG_FUNCTION_LINE_ERR("Failed to init config api");
     }
 
-    // Open storage to read values
-    WUPSStorageError storageRes = WUPS_OpenStorage();
-    if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE("Failed to open storage %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
-    } else {
-        // Try to get value from storage
-        if ((storageRes = WUPS_GetBool(nullptr, LOG_FS_OPEN_CONFIG_ID, &sLogFSOpen)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
-            // Add the value to the storage if it's missing.
-            if (WUPS_StoreBool(nullptr, LOG_FS_OPEN_CONFIG_ID, sLogFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
-                DEBUG_FUNCTION_LINE("Failed to store bool");
-            }
-        } else if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
-            DEBUG_FUNCTION_LINE("Failed to get bool %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
-        }
-
-        // Close storage
-        if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-            DEBUG_FUNCTION_LINE("Failed to close storage");
-        }
+    WUPSStorageError storageRes;
+    if ((storageRes = WUPSStorageAPI::GetOrStoreDefault(LOG_FS_OPEN_CONFIG_ID, sLogFSOpen, LOF_FS_OPEN_DEFAULT_VALUE)) != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE_ERR("GetOrStoreDefault failed: %s (%d)", WUPSStorageAPI_GetStatusStr(storageRes), storageRes);
     }
+    if ((storageRes = WUPSStorageAPI::SaveStorage()) != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE_ERR("GetOrStoreDefault failed: %s (%d)", WUPSStorageAPI_GetStatusStr(storageRes), storageRes);
+    }
+
     deinitLogging();
 }
 

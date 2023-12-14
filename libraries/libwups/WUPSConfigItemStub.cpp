@@ -1,6 +1,8 @@
 #include "wups/config/WUPSConfigItemStub.h"
+#include "wups/config_api.h"
 #include <cstdlib>
 #include <cstring>
+#include <wups/config.h>
 
 static int32_t WUPSConfigItemStub_getEmptyTextValue(void *context, char *out_buf, int32_t out_size) {
     memset(out_buf, 0, out_size);

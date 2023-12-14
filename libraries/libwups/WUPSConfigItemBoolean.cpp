@@ -1,4 +1,5 @@
 #include "wups/config/WUPSConfigItemBoolean.h"
+#include "wups/config_api.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
