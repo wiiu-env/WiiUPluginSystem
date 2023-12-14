@@ -38,16 +38,10 @@ void logFSOpenChanged(ConfigItemBoolean *item, bool newValue) {
     DEBUG_FUNCTION_LINE_INFO("New value in logFSOpenChanged: %d", newValue);
     logFSOpen = newValue;
     // If the value has changed, we store it in the storage.
-    WUPS_StoreInt(NULL, LOG_FS_OPEN_CONFIG_ID, logFSOpen);
+    WUPSStorageAPI_StoreBool(NULL, LOG_FS_OPEN_CONFIG_ID, logFSOpen);
 }
 
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle root) {
-    // We open the storage, so we can persist the configuration the user did.
-    if (WUPS_OpenStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE("Failed to open storage");
-        return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
-    }
-
     {
         // Let's create a new category called "Settings"
         WUPSConfigCategoryHandle settingsCategory;
@@ -131,10 +125,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
 }
 
 void ConfigMenuClosedCallback() {
-    // Save all changes
-    if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE_ERR("Failed to close storage");
-    }
+    WUPSStorageAPI_SaveStorage(false);
 }
 
 /**
@@ -150,26 +141,21 @@ INITIALIZE_PLUGIN() {
         DEBUG_FUNCTION_LINE_ERR("Failed to init config api");
     }
 
-    // Open storage to read values
-    WUPSStorageError storageRes = WUPS_OpenStorage();
-    if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
-        DEBUG_FUNCTION_LINE("Failed to open storage %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
-    } else {
-        // Try to get value from storage
-        if ((storageRes = WUPS_GetBool(NULL, LOG_FS_OPEN_CONFIG_ID, &logFSOpen)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
-            // Add the value to the storage if it's missing.
-            if (WUPS_StoreBool(NULL, LOG_FS_OPEN_CONFIG_ID, logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
-                DEBUG_FUNCTION_LINE("Failed to store bool");
-            }
-        } else if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
-            DEBUG_FUNCTION_LINE("Failed to get bool %s (%d)", WUPS_GetStorageStatusStr(storageRes), storageRes);
-        }
+    WUPSStorageError storageRes;
+    // Try to get value from storage
+    if ((storageRes = WUPSStorageAPI_GetBool(NULL, LOG_FS_OPEN_CONFIG_ID, &logFSOpen)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
 
-        // Close storage
-        if (WUPS_CloseStorage() != WUPS_STORAGE_ERROR_SUCCESS) {
-            DEBUG_FUNCTION_LINE("Failed to close storage");
+        // Add the value to the storage if it's missing.
+        if (WUPSStorageAPI_StoreBool(NULL, LOG_FS_OPEN_CONFIG_ID, logFSOpen) != WUPS_STORAGE_ERROR_SUCCESS) {
+            DEBUG_FUNCTION_LINE_ERR("Failed to store bool");
         }
+    } else if (storageRes != WUPS_STORAGE_ERROR_SUCCESS) {
+        DEBUG_FUNCTION_LINE_ERR("Failed to get bool %s (%d)", WUPSConfigAPI_GetStatusStr(storageRes), storageRes);
+    } else {
+        DEBUG_FUNCTION_LINE_ERR("Successfully read the value from storage: %d %s (%d)", logFSOpen, WUPSConfigAPI_GetStatusStr(storageRes), storageRes);
     }
+    WUPSStorageAPI_SaveStorage(false);
+
     deinitLogging();
 }
 
