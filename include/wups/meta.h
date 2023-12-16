@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define WUPS_VERSION_STR "0.7.2"
+#define WUPS_VERSION_STR "0.8.0"
 #define WUPS_PLUGIN_NAME(__plugin_name)                                                                             \
     WUPS_META(name, __plugin_name);                                                                                 \
     WUPS_META(wups, WUPS_VERSION_STR);                                                                              \
