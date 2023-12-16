@@ -2,32 +2,25 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <wups.h>
+#include <wups/config.h>
 
-int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
+void WUPSConfigItemIntegerRange_onCloseCallback(void *context) {
     auto *item = (ConfigItemIntegerRange *) context;
-    snprintf(out_buf, out_size, "%d", item->value);
-    return 0;
-}
-
-bool WUPSConfigItemIntegerRange_callCallback(void *context) {
-    auto *item = (ConfigItemIntegerRange *) context;
-    if (item->callback != nullptr) {
-        ((IntegerRangeValueChangedCallback) item->callback)(item, item->value);
-        return true;
+    if (item->valueAtCreation != item->value && item->valueChangedCallback != nullptr) {
+        ((IntegerRangeValueChangedCallback) item->valueChangedCallback)(item, item->value);
     }
-    return false;
 }
 
-void WUPSConfigItemIntegerRange_onButtonPressed(void *context, WUPSConfigButtons buttons) {
+void WUPSConfigItemIntegerRange_onInput(void *context, WUPSConfigSimplePadData input) {
     auto *item = (ConfigItemIntegerRange *) context;
-    if (buttons & WUPS_CONFIG_BUTTON_LEFT) {
+
+    if (input.buttons_d & WUPS_CONFIG_BUTTON_LEFT) {
         item->value--;
-    } else if ((buttons & WUPS_CONFIG_BUTTON_RIGHT)) {
+    } else if ((input.buttons_d & WUPS_CONFIG_BUTTON_RIGHT)) {
         item->value++;
-    } else if ((buttons & WUPS_CONFIG_BUTTON_L)) {
+    } else if ((input.buttons_d & WUPS_CONFIG_BUTTON_L)) {
         item->value = item->value - 50;
-    } else if ((buttons & WUPS_CONFIG_BUTTON_R)) {
+    } else if ((input.buttons_d & WUPS_CONFIG_BUTTON_R)) {
         item->value = item->value + 50;
     }
 
@@ -38,8 +31,10 @@ void WUPSConfigItemIntegerRange_onButtonPressed(void *context, WUPSConfigButtons
     }
 }
 
-bool WUPSConfigItemIntegerRange_isMovementAllowed(void *context) {
-    return true;
+int32_t WUPSConfigItemIntegerRange_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
+    auto *item = (ConfigItemIntegerRange *) context;
+    snprintf(out_buf, out_size, "  %d", item->value);
+    return 0;
 }
 
 int32_t WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay(void *context, char *out_buf, int32_t out_size) {
@@ -59,14 +54,11 @@ void WUPSConfigItemIntegerRange_restoreDefault(void *context) {
     item->value = item->defaultValue;
 }
 
-void WUPSConfigItemIntegerRange_onSelected(void *context, bool isSelected) {
-}
-
 static void WUPSConfigItemIntegerRange_Cleanup(ConfigItemIntegerRange *item) {
     if (!item) {
         return;
     }
-    free(item->configId);
+    free((void *) item->identifier);
     free(item);
 }
 
@@ -74,52 +66,87 @@ void WUPSConfigItemIntegerRange_onDelete(void *context) {
     WUPSConfigItemIntegerRange_Cleanup((ConfigItemIntegerRange *) context);
 }
 
-extern "C" bool WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName, int32_t defaultValue, int32_t minValue, int32_t maxValue,
-                                                         IntegerRangeValueChangedCallback callback) {
-    if (cat == 0) {
-        return false;
+extern "C" WUPSConfigAPIStatus
+WUPSConfigItemIntegerRange_Create(const char *identifier,
+                                  const char *displayName,
+                                  int32_t defaultValue, int32_t currentValue,
+                                  int32_t minValue, int32_t maxValue,
+                                  IntegerRangeValueChangedCallback callback,
+                                  WUPSConfigItemHandle *outHandle) {
+    if (outHandle == nullptr) {
+        return WUPSCONFIG_API_RESULT_INVALID_ARGUMENT;
     }
+    if (maxValue < minValue || defaultValue < minValue || defaultValue > maxValue || currentValue < minValue || currentValue > maxValue) {
+        return WUPSCONFIG_API_RESULT_INVALID_ARGUMENT;
+    }
+    *outHandle = {};
     auto *item = (ConfigItemIntegerRange *) malloc(sizeof(ConfigItemIntegerRange));
     if (item == nullptr) {
-        return false;
+        return WUPSCONFIG_API_RESULT_OUT_OF_MEMORY;
     }
 
-    if (configId != nullptr) {
-        item->configId = strdup(configId);
+    if (identifier != nullptr) {
+        item->identifier = strdup(identifier);
     } else {
-        item->configId = nullptr;
+        item->identifier = nullptr;
     }
 
-    item->defaultValue = defaultValue;
-    item->value        = defaultValue;
-    item->minValue     = minValue;
-    item->maxValue     = maxValue;
-    item->callback     = (void *) callback;
+    item->defaultValue         = defaultValue;
+    item->value                = currentValue;
+    item->valueAtCreation      = currentValue;
+    item->minValue             = minValue;
+    item->maxValue             = maxValue;
+    item->valueChangedCallback = (void *) callback;
 
-    WUPSConfigAPIItemCallbacksV1 callbacks = {
+    WUPSConfigAPIItemCallbacksV2 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemIntegerRange_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemIntegerRange_getCurrentValueSelectedDisplay,
-            .onSelected                     = &WUPSConfigItemIntegerRange_onSelected,
+            .onSelected                     = nullptr,
             .restoreDefault                 = &WUPSConfigItemIntegerRange_restoreDefault,
-            .isMovementAllowed              = &WUPSConfigItemIntegerRange_isMovementAllowed,
-            .callCallback                   = &WUPSConfigItemIntegerRange_callCallback,
-            .onButtonPressed                = &WUPSConfigItemIntegerRange_onButtonPressed,
-            .onDelete                       = &WUPSConfigItemIntegerRange_onDelete};
+            .isMovementAllowed              = nullptr,
+            .onCloseCallback                = &WUPSConfigItemIntegerRange_onCloseCallback,
+            .onInput                        = &WUPSConfigItemIntegerRange_onInput,
+            .onInputEx                      = nullptr,
+            .onDelete                       = &WUPSConfigItemIntegerRange_onDelete,
+    };
 
-    WUPSConfigAPIItemOptionsV1 options = {
+    WUPSConfigAPIItemOptionsV2 options = {
             .displayName = displayName,
             .context     = item,
             .callbacks   = callbacks,
     };
 
-    if (WUPSConfigAPI_Item_Create(options, &(item->handle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+    WUPSConfigAPIStatus err;
+    if ((err = WUPSConfigAPI_Item_Create(options, &(item->handle))) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemIntegerRange_Cleanup(item);
-        return false;
-    };
-
-    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
-        WUPSConfigAPI_Item_Destroy(item->handle);
-        return false;
+        return err;
     }
-    return true;
+    *outHandle = item->handle;
+
+    return WUPSCONFIG_API_RESULT_SUCCESS;
+}
+
+extern "C" WUPSConfigAPIStatus
+WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat,
+                                         const char *identifier,
+                                         const char *displayName,
+                                         int32_t defaultValue, int32_t currentValue,
+                                         int32_t minValue, int32_t maxValue,
+                                         IntegerRangeValueChangedCallback callback) {
+    WUPSConfigItemHandle itemHandle;
+    WUPSConfigAPIStatus res;
+    if ((res = WUPSConfigItemIntegerRange_Create(identifier,
+                                                 displayName,
+                                                 defaultValue, currentValue,
+                                                 minValue, maxValue,
+                                                 callback,
+                                                 &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        return res;
+    }
+
+    if ((res = WUPSConfigAPI_Category_AddItem(cat, itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(itemHandle);
+        return res;
+    }
+    return WUPSCONFIG_API_RESULT_SUCCESS;
 }

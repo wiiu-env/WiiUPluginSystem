@@ -102,9 +102,6 @@ WUPSStorageError WUPS_GetFloat(wups_storage_item parent, const char *key, float 
 WUPSStorageError WUPS_GetDouble(wups_storage_item parent, const char *key, double *outValue);
 WUPSStorageError WUPS_GetBinary(wups_storage_item parent, const char *key, void *outData, uint32_t maxSize, uint32_t *outSize);
 
-/**
- * Return the size of a stored string or binary item.
- */
 WUPSStorageError WUPS_GetItemSize(wups_storage_item parent, const char *key, uint32_t *outSize);
 
 #ifdef __cplusplus

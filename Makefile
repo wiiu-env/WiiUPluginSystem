@@ -2,8 +2,8 @@ TOPDIR ?= $(CURDIR)
 include $(TOPDIR)/share/wups_rules
 
 export WUPS_MAJOR	:=	0
-export WUPS_MINOR	:=	7
-export WUPS_PATCH	:=	2
+export WUPS_MINOR	:=	8
+export WUPS_PATCH	:=	0
 
 VERSION	:=	$(WUPS_MAJOR).$(WUPS_MINOR).$(WUPS_PATCH)
 
@@ -23,15 +23,14 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	:=	-g -Wall -Werror -save-temps \
+CFLAGS	:=	-g -O2 -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
-			-fno-exceptions -fno-rtti \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
 
 CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__
 
-CXXFLAGS	:= $(CFLAGS) -std=gnu++20
+CXXFLAGS	:= $(CFLAGS) -std=c++20
 
 ASFLAGS	:=	-g $(MACHDEP)
 

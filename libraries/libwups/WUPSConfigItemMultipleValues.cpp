@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <wups.h>
+#include <wups/config.h>
 
-int32_t WUPSConfigItemMultipleValues_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
+static int32_t WUPSConfigItemMultipleValues_getCurrentValueDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemMultipleValues *) context;
 
     if (item->values && item->valueIndex >= 0 && item->valueIndex < item->valueCount) {
@@ -17,20 +17,20 @@ int32_t WUPSConfigItemMultipleValues_getCurrentValueDisplay(void *context, char 
     return -1;
 }
 
-bool WUPSConfigItemMultipleValues_callCallback(void *context) {
+static void WUPSConfigItemMultipleValues_onCloseCallback(void *context) {
     auto *item = (ConfigItemMultipleValues *) context;
-    if (item->callback != nullptr && item->values && item->valueIndex >= 0 && item->valueIndex < item->valueCount) {
-        ((MultipleValuesChangedCallback) (item->callback))(item, item->values[item->valueIndex].value);
-        return true;
+    if (item->valueIndexAtCreation != item->valueIndex && item->valueChangedCallback != nullptr) {
+        if (item->values && item->valueIndex >= 0 && item->valueIndex < item->valueCount) {
+            ((MultipleValuesChangedCallback) (item->valueChangedCallback))(item, item->values[item->valueIndex].value);
+        }
     }
-    return false;
 }
 
-void WUPSConfigItemMultipleValues_onButtonPressed(void *context, WUPSConfigButtons buttons) {
+static void WUPSConfigItemMultipleValues_onInput(void *context, WUPSConfigSimplePadData input) {
     auto *item = (ConfigItemMultipleValues *) context;
-    if (buttons & WUPS_CONFIG_BUTTON_LEFT) {
+    if (input.buttons_d & WUPS_CONFIG_BUTTON_LEFT) {
         item->valueIndex--;
-    } else if (buttons & WUPS_CONFIG_BUTTON_RIGHT) {
+    } else if (input.buttons_d & WUPS_CONFIG_BUTTON_RIGHT) {
         item->valueIndex++;
     }
     if (item->valueIndex < 0) {
@@ -40,11 +40,7 @@ void WUPSConfigItemMultipleValues_onButtonPressed(void *context, WUPSConfigButto
     }
 }
 
-bool WUPSConfigItemMultipleValues_isMovementAllowed(void *context) {
-    return true;
-}
-
-int32_t WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay(void *context, char *out_buf, int32_t out_size) {
+static int32_t WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay(void *context, char *out_buf, int32_t out_size) {
     auto *item = (ConfigItemMultipleValues *) context;
     if (item->values && item->valueIndex >= 0 && item->valueIndex < item->valueCount) {
         if (item->valueCount == 1) {
@@ -62,12 +58,9 @@ int32_t WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay(void *contex
     return 0;
 }
 
-void WUPSConfigItemMultipleValues_restoreDefault(void *context) {
+static void WUPSConfigItemMultipleValues_restoreDefault(void *context) {
     auto *item       = (ConfigItemMultipleValues *) context;
     item->valueIndex = item->defaultValueIndex;
-}
-
-void WUPSConfigItemMultipleValues_onSelected(void *context, bool isSelected) {
 }
 
 static void WUPSConfigItemMultipleValues_Cleanup(ConfigItemMultipleValues *item) {
@@ -76,80 +69,108 @@ static void WUPSConfigItemMultipleValues_Cleanup(ConfigItemMultipleValues *item)
     }
 
     for (int i = 0; i < item->valueCount; ++i) {
-        free(item->values[i].valueName);
+        free((void *) item->values[i].valueName);
     }
 
-    free(item->configId);
-    free(item->values);
+    free((void *) item->identifier);
 
+    free(item->values);
     free(item);
 }
 
-void WUPSConfigItemMultipleValues_onDelete(void *context) {
+static void WUPSConfigItemMultipleValues_onDelete(void *context) {
     auto *item = (ConfigItemMultipleValues *) context;
-
     WUPSConfigItemMultipleValues_Cleanup(item);
 }
 
-extern "C" bool
-WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *configId, const char *displayName,
-                                           int32_t defaultValueIndex, ConfigItemMultipleValuesPair *possibleValues,
-                                           int pairCount, MultipleValuesChangedCallback callback) {
-    if (cat == 0 || displayName == nullptr || possibleValues == nullptr || pairCount < 0) {
-        return false;
+extern "C" WUPSConfigAPIStatus
+WUPSConfigItemMultipleValues_Create(const char *identifier, const char *displayName,
+                                    int32_t defaultValueIndex, int currentValueIndex,
+                                    ConfigItemMultipleValuesPair *possibleValues,
+                                    int pairCount, MultipleValuesChangedCallback callback,
+                                    WUPSConfigItemHandle *outHandle) {
+    if (outHandle == nullptr || displayName == nullptr || possibleValues == nullptr || pairCount < 0 ||
+        defaultValueIndex >= pairCount || currentValueIndex >= pairCount) {
+        return WUPSCONFIG_API_RESULT_INVALID_ARGUMENT;
     }
+    *outHandle = {};
     auto *item = (ConfigItemMultipleValues *) malloc(sizeof(ConfigItemMultipleValues));
     if (item == nullptr) {
-        return false;
+        return WUPSCONFIG_API_RESULT_OUT_OF_MEMORY;
+    }
+    *item = {};
+
+    item->values = (ConfigItemMultipleValuesPair *) malloc(sizeof(ConfigItemMultipleValuesPair) * pairCount);
+    if (!item->values) {
+        WUPSConfigItemMultipleValues_Cleanup(item);
+        return WUPSCONFIG_API_RESULT_OUT_OF_MEMORY;
     }
 
-    auto *values = (ConfigItemMultipleValuesPair *) malloc(sizeof(ConfigItemMultipleValuesPair) * pairCount);
+    if (identifier != nullptr) {
+        item->identifier = strdup(identifier);
+    } else {
+        item->identifier = nullptr;
+    }
 
     for (int i = 0; i < pairCount; ++i) {
-        values[i].value = possibleValues[i].value;
+        item->values[i].value = possibleValues[i].value;
         if (possibleValues[i].valueName == nullptr) {
-            values[i].valueName = nullptr;
+            item->values[i].valueName = nullptr;
             continue;
         }
-        values[i].valueName = strdup(possibleValues[i].valueName);
+        item->values[i].valueName = strdup(possibleValues[i].valueName);
     }
 
-    item->valueCount        = pairCount;
-    item->values            = values;
-    item->valueIndex        = defaultValueIndex;
-    item->defaultValueIndex = defaultValueIndex;
-    item->callback          = (void *) callback;
+    item->valueCount           = pairCount;
+    item->defaultValueIndex    = defaultValueIndex;
+    item->valueIndex           = currentValueIndex;
+    item->valueIndexAtCreation = currentValueIndex;
+    item->valueChangedCallback = (void *) callback;
 
-    if (configId != nullptr) {
-        item->configId = strdup(configId);
-    } else {
-        item->configId = nullptr;
-    }
-
-    WUPSConfigAPIItemCallbacksV1 callbacks = {
+    WUPSConfigAPIItemCallbacksV2 callbacks = {
             .getCurrentValueDisplay         = &WUPSConfigItemMultipleValues_getCurrentValueDisplay,
             .getCurrentValueSelectedDisplay = &WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay,
-            .onSelected                     = &WUPSConfigItemMultipleValues_onSelected,
+            .onSelected                     = nullptr,
             .restoreDefault                 = &WUPSConfigItemMultipleValues_restoreDefault,
-            .isMovementAllowed              = &WUPSConfigItemMultipleValues_isMovementAllowed,
-            .callCallback                   = &WUPSConfigItemMultipleValues_callCallback,
-            .onButtonPressed                = &WUPSConfigItemMultipleValues_onButtonPressed,
+            .isMovementAllowed              = nullptr,
+            .onCloseCallback                = &WUPSConfigItemMultipleValues_onCloseCallback,
+            .onInput                        = &WUPSConfigItemMultipleValues_onInput,
+            .onInputEx                      = nullptr,
             .onDelete                       = &WUPSConfigItemMultipleValues_onDelete};
 
-    WUPSConfigAPIItemOptionsV1 options = {
+    WUPSConfigAPIItemOptionsV2 options = {
             .displayName = displayName,
             .context     = item,
             .callbacks   = callbacks,
     };
 
-    if (WUPSConfigAPI_Item_Create(options, &item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
+    WUPSConfigAPIStatus err;
+    if ((err = WUPSConfigAPI_Item_Create(options, &item->handle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
         WUPSConfigItemMultipleValues_Cleanup(item);
-        return false;
+        return err;
     }
+    *outHandle = item->handle;
+    return WUPSCONFIG_API_RESULT_SUCCESS;
+}
 
-    if (WUPSConfigAPI_Category_AddItem(cat, item->handle) != WUPSCONFIG_API_RESULT_SUCCESS) {
-        WUPSConfigAPI_Item_Destroy(item->handle);
-        return false;
+extern "C" WUPSConfigAPIStatus
+WUPSConfigItemMultipleValues_AddToCategory(WUPSConfigCategoryHandle cat, const char *identifier, const char *displayName,
+                                           int32_t defaultValueIndex, int currentValueIndex,
+                                           ConfigItemMultipleValuesPair *possibleValues, int pairCount,
+                                           MultipleValuesChangedCallback callback) {
+    WUPSConfigItemHandle itemHandle;
+    WUPSConfigAPIStatus res;
+    if ((res = WUPSConfigItemMultipleValues_Create(identifier,
+                                                   displayName,
+                                                   defaultValueIndex, currentValueIndex,
+                                                   possibleValues, pairCount,
+                                                   callback,
+                                                   &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        return res;
     }
-    return true;
+    if ((res = WUPSConfigAPI_Category_AddItem(cat, itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(itemHandle);
+        return res;
+    }
+    return WUPSCONFIG_API_RESULT_SUCCESS;
 }
