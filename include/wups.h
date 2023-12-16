@@ -32,12 +32,4 @@
 #include "wups/hooks.h"
 #include "wups/meta.h"
 #include "wups/storage.h"
-#ifdef DEBUG
-#include <coreinit/debug.h>
-#endif
-
-#ifdef DEBUG
-#define WUPS_DEBUG_REPORT(fmt, ...) OSReport(fmt, ##__VA_ARGS__)
-#else
-#define WUPS_DEBUG_REPORT(fmt, ...)
-#endif
+#include "wups/wups_debug.h"

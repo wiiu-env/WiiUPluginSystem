@@ -17,26 +17,54 @@
 
 #pragma once
 
+#include <padscore/kpad.h>
 #include <stdint.h>
+#include <vpad/input.h>
 
-#define WUPS_CONFIG_BUTTON_NONE    0
-#define WUPS_CONFIG_BUTTON_LEFT    (1 << 0)
-#define WUPS_CONFIG_BUTTON_RIGHT   (1 << 1)
-#define WUPS_CONFIG_BUTTON_UP      (1 << 2)
-#define WUPS_CONFIG_BUTTON_DOWN    (1 << 3)
-#define WUPS_CONFIG_BUTTON_A       (1 << 4)
-#define WUPS_CONFIG_BUTTON_B       (1 << 5)
-#define WUPS_CONFIG_BUTTON_ZL      (1 << 6)
-#define WUPS_CONFIG_BUTTON_ZR      (1 << 7)
-#define WUPS_CONFIG_BUTTON_L       (1 << 8)
-#define WUPS_CONFIG_BUTTON_R       (1 << 9)
-#define WUPS_CONFIG_BUTTON_X       (1 << 10)
-#define WUPS_CONFIG_BUTTON_Y       (1 << 11)
-#define WUPS_CONFIG_BUTTON_STICK_L (1 << 12)
-#define WUPS_CONFIG_BUTTON_STICK_R (1 << 13)
-#define WUPS_CONFIG_BUTTON_PLUS    (1 << 14)
-#define WUPS_CONFIG_BUTTON_MINUS   (1 << 15)
-typedef int32_t WUPSConfigButtons;
+typedef uint32_t WUPSConfigButtons;
+
+typedef enum WUPS_CONFIG_SIMPLE_INPUT {
+    WUPS_CONFIG_BUTTON_NONE    = 0,
+    WUPS_CONFIG_BUTTON_LEFT    = (1 << 0),
+    WUPS_CONFIG_BUTTON_RIGHT   = (1 << 1),
+    WUPS_CONFIG_BUTTON_UP      = (1 << 2),
+    WUPS_CONFIG_BUTTON_DOWN    = (1 << 3),
+    WUPS_CONFIG_BUTTON_A       = (1 << 4),
+    WUPS_CONFIG_BUTTON_B       = (1 << 5),
+    WUPS_CONFIG_BUTTON_ZL      = (1 << 6),
+    WUPS_CONFIG_BUTTON_ZR      = (1 << 7),
+    WUPS_CONFIG_BUTTON_L       = (1 << 8),
+    WUPS_CONFIG_BUTTON_R       = (1 << 9),
+    WUPS_CONFIG_BUTTON_X       = (1 << 10),
+    WUPS_CONFIG_BUTTON_Y       = (1 << 11),
+    WUPS_CONFIG_BUTTON_STICK_L = (1 << 12),
+    WUPS_CONFIG_BUTTON_STICK_R = (1 << 13),
+    WUPS_CONFIG_BUTTON_PLUS    = (1 << 14),
+    WUPS_CONFIG_BUTTON_MINUS   = (1 << 15),
+} WUPS_CONFIG_SIMPLE_INPUT;
+
+typedef struct {
+    WUPS_CONFIG_SIMPLE_INPUT buttons_h;
+    WUPS_CONFIG_SIMPLE_INPUT buttons_d;
+    WUPS_CONFIG_SIMPLE_INPUT buttons_r;
+    bool validPointer;
+    bool touched;
+    float pointerAngle;
+    int32_t x;
+    int32_t y;
+} WUPSConfigSimplePadData;
+
+typedef struct {
+    struct {
+        VPADReadError vpadError;
+        VPADTouchData tpCalib;
+        VPADStatus data;
+    } vpad;
+    struct {
+        KPADError kpadError[4];
+        KPADStatus data[4];
+    } kpad;
+} WUPSConfigComplexPadData;
 
 typedef enum WUPSConfigAPIStatus {
     WUPSCONFIG_API_RESULT_SUCCESS                   = 0,
@@ -76,17 +104,111 @@ typedef struct {
     void (*onDelete)(void *context);
 } WUPSConfigAPIItemCallbacksV1;
 
+typedef struct {
+    /**
+     * Set the string which is displayed for an item
+     * @param context  The context which has been passed to the item during creating
+     * @param out_buf  Buffer where the string should be written to
+     * @param out_size Size of out_buf
+     *
+     * \result non-zero result indicates an error.
+     */
+    int32_t (*getCurrentValueDisplay)(void *context, char *out_buf, int32_t out_size);
+
+    /**
+     * Set the string which is displayed for an item when the cursor is on is item
+     * @param context  The context which has been passed to the item during creating
+     * @param out_buf  Buffer where the string should be written to
+     * @param out_size Size of out_buf
+     *
+     * \result non-zero result indicates an error.
+     */
+    int32_t (*getCurrentValueSelectedDisplay)(void *context, char *out_buf, int32_t out_size);
+
+    /**
+     * Called when the cursor enters or leaves this item
+     * @param context    The context which has been passed to the item during creating
+     * @param isSelected True if the item cursor is now pointing to this item, \n
+     *                   False if it's not pointing to this item anymore
+     */
+    void (*onSelected)(void *context, bool isSelected);
+
+    /**
+     * Called when the current value of this item should be set to the default value
+     * @param context The context which has been passed to the item during creating
+     */
+    void (*restoreDefault)(void *context);
+
+    /**
+     * Determines if movement to different item is allowed.
+     * @param context The context which has been passed to the item during creating
+     * \return True if it should be not possible to select a different item or exit the current category \n
+     *         False if it should be possible to select a different item or exit the current category
+     */
+    bool (*isMovementAllowed)(void *context);
+
+    /**
+     * Called when the config menu has been closed
+     * @param context The context which has been passed to the item during creating
+     */
+    void (*onCloseCallback)(void *context);
+
+    /**
+     * This function is called on each frame and provides information about the current inputs.
+     * The inputs are simplified and all 5 possible controller inputs (from Gamepad and up to 4 Wiimotes/Pro Controller)
+     * are unified in this single unified struct.
+     *
+     * @param context The context which has been passed to the item during creating
+     * @param input Simplified version of the current inputs
+     *
+     * \note To get the full input for all possible controllers see "onInputEx"
+     *
+     * @see onInputEx
+     */
+    void (*onInput)(void *context, WUPSConfigSimplePadData input);
+
+    /**
+     * This function is called on each frame and provides information about the current inputs.
+     * The structs contains information for current individual Gampepad and Wiimote/Pro Contoller inputs.
+     *
+     * @param context The context which has been passed to the item during creating
+     * @param input current input for all possibles controller
+     *
+     * \note To get a simplified input callback that combines all controller into a single struct see "onInput"
+     *
+     * @see onInput
+     */
+    void (*onInputEx)(void *context, WUPSConfigComplexPadData input);
+
+    /**
+     * This function is called when the item is about to be deleted. It can be used to free any alloated memory.
+     *
+     * @param context The context which has been passed to the item during creating
+     */
+    void (*onDelete)(void *context);
+} WUPSConfigAPIItemCallbacksV2;
+
 #define WUPS_API_ITEM_OPTION_VERSION_V1 1
+#define WUPS_API_ITEM_OPTION_VERSION_V2 2
+
 typedef struct WUPSConfigAPIItemOptionsV1 {
+    const char *configId;
     const char *displayName;
     void *context;
     WUPSConfigAPIItemCallbacksV1 callbacks;
 } WUPSConfigAPIItemOptionsV1;
 
+typedef struct WUPSConfigAPIItemOptionsV2 {
+    const char *displayName;
+    void *context;
+    WUPSConfigAPIItemCallbacksV2 callbacks;
+} WUPSConfigAPIItemOptionsV2;
+
 typedef struct WUPSConfigAPICreateItemOptions {
     uint32_t version;
     union {
         WUPSConfigAPIItemOptionsV1 v1;
+        WUPSConfigAPIItemOptionsV2 v2;
     } data;
 } WUPSConfigAPICreateItemOptions;
 

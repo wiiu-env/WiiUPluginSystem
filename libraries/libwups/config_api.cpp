@@ -1,5 +1,5 @@
 #include "wups/config_api.h"
-#include "wups.h"
+#include "wups/wups_debug.h"
 #include <coreinit/dynload.h>
 #include <wups/config.h>
 
