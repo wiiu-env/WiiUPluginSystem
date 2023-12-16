@@ -1,10 +1,12 @@
 #include "utils/logger.h"
 #include <coreinit/filesystem.h>
 #include <malloc.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <wups.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
+#include <wups/config/WUPSConfigItemStub.h>
 
 /**
     Mandatory plugin information.
@@ -56,7 +58,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
         }
 
         // Add a new item to this settings category
-        if (!WUPSConfigItemBoolean_AddToCategory(settingsCategory, LOG_FS_OPEN_CONFIG_ID, "Log FSOpen calls", logFSOpen, &logFSOpenChanged)) {
+        if (WUPSConfigItemBoolean_AddToCategory(settingsCategory, LOG_FS_OPEN_CONFIG_ID, "Log FSOpen calls", true, logFSOpen, &logFSOpenChanged) != WUPSCONFIG_API_RESULT_SUCCESS) {
             DEBUG_FUNCTION_LINE_ERR("Failed to add item to category");
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
@@ -81,7 +83,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
             DEBUG_FUNCTION_LINE_ERR("Failed to create categoryLevel1");
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
-        if (!WUPSConfigItemBoolean_AddToCategory(categoryLevel2, "stubInsideCategory", "This is stub item inside a nested category", false, NULL)) {
+        if (WUPSConfigItemBoolean_AddToCategory(categoryLevel2, "stubInsideCategory", "This is stub item inside a nested category", false, false, NULL) != WUPSCONFIG_API_RESULT_SUCCESS) {
             DEBUG_FUNCTION_LINE_ERR("Failed to add stub item to root category");
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
@@ -98,10 +100,9 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
     }
-
     {
         // We can also directly add items to the root category
-        if (!WUPSConfigItemBoolean_AddToCategory(root, "stub0", "This is stub item without category", false, NULL)) {
+        if (WUPSConfigItemStub_AddToCategory(root, "This is stub item without category") != WUPSCONFIG_API_RESULT_SUCCESS) {
             DEBUG_FUNCTION_LINE_ERR("Failed to add stub item to root category");
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
@@ -117,11 +118,11 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
             values[i].value     = i;
             values[i].valueName = str;
         }
-        bool multValuesRes = WUPSConfigItemMultipleValues_AddToCategory(root, "multival", "Multiple values", 0, values, numOfElements, NULL);
+        WUPSConfigAPIStatus multValuesRes = WUPSConfigItemMultipleValues_AddToCategory(root, "multival", "Multiple values", 0, 0, values, numOfElements, NULL);
         for (int i = 0; i < sizeof(values) / sizeof(values[0]); i++) {
-            free(values[i].valueName);
+            free((void *) values[i].valueName);
         }
-        if (!multValuesRes) {
+        if (multValuesRes != WUPSCONFIG_API_RESULT_SUCCESS) {
             return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
         }
     }
