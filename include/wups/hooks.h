@@ -24,7 +24,7 @@ extern "C" {
 #endif
 /**
  * @defgroup hooks
- * Various functions called by WUPS that can be used to execute code upon certain system events. 
+ * Various macro functions called by WUPS that can be used to execute code upon certain system events. 
  * @addtogroup hooks 
  * @{
  * @brief 
@@ -53,15 +53,17 @@ typedef enum wups_loader_hook_type_t {
     /* Calls __fini */
     WUPS_LOADER_HOOK_FINI_WRAPPER,
 
+    /* Called when re-entering the plugin menu */
     WUPS_LOADER_HOOK_GET_CONFIG,
+    /* Called when exiting the plugin menu */
     WUPS_LOADER_HOOK_CONFIG_CLOSED,
 
     /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_STORAGE, 
 
-    /* Called when re-entering the plugin loader */
+    /* Called when the plugin is being initialized by WUPS */
     WUPS_LOADER_HOOK_INIT_PLUGIN,
-    /* Called when exiting the plugin loader */
+    /* Called when the plugin is being de-ititialized by WUPS */
     WUPS_LOADER_HOOK_DEINIT_PLUGIN,
     /* Called when an application gets started */
     WUPS_LOADER_HOOK_APPLICATION_STARTS,
@@ -71,7 +73,7 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_ACQUIRED_FOREGROUND,
     /* Called when an application wants to exit */
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT,
-    /* Called when an application ends */
+    /* Called when an application actually exits */
     WUPS_LOADER_HOOK_APPLICATION_ENDS,
 } wups_loader_hook_type_t;
 
@@ -83,7 +85,7 @@ typedef struct wups_loader_hook_t {
 } wups_loader_hook_t;
 /**
  * 
- * @brief Called when initializing the plugin
+ * @brief Called when WUPS is initializing the plugin
  * 
  */
 #define INITIALIZE_PLUGIN()                                  \
@@ -92,7 +94,7 @@ typedef struct wups_loader_hook_t {
     void init_plugin()
 /**
  * 
- * @brief Called when deinitializing the plugin
+ * @brief Called when WUPS is deinitializing the plugin
  * 
  */
 #define DEINITIALIZE_PLUGIN()                                    \
@@ -135,27 +137,35 @@ typedef struct wups_loader_hook_t {
     void on_app_requests_exit(void)
 /**
  * 
- * @brief Called when an app exits.
+ * @brief Called when an app actually exits.
  * 
  */
 #define ON_APPLICATION_ENDS()                                       \
     void on_app_ending(void);                                       \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_APPLICATION_ENDS, on_app_ending); \
     void on_app_ending(void)
-
+/**
+ * @brief Called when a user opens the WUPS menu
+ * 
+ * @warning Will be depreciated soon(?)
+ */
 #define WUPS_GET_CONFIG()                                          \
     WUPSConfigHandle on_get_wups_config(void);                     \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_GET_CONFIG, on_get_wups_config); \
     WUPSConfigHandle on_get_wups_config(void)
 
+/**
+ * @brief Called when a user closes the WUPS menu
+ * 
+ */
 #define WUPS_CONFIG_CLOSED()                                             \
     void on_wups_config_closed(void);                                    \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_CONFIG_CLOSED, on_wups_config_closed); \
     void on_wups_config_closed(void)
 /**
  * 
- * @brief Called when an app exits.
- * @param x the name of the storage you are accessing (typically, your app name)
+ * @brief Defined to tell the WUPS storage API where to point to.
+ * @param x the name of the storage you are accessing (typically, your plugin name)
  */
 #define WUPS_USE_STORAGE(x)                                    \
     WUPS_META(storage_id, x);                                  \
@@ -170,7 +180,10 @@ typedef struct wups_loader_hook_t {
 #else
 #define __EXTERN_C_MACRO
 #endif
-
+/**
+ * @brief Use WUT's malloc functions
+ * 
+ */
 #define WUPS_USE_WUT_MALLOC()                                           \
     __EXTERN_C_MACRO void __init_wut_malloc();                          \
     void on_init_wut_malloc() {                                         \
@@ -197,7 +210,10 @@ typedef struct wups_loader_hook_t {
         __fini_wut_devoptab();                                              \
     }                                                                       \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_DEVOPTAB, on_fini_wut_devoptab)
-
+/**
+ * @brief Use the WUT newlib library
+ * 
+ */
 #define WUPS_USE_WUT_NEWLIB()                                           \
     __EXTERN_C_MACRO void __init_wut_newlib();                          \
     void on_init_wut_newlib() {                                         \
@@ -209,7 +225,10 @@ typedef struct wups_loader_hook_t {
         __fini_wut_newlib();                                            \
     }                                                                   \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_NEWLIB, on_fini_wut_newlib)
-
+/**
+ * @brief Use the WUT stdcpp library
+ * 
+ */
 #define WUPS_USE_WUT_STDCPP()                                           \
     __EXTERN_C_MACRO void __init_wut_stdcpp();                          \
     void on_init_wut_stdcpp() {                                         \
@@ -248,7 +267,10 @@ extern void OSFatal(const char *msg);
         __fini();                   \
     }                               \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WRAPPER, __fini_wrapper);
-
+/**
+ * @brief Use the WUT sockets
+ * 
+ */
 #define WUPS_USE_WUT_SOCKETS()                                            \
     __EXTERN_C_MACRO void __attribute__((weak)) __init_wut_socket();      \
     void on_init_wut_sockets() {                                          \

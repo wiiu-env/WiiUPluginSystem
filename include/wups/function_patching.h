@@ -42,7 +42,7 @@ extern "C" {
  * 
  */
 typedef enum wups_loader_library_type_t {
-    //! The AVM library.
+    //! The audio-video manager library.
     WUPS_LOADER_LIBRARY_AVM,
     WUPS_LOADER_LIBRARY_CAMERA,
     WUPS_LOADER_LIBRARY_COREINIT,
@@ -165,12 +165,41 @@ typedef struct wups_loader_entry_t {
     } _function;
 } wups_loader_entry_t;
 
-#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address)                            WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+/**
+ * @brief 
+ * 
+ * @param x
+ * @param physical_address
+ * @param virtual_address
+ */
+#define WUPS_MUST_REPLACE_PHYSICAL(x, physical_address, virtual_address)   
+/**
+ * @brief 
+ * 
+ */
 #define WUPS_MUST_REPLACE_PHYSICAL_FOR_PROCESS(x, physical_address, virtual_address, targetProcess) WUPS_MUST_REPLACE_EX(physical_address, virtual_address, real_##x, WUPS_LOADER_LIBRARY_OTHER, my_##x, x, targetProcess)
 
+/**
+ * @brief A macro that defines a specific function in a specific system library that you intend to patch
+ * 
+ * @param x 
+ * @param lib The library, defined in wups_loader_library_type_t, that your function patch targets
+ * @param function_name The specific name of the function within your target library that you are patching
+ */
 #define WUPS_MUST_REPLACE(x, lib, function_name)                                                    WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, WUPS_FP_TARGET_PROCESS_GAME_AND_MENU)
+/**
+ * @brief 
+ * 
+ * @param x
+ * @param lib The library, defined in wups_loader_library_type_t, that your function patch targets
+ * @param function_name The specific name of the function within your target library that you are patching
+ * @param targetProcess The WUPSFPTargetProcess your patch is targeting (going to run on?)
+ */
 #define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess)                         WUPS_MUST_REPLACE_EX(NULL, NULL, real_##x, lib, my_##x, function_name, targetProcess)
-
+/**
+ * @brief 
+ * 
+ */
 #define WUPS_MUST_REPLACE_EX(pAddress, vAddress, original_func, rpl_type, replace_func, replace_function_name, process) \
     extern const wups_loader_entry_t wups_load_##replace_func                                                           \
             WUPS_SECTION("load");                                                                                       \
@@ -187,6 +216,8 @@ typedef struct wups_loader_entry_t {
                     .targetProcess    = process}}
 /**
  * @brief Macro that allows you to map your own functions.
+ * 
+ * This must be paired with a relevant WUPS_MUST_REPLACE related macro defining that you are patching a specific function.
  * 
  */
 #define DECL_FUNCTION(res, name, ...)                                  \
