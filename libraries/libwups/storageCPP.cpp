@@ -58,18 +58,8 @@ WUPSStorageSubItem WUPSStorageAPI::GetRootItem() noexcept {
     return WUPSStorageSubItem(nullptr);
 }
 
-WUPSStorageError WUPSStorageAPI::GetItemSize(std::string_view key, uint32_t &outSize) noexcept {
-    WUPSStorageSubItem item(nullptr);
-    return item.GetItemSize(key, outSize);
-}
-
-
 WUPSStorageError WUPSStorageSubItem::DeleteItem(std::string_view key) noexcept {
     return WUPSStorageAPI_DeleteItem(mHandle, key.data());
-}
-
-WUPSStorageError WUPSStorageSubItem::GetItemSize(std::string_view key, uint32_t &outSize) noexcept {
-    return WUPSStorageAPI_GetItemSize(mHandle, key.data(), &outSize);
 }
 
 std::optional<WUPSStorageSubItem> WUPSStorageSubItem::CreateSubItem(std::string_view key, WUPSStorageError &err) noexcept {

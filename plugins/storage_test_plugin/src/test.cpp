@@ -153,7 +153,7 @@ void CheckItemSize(const char *key, const T &expectedVal, const uint32_t expecte
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     uint32_t itemSize = 0;
-    res               = WUPSStorageAPI::GetItemSize(key, itemSize);
+    res               = WUPSStorageAPI::GetItemSize<T>(key, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(itemSize == expectedItemSize);
 
@@ -164,7 +164,7 @@ void CheckItemSize(const char *key, const T &expectedVal, const uint32_t expecte
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     itemSize = 0;
-    res      = WUPSStorageAPI::GetItemSize(key, itemSize);
+    res      = WUPSStorageAPI::GetItemSize<T>(key, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(itemSize == expectedItemSize);
 }
@@ -194,9 +194,35 @@ TEST_CASE("Test getSize fails with other type") {
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     uint32_t itemSize = 0;
-    res               = WUPSStorageAPI::GetItemSize(key, itemSize);
+    res               = WUPSStorageAPI::GetItemSize<std::string>(key, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
     REQUIRE(itemSize == 0);
+
+    itemSize = 0;
+    res               = WUPSStorageAPI::GetItemSize<std::vector<uint8_t>>(key, itemSize);
+    REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
+    REQUIRE(itemSize == 0);
+}
+
+TEST_CASE("Saving Base64 string as string works") {
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    constexpr auto *key  = "test";
+    std::string storeStr = "97bb3f3b0ec8755028e5cdf56eaf01b47140a6cd";
+    res                  = WUPSStorageAPI::Store<std::string>(key, storeStr);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    res = WUPSStorageAPI::SaveStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    res = WUPSStorageAPI::ForceReloadStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    uint32_t itemSize = 0;
+    std::string retValue;
+    res = WUPSStorageAPI::Get(key, retValue);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(isEqual(storeStr, retValue));
 }
 
 TEST_CASE("Delete non-existent item should fail") {
@@ -475,7 +501,7 @@ TEST_CASE("Get (size) works after changing type to binary") {
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     uint32_t itemSize = 0;
-    res               = WUPSStorageAPI::GetItemSize(itemName, itemSize);
+    res               = WUPSStorageAPI::GetItemSize<std::string>(itemName, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
     REQUIRE(itemSize == 0);
 
@@ -485,7 +511,7 @@ TEST_CASE("Get (size) works after changing type to binary") {
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     itemSize = 0;
-    res      = WUPSStorageAPI::GetItemSize(itemName, itemSize);
+    res      = WUPSStorageAPI::GetItemSize<std::vector<uint8_t>>(itemName, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(itemSize == binaryDataSize);
 
@@ -511,7 +537,7 @@ TEST_CASE("Change type from binary to int causes get size to fail") {
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
     uint32_t itemSize = 0;
-    res               = WUPSStorageAPI::GetItemSize(itemName, itemSize);
+    res               = WUPSStorageAPI::GetItemSize<std::vector<uint8_t>>(itemName, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
     REQUIRE(itemSize == 0);
 }

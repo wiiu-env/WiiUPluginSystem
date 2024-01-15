@@ -116,7 +116,7 @@ typedef WUPSStorageError (*WUPSStorage_GetItemFunction)(wups_storage_root_item r
  * @typedef WUPSStorage_GetItemSizeFunction
  * @brief Type alias for the function pointer to get the size of an item in storage.  For internal usage only.
  */
-typedef WUPSStorageError (*WUPSStorage_GetItemSizeFunction)(wups_storage_root_item root, wups_storage_item parent, const char *key, uint32_t *outSize);
+typedef WUPSStorageError (*WUPSStorage_GetItemSizeFunction)(wups_storage_root_item root, wups_storage_item parent, const char *key, WUPSStorageItemType itemType, uint32_t *outSize);
 
 /**
  * @typedef WUPS_STORAGE_API_VERSION
@@ -641,7 +641,7 @@ inline WUPSStorageError WUPSStorageAPI_GetBinary(wups_storage_item parent, const
  *         - WUPS_STORAGE_ERROR_NOT_FOUND: No item with the given key has been found inside the given parent.
  *         - WUPS_STORAGE_ERROR_INTERNAL_NOT_INITIALIZED: The library is not initialized properly; make sure to use the WUPS_USE_STORAGE macro.
  */
-WUPSStorageError WUPSStorageAPI_GetItemSize(wups_storage_item parent, const char *key, uint32_t *outSize);
+WUPSStorageError WUPSStorageAPI_GetItemSize(wups_storage_item parent, const char *key, WUPSStorageItemType itemType, uint32_t *outSize);
 
 #ifdef __cplusplus
 }
@@ -663,6 +663,19 @@ class WUPSStorageSubItem;
  * @brief C++ wrapper for the WUPS storage API. See the C-API for detailed information about the possible return values.
  */
 namespace WUPSStorageAPI {
+    template<typename T>
+    struct GetStorageItemType;
+
+    template<>
+    struct GetStorageItemType<std::string> {
+        static constexpr WUPSStorageItemTypes value = WUPS_STORAGE_ITEM_STRING;
+    };
+
+    template<>
+    struct GetStorageItemType<std::vector<uint8_t>> {
+        static constexpr WUPSStorageItemTypes value = WUPS_STORAGE_ITEM_BINARY;
+    };
+
     /**
      * @brief Gets a string representation of the specified storage status.
      * @param err The storage error status.
@@ -835,7 +848,10 @@ namespace WUPSStorageAPI {
      *         Returns an error code if an error occurs.
      * \see WUPSStorageAPI_GetItemSize
      */
-    WUPSStorageError GetItemSize(std::string_view key, uint32_t &outSize) noexcept;
+    template<typename T>
+    inline WUPSStorageError GetItemSize(std::string_view key, uint32_t &outSize) noexcept {
+        return WUPSStorageAPI_GetItemSize(nullptr, key.data(), WUPSStorageAPI::GetStorageItemType<T>::value, &outSize);
+    }
 
     /**
      * @brief Retrieve a value from the storage.
@@ -1020,7 +1036,7 @@ namespace WUPSStorageAPI {
 
         if (outValue.empty()) {
             uint32_t resizeToSize = 0;
-            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), &resizeToSize);
+            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_BINARY, &resizeToSize);
             if (r == WUPS_STORAGE_ERROR_SUCCESS) {
                 outValue.resize(resizeToSize);
             } else {
@@ -1058,7 +1074,7 @@ namespace WUPSStorageAPI {
         uint32_t outSize = 0;
         if (outValue.empty()) {
             uint32_t resizeToSize = 0;
-            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), &resizeToSize);
+            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_STRING, &resizeToSize);
             if (r == WUPS_STORAGE_ERROR_SUCCESS) {
                 outValue.resize(resizeToSize);
             } else {
@@ -1321,23 +1337,21 @@ namespace WUPSStorageAPI {
 
     /**
      * @brief Retrieves the value associated with the specified key from a storage item.
-     *        If the key is not found, stores the default value in the storage item.
+     *        If the key is not found, stores the default value with taht key in the storage item.
      *
      * @tparam T The type of the value to retrieve and store.
      * @param parent The storage item to retrieve and store the value from. Can be NULL to refer to the root of the storage
      * @param key The key associated with the value.
      * @param outValue [out] The output parameter to store the retrieved value.
-     * @param defaultValue The default value to store if the key is not found.
+     * @param defaultValue The default value to store in storage and outValue if the key does not exist.
      * @return The error code indicating the success or failure of the operation.
      *
-     * @details This function retrieves the value associated with the specified key from the given storage item.
+     * @details This function retrieves the value associated with the specified key from the given parent.
      *          If the key is not found, the default value is stored in the storage item using the StoreEx function.
      *          The retrieved or stored value is then assigned to the output parameter outValue.
      *          The function returns an error code indicating the success or failure of the operation.
      *          The possible error codes are defined in the WUPSStorageError enumeration.
      *          If the retrieval and storage operations are successful, the error code will be WUPS_STORAGE_ERROR_SUCCESS.
-     *          If there are any errors, such as invalid arguments, memory allocation failure, I/O errors, or unknown errors,
-     *          the error code will indicate the specific type of error occurred.
      * \see GetEx
      * \see StoreEx
      */
@@ -1346,6 +1360,9 @@ namespace WUPSStorageAPI {
         WUPSStorageError err = GetEx(parent, key, outValue);
         if (err == WUPS_STORAGE_ERROR_NOT_FOUND) {
             err = StoreEx(parent, key, defaultValue);
+            if (err == WUPS_STORAGE_ERROR_SUCCESS) {
+                outValue = defaultValue;
+            }
         }
         return err;
     }
@@ -1356,18 +1373,20 @@ namespace WUPSStorageAPI {
      * @tparam T The type of the value.
      * @param key The key of the value to retrieve or store.
      * @param outValue The variable to store the retrieved or stored value.
-     * @param defaultValue The default value to store if the key does not exist.
+     * @param defaultValue The default value to store in storage and outValue if the key does not exist.
      * @return WUPSStorageError An error code indicating the success or failure of the operation.
      *
-     * This function retrieves a value associated with the given key from storage. If the key does not exist,
-     * it stores the default value provided and returns WUPS_STORAGE_ERROR_SUCCESS. If the storage API function
-     * encounters an error, the corresponding error code is returned.
-     * It is a wrapper around the `GetOrStoreDefaultEx` function, and stores into the root item of the storage by default.
+     * @details This function retrieves the value associated with the specified key from the root of the storage.
+     *          If the key is not found, the default value is stored in the storage item using the StoreEx function.
+     *          The retrieved or stored value is then assigned to the output parameter outValue.
+     *          The function returns an error code indicating the success or failure of the operation.
+     *          The possible error codes are defined in the WUPSStorageError enumeration.
+     *          If the retrieval and storage operations are successful, the error code will be WUPS_STORAGE_ERROR_SUCCESS.
      *
      * @note This function internally calls the GetEx and StoreEx functions of the storage API.
      */
     template<typename T>
-    inline WUPSStorageError GetOrStoreDefault(const char *key, T &outValue, const T &defaultValue) noexcept {
+    inline WUPSStorageError GetOrStoreDefault(std::string_view key, T &outValue, const T &defaultValue) noexcept {
         return GetOrStoreDefaultEx<T>(nullptr, key, outValue, defaultValue);
     }
 } // namespace WUPSStorageAPI
@@ -1463,7 +1482,10 @@ public:
      *
      * @see WUPSStorageAPI_GetItemSize()
      */
-    WUPSStorageError GetItemSize(std::string_view key, uint32_t &outSize) noexcept;
+    template<typename T>
+    WUPSStorageError GetItemSize(std::string_view key, uint32_t &outSize) noexcept {
+        return WUPSStorageAPI_GetItemSize(mHandle, key.data(), WUPSStorageAPI::GetStorageItemType<T>::value, &outSize);
+    }
 
     /**
      * @brief Create a sub-item in this sub-item. (non-throwing)
