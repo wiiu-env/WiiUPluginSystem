@@ -147,12 +147,12 @@ WUPSStorageError WUPSStorageAPI_GetItem(wups_storage_item parent, const char *ke
 }
 
 
-WUPSStorageError WUPSStorageAPI_GetItemSize(wups_storage_item parent, const char *key, uint32_t *outSize) {
+WUPSStorageError WUPSStorageAPI_GetItemSize(wups_storage_item parent, const char *key, WUPSStorageItemType itemType, uint32_t *outSize) {
     if (outSize == nullptr) {
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
     if (__internal_functions.get_item_size_function_ptr == nullptr) {
         return WUPS_STORAGE_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    return __internal_functions.get_item_size_function_ptr(__internal_functions.__storageroot_item, parent, key, outSize);
+    return __internal_functions.get_item_size_function_ptr(__internal_functions.__storageroot_item, parent, key, itemType, outSize);
 }
