@@ -677,6 +677,15 @@ namespace WUPSStorageAPI {
     };
 
     /**
+     * @enum GetOptions
+     * Enumerates options for retrieving items from storage.
+     */
+    enum GetOptions {
+        RESIZE_EXISTING_BUFFER, /**< Resizes the given buffer to the item size before loading an item from storage */
+        USE_EXISTING_BUFFER,    /**< Does not resize the buffer before loading an item from storage */
+    };
+
+    /**
      * @brief Gets a string representation of the specified storage status.
      * @param err The storage error status.
      * @return A string describing the provided storage status.
@@ -864,11 +873,12 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options additional options, see @GetOptions for more information
      * @return WUPSStorageError WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetItem
      */
     template<typename T>
-    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue) noexcept;
+    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue, GetOptions options = RESIZE_EXISTING_BUFFER) noexcept;
 
     /**
      * @brief Retrieves a signed 32-bit integer value from a storage item.
@@ -878,12 +888,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetS32
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<int32_t>(wups_storage_item parent, std::string_view key, int32_t &outValue) noexcept {
+    inline WUPSStorageError GetEx<int32_t>(wups_storage_item parent, std::string_view key, int32_t &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetS32(parent, key.data(), &outValue);
     }
 
@@ -895,12 +906,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetS64
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<int64_t>(wups_storage_item parent, std::string_view key, int64_t &outValue) noexcept {
+    inline WUPSStorageError GetEx<int64_t>(wups_storage_item parent, std::string_view key, int64_t &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetS64(parent, key.data(), &outValue);
     }
 
@@ -912,12 +924,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetU32
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<uint32_t>(wups_storage_item parent, std::string_view key, uint32_t &outValue) noexcept {
+    inline WUPSStorageError GetEx<uint32_t>(wups_storage_item parent, std::string_view key, uint32_t &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetU32(parent, key.data(), &outValue);
     }
 
@@ -929,12 +942,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetU64
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<uint64_t>(wups_storage_item parent, std::string_view key, uint64_t &outValue) noexcept {
+    inline WUPSStorageError GetEx<uint64_t>(wups_storage_item parent, std::string_view key, uint64_t &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetU64(parent, key.data(), &outValue);
     }
 
@@ -946,12 +960,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetBool
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<bool>(wups_storage_item parent, std::string_view key, bool &outValue) noexcept {
+    inline WUPSStorageError GetEx<bool>(wups_storage_item parent, std::string_view key, bool &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetBool(parent, key.data(), &outValue);
     }
 
@@ -963,12 +978,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetFloat
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<float>(wups_storage_item parent, std::string_view key, float &outValue) noexcept {
+    inline WUPSStorageError GetEx<float>(wups_storage_item parent, std::string_view key, float &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetFloat(parent, key.data(), &outValue);
     }
 
@@ -980,12 +996,13 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns `WUPS_STORAGE_ERROR_SUCCESS` on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_GetFloat
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<double>(wups_storage_item parent, std::string_view key, double &outValue) noexcept {
+    inline WUPSStorageError GetEx<double>(wups_storage_item parent, std::string_view key, double &outValue, GetOptions options) noexcept {
         return WUPSStorageAPI_GetDouble(parent, key.data(), &outValue);
     }
 
@@ -999,6 +1016,7 @@ namespace WUPSStorageAPI {
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved enum value will be stored.
+     * @param options unused parameter
      * @return WUPSStorageError Returns WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      *
      * @note This function assumes that the enum type is of size sizeof(uint32_t).
@@ -1007,7 +1025,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<typename T>
-    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue) noexcept {
+    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue, GetOptions options) noexcept {
         static_assert(sizeof(T) == sizeof(uint32_t) && std::is_enum<T>::value, "T must be an enum of size sizeof(uint32_t)");
         return WUPSStorageAPI_GetU32(parent, key.data(), (uint32_t *) &outValue);
     }
@@ -1015,32 +1033,38 @@ namespace WUPSStorageAPI {
     /**
      * @brief Retrieves a vector of uint8_t from storage.
      *
-     * This template specialization of the GetEx function retrieves a vector of uint8_t from the storage.
-     * It first checks if the outValue vector is empty (size == 0).
-     * If it is, it retrieves the size of the data and resizes the outValue vector to that size. Otherwise the existing vector (size) will the be used.
-     * Then, it retrieves the binary data from the storage using the WUPSStorageAPI_GetBinary function.
-     * If the retrieval is successful, the outValue vector is resized to the size of the retrieved data.
-     * If the retrieval fails, the outValue vector is resized to 0.
+     * This template specialization of the GetEx function retrieves a vector of uint8_t from the storage. \n
+     * Before getting the actual data, the buffer might be prepared depending on the given option parameter: \n
+     *      - USE_EXISTING_BUFFER: the buffer will not be resized to the item size before getting the item. The caller has to make sure the buffer is big enough. \n
+     *      - RESIZE_EXISTING_BUFFER: the buffer will be resized to the actual item size before getting the item. \n
+     * Then, it retrieves the binary data from the storage using the WUPSStorageAPI_GetBinary function. \n
+     * If the retrieval is successful, the outValue vector is resized to the size of the retrieved data. \n
+     * If the retrieval fails, the outValue vector is resized to 0. \n
      *
      * @param parent The parent storage item. Can be NULL to refer to the root of the storage.
      * @param key The key under which the data is stored.
      * @param[out] outValue A reference to the vector where the retrieved data will be stored. Will be resized to fit the data only if it's empty.
+     * @param options Defines how the given outValue buffer is used.
      * @return WUPSStorageError WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      *
      * @see WUPSStorageAPI_GetBinary
      * @see WUPSStorageAPI_GetItemSize
      */
     template<>
-    inline WUPSStorageError GetEx<std::vector<uint8_t>>(wups_storage_item parent, std::string_view key, std::vector<uint8_t> &outValue) noexcept {
+    inline WUPSStorageError GetEx<std::vector<uint8_t>>(wups_storage_item parent, std::string_view key, std::vector<uint8_t> &outValue, GetOptions options) noexcept {
         uint32_t outSize = 0;
 
-        if (outValue.empty()) {
-            uint32_t resizeToSize = 0;
-            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_BINARY, &resizeToSize);
-            if (r == WUPS_STORAGE_ERROR_SUCCESS) {
-                outValue.resize(resizeToSize);
-            } else {
-                return r;
+        switch (options) {
+            case USE_EXISTING_BUFFER:
+                break;
+            case RESIZE_EXISTING_BUFFER: {
+                uint32_t resizeToSize = 0;
+                auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_BINARY, &resizeToSize);
+                if (r == WUPS_STORAGE_ERROR_SUCCESS) {
+                    outValue.resize(resizeToSize);
+                } else {
+                    return r;
+                }
             }
         }
 
@@ -1056,29 +1080,35 @@ namespace WUPSStorageAPI {
     /**
      * @brief Retrieves a string value from a storage item with the given key.
      *
-     * If the input `outValue` is empty, the function first retrieves the size of the stored data using `WUPSStorageAPI_GetItemSize`.
+     * Before getting the actual data, the string might be resized to fit the data depending on the given option parameter: \n
+     *      - USE_EXISTING_BUFFER: the string will not be resized to the item size before getting the item. The caller has to make sure the string is already big enough. \n
+     *      - RESIZE_EXISTING_BUFFER: the string will be resized to the actual string size before getting the item. \n
      * If the retrieval is successful, the function resizes `outValue` to the retrieved size.
      * Then, it calls `WUPSStorageAPI_GetString` to retrieve the string from the storage item.
-     * If the retrieval is successful, the function resizes `outValue` to remove the null terminator.
      *
      * @param parent The parent storage item. Can be `NULL` to refer to the root of the storage.
      * @param key The key under which the string is stored.
      * @param[out] outValue A reference to a `std::string` object where the retrieved string will be stored. Will be resized to fit the data only if it's empty.
+     * @param options Defines how the given outValue buffer is used.
      * @return WUPSStorageError WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      *
      * @see WUPSStorageAPI_GetBinary
      * @see WUPSStorageAPI_GetString
      */
     template<>
-    inline WUPSStorageError GetEx<std::string>(wups_storage_item parent, std::string_view key, std::string &outValue) noexcept {
+    inline WUPSStorageError GetEx<std::string>(wups_storage_item parent, std::string_view key, std::string &outValue, GetOptions options) noexcept {
         uint32_t outSize = 0;
-        if (outValue.empty()) {
-            uint32_t resizeToSize = 0;
-            auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_STRING, &resizeToSize);
-            if (r == WUPS_STORAGE_ERROR_SUCCESS) {
-                outValue.resize(resizeToSize);
-            } else {
-                return r;
+        switch (options) {
+            case USE_EXISTING_BUFFER:
+                break;
+            case RESIZE_EXISTING_BUFFER: {
+                uint32_t resizeToSize = 0;
+                auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_STRING, &resizeToSize);
+                if (r == WUPS_STORAGE_ERROR_SUCCESS) {
+                    outValue.resize(resizeToSize);
+                } else {
+                    return r;
+                }
             }
         }
 
@@ -1102,14 +1132,15 @@ namespace WUPSStorageAPI {
      *
      * @param key The key under which the value is stored.
      * @param[out] outValue A reference to the variable where the retrieved value will be stored.
+     * @param[optional] options Defines how a given buffer might be used, only relevant for certain item types (e.g. strings or buffer). Default value is RESIZE_EXISTING_BUFFER.
      * @return WUPSStorageError WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      *
      * @see WUPSStorageAPI_GetItem
      * @see GetEx
      */
     template<typename T>
-    inline WUPSStorageError Get(std::string_view key, T &outValue) noexcept {
-        return GetEx(nullptr, key.data(), outValue);
+    inline WUPSStorageError Get(std::string_view key, T &outValue, GetOptions options = RESIZE_EXISTING_BUFFER) noexcept {
+        return GetEx(nullptr, key.data(), outValue, options);
     }
 
     /**

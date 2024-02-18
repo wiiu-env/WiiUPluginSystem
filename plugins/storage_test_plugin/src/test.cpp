@@ -1,8 +1,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "utils/logger.h"
 #include "utils/utils.h"
-#include <coreinit/ios.h>
-#include <sys/stat.h>
 #include <vector>
 #include <wups/storage.h>
 template<typename T>
@@ -199,7 +197,7 @@ TEST_CASE("Test getSize fails with other type") {
     REQUIRE(itemSize == 0);
 
     itemSize = 0;
-    res               = WUPSStorageAPI::GetItemSize<std::vector<uint8_t>>(key, itemSize);
+    res      = WUPSStorageAPI::GetItemSize<std::vector<uint8_t>>(key, itemSize);
     REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
     REQUIRE(itemSize == 0);
 }
@@ -218,7 +216,6 @@ TEST_CASE("Saving Base64 string as string works") {
     res = WUPSStorageAPI::ForceReloadStorage();
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
-    uint32_t itemSize = 0;
     std::string retValue;
     res = WUPSStorageAPI::Get(key, retValue);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
@@ -627,7 +624,7 @@ TEST_CASE("Store string and load it as binary fails") {
     REQUIRE(res == WUPS_STORAGE_ERROR_UNEXPECTED_DATA_TYPE);
 }
 
-TEST_CASE("Get binary fails if buffer is too small") {
+TEST_CASE("USE_EXISTING_BUFFER: Get binary fails if buffer is too small") {
     auto res = WUPSStorageAPI::WipeStorage();
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
@@ -640,11 +637,11 @@ TEST_CASE("Get binary fails if buffer is too small") {
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(binaryData.size() - 1); // Make the buffer just a bit to small
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL);
 }
 
-TEST_CASE("Get binary works with exact buffer size") {
+TEST_CASE("USE_EXISTING_BUFFER: Get binary works with exact buffer size") {
     auto res = WUPSStorageAPI::WipeStorage();
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
@@ -657,12 +654,62 @@ TEST_CASE("Get binary works with exact buffer size") {
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(binaryData.size());
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(isEqual(binaryData, readBinaryData));
 }
 
-TEST_CASE("Get string fails if buffer is too small") {
+TEST_CASE("USE_EXISTING_BUFFER: Get binary works if buffer is too big") {
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    constexpr auto *itemName = "item";
+
+    std::vector<uint8_t> binaryData = {8, 4, 5, 4, 12, 4, 2};
+    res                             = WUPSStorageAPI::Store<std::vector<uint8_t>>(itemName, binaryData);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    std::vector<uint8_t> readBinaryData;
+    REQUIRE(!binaryData.empty());
+    readBinaryData.resize(binaryData.size() * 2);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(isEqual(binaryData, readBinaryData));
+}
+
+void test_binary_get_RESIZE_EXISTING_BUFFER_generic(std::vector<uint8_t> &binaryData, uint32_t buffer_size) {
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    constexpr auto *itemName = "item";
+
+    res = WUPSStorageAPI::Store<std::vector<uint8_t>>(itemName, binaryData);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    std::vector<uint8_t> readBinaryData;
+    REQUIRE(!binaryData.empty());
+    readBinaryData.resize(buffer_size);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::RESIZE_EXISTING_BUFFER);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(isEqual(binaryData, readBinaryData));
+}
+
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get binary fails if buffer is empty") {
+    std::vector<uint8_t> binaryData = {8, 4, 5, 4, 12, 4, 2};
+    test_binary_get_RESIZE_EXISTING_BUFFER_generic(binaryData, 0);
+}
+
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get binary works with exact buffer size") {
+    std::vector<uint8_t> binaryData = {8, 4, 5, 4, 12, 4, 2};
+    test_binary_get_RESIZE_EXISTING_BUFFER_generic(binaryData, binaryData.size());
+}
+
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get binary works if buffer is too big") {
+    std::vector<uint8_t> binaryData = {8, 4, 5, 4, 12, 4, 2};
+    test_binary_get_RESIZE_EXISTING_BUFFER_generic(binaryData, binaryData.size() * 2);
+}
+
+TEST_CASE("USE_EXISTING_BUFFER: Get string fails if buffer is too small") {
     auto res = WUPSStorageAPI::WipeStorage();
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
@@ -676,11 +723,11 @@ TEST_CASE("Get string fails if buffer is too small") {
     REQUIRE(!strData.empty());
     // Make the buffer just a bit to small
     readStr.resize(strData.length() - 1);
-    res = WUPSStorageAPI::Get<std::string>(itemName, readStr);
+    res = WUPSStorageAPI::Get<std::string>(itemName, readStr, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL);
 }
 
-TEST_CASE("Get string works with exact buffer size") {
+TEST_CASE("USE_EXISTING_BUFFER: Get string works with exact buffer size") {
     auto res = WUPSStorageAPI::WipeStorage();
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
 
@@ -694,9 +741,60 @@ TEST_CASE("Get string works with exact buffer size") {
     REQUIRE(!strData.empty());
     // We need to add one byte because of the null terminator
     readStr.resize(strData.length() + 1);
-    res = WUPSStorageAPI::Get<std::string>(itemName, readStr);
+    res = WUPSStorageAPI::Get<std::string>(itemName, readStr, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(isEqual(strData, readStr));
+}
+
+TEST_CASE("USE_EXISTING_BUFFER: Get string works if buffer it too big.") {
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    constexpr auto *itemName = "item";
+
+    std::string strData = "Random string I just need for this test.";
+    res                 = WUPSStorageAPI::Store<std::string>(itemName, strData);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    std::string readStr;
+    REQUIRE(!strData.empty());
+    // We need to add one byte because of the null terminator
+    readStr.resize(strData.length() * 2);
+    res = WUPSStorageAPI::Get<std::string>(itemName, readStr, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(isEqual(strData, readStr));
+}
+
+void test_string_get_RESIZE_EXISTING_BUFFER_generic(std::string &strData, uint32_t buffer_size) {
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    constexpr auto *itemName = "item";
+
+    res = WUPSStorageAPI::Store<std::string>(itemName, strData);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+
+    std::string readStr;
+    REQUIRE(!strData.empty());
+
+    readStr.resize(buffer_size);
+    res = WUPSStorageAPI::Get<std::string>(itemName, readStr, WUPSStorageAPI::GetOptions::RESIZE_EXISTING_BUFFER);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(isEqual(strData, readStr));
+}
+
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get string works if buffer is too small") {
+    std::string strData = "Random string I just need for this test.";
+    test_string_get_RESIZE_EXISTING_BUFFER_generic(strData, 0);
+}
+
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get string works if buffer is perfect") {
+    std::string strData = "Random string I just need for this test.";
+    test_string_get_RESIZE_EXISTING_BUFFER_generic(strData, strData.length() + 1); //add null terminator
+}
+TEST_CASE("RESIZE_EXISTING_BUFFER: Get string works if buffer is too big") {
+    std::string strData = "Random string I just need for this test.";
+    test_string_get_RESIZE_EXISTING_BUFFER_generic(strData, strData.length() * 2);
 }
 
 TEST_CASE("Create two sub-items, storing in first still works") {
