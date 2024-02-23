@@ -894,7 +894,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<int32_t>(wups_storage_item parent, std::string_view key, int32_t &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<int32_t>(wups_storage_item parent, std::string_view key, int32_t &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetS32(parent, key.data(), &outValue);
     }
 
@@ -912,7 +912,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<int64_t>(wups_storage_item parent, std::string_view key, int64_t &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<int64_t>(wups_storage_item parent, std::string_view key, int64_t &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetS64(parent, key.data(), &outValue);
     }
 
@@ -930,7 +930,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<uint32_t>(wups_storage_item parent, std::string_view key, uint32_t &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<uint32_t>(wups_storage_item parent, std::string_view key, uint32_t &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetU32(parent, key.data(), &outValue);
     }
 
@@ -948,7 +948,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<uint64_t>(wups_storage_item parent, std::string_view key, uint64_t &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<uint64_t>(wups_storage_item parent, std::string_view key, uint64_t &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetU64(parent, key.data(), &outValue);
     }
 
@@ -966,7 +966,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<bool>(wups_storage_item parent, std::string_view key, bool &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<bool>(wups_storage_item parent, std::string_view key, bool &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetBool(parent, key.data(), &outValue);
     }
 
@@ -984,7 +984,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<float>(wups_storage_item parent, std::string_view key, float &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<float>(wups_storage_item parent, std::string_view key, float &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetFloat(parent, key.data(), &outValue);
     }
 
@@ -1002,7 +1002,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<>
-    inline WUPSStorageError GetEx<double>(wups_storage_item parent, std::string_view key, double &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx<double>(wups_storage_item parent, std::string_view key, double &outValue, GetOptions /* options */) noexcept {
         return WUPSStorageAPI_GetDouble(parent, key.data(), &outValue);
     }
 
@@ -1025,7 +1025,7 @@ namespace WUPSStorageAPI {
      * \see WUPSStorageAPI_GetItem
      */
     template<typename T>
-    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue, GetOptions options) noexcept {
+    inline WUPSStorageError GetEx(wups_storage_item parent, std::string_view key, T &outValue, GetOptions /* options */) noexcept {
         static_assert(sizeof(T) == sizeof(uint32_t) && std::is_enum<T>::value, "T must be an enum of size sizeof(uint32_t)");
         return WUPSStorageAPI_GetU32(parent, key.data(), (uint32_t *) &outValue);
     }
