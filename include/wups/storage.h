@@ -437,7 +437,7 @@ inline WUPSStorageError WUPSStorageAPI_StoreDouble(wups_storage_item parent, con
 * \see WUPSStorageAPI_StoreItem
 */
 inline WUPSStorageError WUPSStorageAPI_StoreBinary(wups_storage_item parent, const char *key, const void *data, uint32_t size) {
-    if (data == NULL) {
+    if (data == NULL && size > 0) {
         return WUPS_STORAGE_ERROR_INVALID_ARGS;
     }
     return WUPSStorageAPI_StoreItem(parent, key, WUPS_STORAGE_ITEM_BINARY, (void *) data, size);
@@ -1062,6 +1062,9 @@ namespace WUPSStorageAPI {
                 auto r                = WUPSStorageAPI_GetItemSize(parent, key.data(), WUPS_STORAGE_ITEM_BINARY, &resizeToSize);
                 if (r == WUPS_STORAGE_ERROR_SUCCESS) {
                     outValue.resize(resizeToSize);
+                    if (resizeToSize == 0) {
+                        return WUPS_STORAGE_ERROR_SUCCESS;
+                    }
                 } else {
                     return r;
                 }
