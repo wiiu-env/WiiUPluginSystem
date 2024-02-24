@@ -928,3 +928,54 @@ TEST_CASE("Load stored item from deleted sub-item should fail") {
     REQUIRE(res == WUPS_STORAGE_ERROR_NOT_FOUND);
     REQUIRE(readValue == 0);
 }
+
+TEST_CASE("Test GetOrStoreDefault with no existing value") {
+    // make sure storage is closed
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::string target        = "will be discarded";
+    std::string default_value = "new_default";
+    res                       = WUPSStorageAPI::GetOrStoreDefault("test", target, default_value);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(target == default_value);
+}
+
+TEST_CASE("Test GetOrStoreDefault with existing value") {
+    // make sure storage is closed
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::string original_value = "original_value";
+    std::string target         = original_value;
+    res                        = WUPSStorageAPI::Store<std::string>("test", target);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::string default_value = "new_default";
+    res                       = WUPSStorageAPI::GetOrStoreDefault("test", target, default_value);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(target == original_value);
+}
+
+TEST_CASE("Store empty string works") {
+    // make sure storage is closed
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::string empty_string;
+    res = WUPSStorageAPI::Store("test", empty_string);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::string get_test = "_";
+    res                  = WUPSStorageAPI::Get("test", get_test);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(get_test.empty());
+}
+
+TEST_CASE("Store empty binary works") {
+    // make sure storage is closed
+    auto res = WUPSStorageAPI::WipeStorage();
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::vector<uint8_t> empty_vector;
+    res = WUPSStorageAPI::Store("test", empty_vector);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    std::vector<uint8_t> get_vector{0x13, 0x37};
+    res = WUPSStorageAPI::Get("test", get_vector);
+    REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
+    REQUIRE(empty_vector.empty());
+}
