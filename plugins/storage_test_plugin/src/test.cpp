@@ -977,5 +977,5 @@ TEST_CASE("Store empty binary works") {
     std::vector<uint8_t> get_vector{0x13, 0x37};
     res = WUPSStorageAPI::Get("test", get_vector);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
-    REQUIRE(empty_vector.empty());
+    REQUIRE(get_vector.empty());
 }
