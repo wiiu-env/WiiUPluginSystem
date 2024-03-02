@@ -62,10 +62,10 @@ std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::Create
         if (defaultIndex != -1 && currentValueIndex != -1) {
             break;
         }
-        if (cur.value == defaultValue) {
+        if (cur.value == currentValue) {
             currentValueIndex = i;
         }
-        if (cur.value == currentValue) {
+        if (cur.value == defaultValue) {
             defaultIndex = i;
         }
         i++;
