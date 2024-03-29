@@ -21,7 +21,8 @@ public:
 
     WUPSConfigItem &operator=(WUPSConfigItem &&src) noexcept {
         if (this != &src) {
-            src.mHandle = {};
+            this->mHandle = src.mHandle;
+            src.mHandle   = {};
         }
         return *this;
     }
