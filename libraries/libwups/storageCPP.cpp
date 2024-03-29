@@ -85,7 +85,7 @@ std::optional<WUPSStorageSubItem> WUPSStorageSubItem::GetOrCreateSubItem(std::st
     wups_storage_item outItem = {};
     err                       = WUPSStorageAPI_GetSubItem(mHandle, key.data(), &outItem);
     if (err == WUPS_STORAGE_ERROR_NOT_FOUND) {
-        return CreateSubItem(key);
+        return CreateSubItem(key, err);
     }
     return WUPSStorageSubItem(outItem);
 }
