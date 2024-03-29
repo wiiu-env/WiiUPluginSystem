@@ -20,7 +20,8 @@ public:
 
     WUPSConfigCategory &operator=(WUPSConfigCategory &&src) noexcept {
         if (this != &src) {
-            src.mHandle = {};
+            this->mHandle = src.mHandle;
+            src.mHandle   = {};
         }
         return *this;
     }
