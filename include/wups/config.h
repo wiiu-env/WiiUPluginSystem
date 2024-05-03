@@ -61,8 +61,8 @@ typedef struct {
         VPADStatus data;
     } vpad;
     struct {
-        KPADError kpadError[4];
-        KPADStatus data[4];
+        KPADError kpadError[7];
+        KPADStatus data[7];
     } kpad;
 } WUPSConfigComplexPadData;
 
