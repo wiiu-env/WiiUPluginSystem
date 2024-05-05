@@ -6,7 +6,7 @@ jobs:
   clang-format-lib:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: clang-format
       run: |
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./include ./libraries
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: clang-format-lib
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build binary
       run: |
         docker build . -f Dockerfile.buildlocal -t builder
@@ -26,7 +26,7 @@ jobs:
   clang-format-examples:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: clang-format
       run: |
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin/src
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: clang-format-examples
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build binary
       run: |
         docker build . -f Dockerfile.buildexamples -t builder
