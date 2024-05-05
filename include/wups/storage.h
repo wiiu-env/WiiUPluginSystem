@@ -703,6 +703,8 @@ namespace WUPSStorageAPI {
 
     /**
      * @brief Forces a reload of storage data.
+     * Any existing (sub-)item pointers (including the root item9will be invalid after calling this.
+     * They need to be re-obtained via \see WUPSStorageAPI_GetRootItem , \see WUPSStorageAPI_GetSubItem or similar functions.
      * @return WUPSStorageError WUPS_STORAGE_ERROR_SUCCESS on success, otherwise an appropriate error code.
      * \see WUPSStorageAPI_ForceReloadStorage
      */
