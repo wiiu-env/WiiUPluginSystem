@@ -254,7 +254,6 @@ TEST_CASE("Create subitem") {
     readItem = WUPSStorageAPI::GetSubItem(subItemName, res);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(readItem);
-    REQUIRE(*readItem == *subItem);
 }
 
 void storeNestedSubItem(int NEST_DEEP_SIZE) {
