@@ -35,6 +35,7 @@ jobs:
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/storage_test_plugin/src --exclude ./plugins/storage_test_plugin/src/catch2
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin/src
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin_cpp/src
+        docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin_cmake/src
   build-examples:
     runs-on: ubuntu-22.04
     needs: clang-format-examples
@@ -47,6 +48,8 @@ jobs:
         docker run --rm -v ${PWD}:/project builder make
         cd ../example_plugin_cpp
         docker run --rm -v ${PWD}:/project builder make
+        cd ../example_plugin_cmake
+        docker run --rm -v ${PWD}:/project builder /bin/bash -c "/opt/devkitpro/portlibs/wiiu/bin/powerpc-eabi-cmake -S . -B build && cd build && make"
         cd ../storage_test_plugin
         docker run --rm -v ${PWD}:/project builder make
   build-and-push-image:
