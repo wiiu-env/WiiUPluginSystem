@@ -214,11 +214,14 @@ const char *WUPSConfigAPI_GetStatusStr(WUPSConfigAPIStatus status);
  * Use this function if you want to change the behavior of a function replacement while
  * the user is interacting with the WUPS config menu.
  *
- * Note: if the backend is too old to export this function, the result is always false.
- *
- * @return true if the menu is open, false if the menu is closed.
+ * @param[out] isOpen Pointer to a BOOL variable to write the result, true if the menu is open.
+ * @return WUPSConfigAPIStatus The status code indicating the result of the operation:
+ *         - WUPSCONFIG_API_RESULT_SUCCESS: The result was written successfully to the isOpen argument.
+ *         - WUPSCONFIG_API_RESULT_INVALID_ARGUMENT: The isOpen argument is a null pointer.
+ *         - WUPSCONFIG_API_RESULT_LIB_UNINITIALIZED: The WUPSConfig API is not initialized.
+ *         - WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT: The function WUPSConfigAPI_GetMenuOpen was not found in the module.
  */
-BOOL WUPSConfigAPI_IsMenuOpen(void);
+WUPSConfigAPIStatus WUPSConfigAPI_GetMenuOpen(BOOL *isOpen);
 
 #ifdef __cplusplus
 }
