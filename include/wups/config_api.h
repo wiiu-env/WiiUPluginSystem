@@ -208,6 +208,18 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_Destroy(WUPSConfigItemHandle handle);
  */
 const char *WUPSConfigAPI_GetStatusStr(WUPSConfigAPIStatus status);
 
+/**
+ * @brief Checks if the WUPS config menu is open.
+ *
+ * Use this function if you want to change the behavior of a function replacement while
+ * the user is interacting with the WUPS config menu.
+ *
+ * Note: if the backend is too old to export this function, the result is always false.
+ *
+ * @return true if the menu is open, false if the menu is closed.
+ */
+BOOL WUPSConfigAPI_IsMenuOpen(void);
+
 #ifdef __cplusplus
 }
 #endif

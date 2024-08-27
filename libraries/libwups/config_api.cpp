@@ -13,6 +13,7 @@ static WUPSConfigAPIStatus (*sAPICategoryAddCategory)(WUPSConfigCategoryHandle p
 static WUPSConfigAPIStatus (*sAPICategoryAddItem)(WUPSConfigCategoryHandle parentHandle, WUPSConfigItemHandle itemHandle)                                                                           = nullptr;
 static WUPSConfigAPIStatus (*sAPIItemCreateEx)(WUPSConfigAPICreateItemOptions options, WUPSConfigItemHandle *out)                                                                                   = nullptr;
 static WUPSConfigAPIStatus (*sAPIItemDestroy)(WUPSConfigItemHandle handle)                                                                                                                          = nullptr;
+static BOOL (*sAPIIsMenuOpen)(void)                                                                                                                                                               = nullptr;
 
 static WUPSConfigAPIVersion sConfigAPIVersion = WUPS_CONFIG_API_VERSION_ERROR;
 
@@ -101,6 +102,8 @@ extern "C" WUPSConfigAPIStatus WUPSConfigAPI_InitLibrary_Internal(wups_loader_in
         WUPS_DEBUG_REPORT("libwups: FindExport WUPSConfigAPI_Item_Destroy failed.\n");
         return WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT;
     }
+    // This one is allowed to fail.
+    OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "WUPSConfigAPI_IsMenuOpen", (void **) &sAPIIsMenuOpen);
 
     sConfigLibInitDone      = true;
     sConfigPluginIdentifier = args.plugin_identifier;
@@ -242,4 +245,14 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_Destroy(WUPSConfigItemHandle handle) {
     }
 
     return sAPIItemDestroy(handle);
+}
+
+BOOL WUPSConfigAPI_IsMenuOpen(void) {
+    if (sConfigAPIVersion == WUPS_CONFIG_API_VERSION_ERROR) {
+        return false;
+    }
+    if (sAPIIsMenuOpen == nullptr) {
+        return false;
+    }
+    return sAPIIsMenuOpen();
 }
