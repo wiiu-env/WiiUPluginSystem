@@ -71,7 +71,7 @@ class WUPSConfigItemIntegerRange : public WUPSConfigItem {
 
 public:
     static std::optional<WUPSConfigItemIntegerRange> Create(
-            std::optional<std::string> identifier,
+            std::optional<std::string_view> identifier,
             std::string_view displayName,
             int32_t defaultValue, int32_t currentValue,
             int32_t minValue, int32_t maxValue,
@@ -79,7 +79,7 @@ public:
             WUPSConfigAPIStatus &err) noexcept;
 
     static WUPSConfigItemIntegerRange Create(
-            std::optional<std::string> identifier,
+            std::optional<std::string_view> identifier,
             std::string_view displayName,
             int32_t defaultValue, int32_t currentValue,
             int32_t minValue, int32_t maxValue,

@@ -89,12 +89,12 @@ WUPSConfigItemBoolean_AddToCategoryEx(WUPSConfigCategoryHandle cat,
 #include "WUPSConfigItem.h"
 #include <optional>
 #include <stdexcept>
-#include <string>
+#include <string_view>
 #include <wups/config_api.h>
 
 class WUPSConfigItemBoolean : public WUPSConfigItem {
 public:
-    static std::optional<WUPSConfigItemBoolean> CreateEx(std::optional<std::string> identifier,
+    static std::optional<WUPSConfigItemBoolean> CreateEx(std::optional<std::string_view> identifier,
                                                          std::string_view displayName,
                                                          bool defaultValue,
                                                          bool currentValue,
@@ -103,7 +103,7 @@ public:
                                                          std::string_view falseValue,
                                                          WUPSConfigAPIStatus &err) noexcept;
 
-    static WUPSConfigItemBoolean CreateEx(std::optional<std::string> identifier,
+    static WUPSConfigItemBoolean CreateEx(std::optional<std::string_view> identifier,
                                           std::string_view displayName,
                                           bool defaultValue,
                                           bool currentValue,
@@ -111,14 +111,14 @@ public:
                                           std::string_view trueValue,
                                           std::string_view falseValue);
 
-    static std::optional<WUPSConfigItemBoolean> Create(std::optional<std::string> identifier,
+    static std::optional<WUPSConfigItemBoolean> Create(std::optional<std::string_view> identifier,
                                                        std::string_view displayName,
                                                        bool defaultValue,
                                                        bool currentValue,
                                                        BooleanValueChangedCallback callback,
                                                        WUPSConfigAPIStatus &err) noexcept;
 
-    static WUPSConfigItemBoolean Create(std::optional<std::string> identifier,
+    static WUPSConfigItemBoolean Create(std::optional<std::string_view> identifier,
                                         std::string_view displayName,
                                         bool defaultValue,
                                         bool currentValue,

@@ -81,21 +81,21 @@ public:
         std::string_view name;
     };
 
-    static std::optional<WUPSConfigItemMultipleValues> CreateFromIndex(std::optional<const std::string> identifier,
+    static std::optional<WUPSConfigItemMultipleValues> CreateFromIndex(std::optional<std::string_view> identifier,
                                                                        std::string_view displayName,
                                                                        int defaultValueIndex, int currentValueIndex,
                                                                        const std::span<const ValuePair> &possibleValues,
                                                                        MultipleValuesChangedCallback valuesChangedCallback,
                                                                        WUPSConfigAPIStatus &err) noexcept;
 
-    static WUPSConfigItemMultipleValues CreateFromIndex(std::optional<const std::string> identifier,
+    static WUPSConfigItemMultipleValues CreateFromIndex(std::optional<std::string_view> identifier,
                                                         std::string_view displayName,
                                                         int defaultValueIndex, int currentValueIndex,
                                                         const std::span<const ValuePair> &possibleValues,
                                                         MultipleValuesChangedCallback valuesChangedCallback);
 
     static std::optional<WUPSConfigItemMultipleValues> CreateFromValue(
-            std::optional<const std::string> identifier,
+            std::optional<std::string_view> identifier,
             std::string_view displayName,
             uint32_t defaultValue, uint32_t currentValue,
             const std::span<const ValuePair> &possibleValues,
@@ -103,7 +103,7 @@ public:
             WUPSConfigAPIStatus &err) noexcept;
 
     static WUPSConfigItemMultipleValues CreateFromValue(
-            std::optional<const std::string> identifier,
+            std::optional<std::string_view> identifier,
             std::string_view displayName,
             int32_t defaultValue, int32_t currentValue,
             const std::span<const ValuePair> &possibleValues,

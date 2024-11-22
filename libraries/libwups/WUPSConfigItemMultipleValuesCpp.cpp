@@ -2,7 +2,7 @@
 
 
 std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::CreateFromIndex(
-        std::optional<const std::string> identifier,
+        std::optional<std::string_view> identifier,
         std::string_view displayName,
         int defaultValueIndex, int currentValueIndex,
         const std::span<const ValuePair> &possibleValues,
@@ -21,7 +21,7 @@ std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::Create
     }
     WUPSConfigItemHandle itemHandle;
     err = WUPSConfigItemMultipleValues_Create(
-            identifier ? identifier->c_str() : nullptr,
+            identifier ? identifier->data() : nullptr,
             displayName.data(),
             defaultValueIndex, currentValueIndex,
             values, (int32_t) possibleValues.size(),
@@ -35,13 +35,13 @@ std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::Create
 }
 
 WUPSConfigItemMultipleValues WUPSConfigItemMultipleValues::CreateFromIndex(
-        std::optional<const std::string> identifier,
+        std::optional<std::string_view> identifier,
         std::string_view displayName,
         int defaultValueIndex, int currentValueIndex,
         const std::span<const ValuePair> &possibleValues,
         MultipleValuesChangedCallback valuesChangedCallback) {
     WUPSConfigAPIStatus err = WUPSCONFIG_API_RESULT_UNKNOWN_ERROR;
-    auto result             = CreateFromIndex(std::move(identifier), displayName, defaultValueIndex, currentValueIndex, possibleValues, valuesChangedCallback, err);
+    auto result             = CreateFromIndex(identifier, displayName, defaultValueIndex, currentValueIndex, possibleValues, valuesChangedCallback, err);
     if (!result) {
         throw std::runtime_error(std::string("Failed to create WUPSConfigItemMultipleValues: ").append(WUPSConfigAPI_GetStatusStr(err)));
     }
@@ -49,7 +49,7 @@ WUPSConfigItemMultipleValues WUPSConfigItemMultipleValues::CreateFromIndex(
 }
 
 std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::CreateFromValue(
-        std::optional<const std::string> identifier,
+        std::optional<std::string_view> identifier,
         std::string_view displayName,
         uint32_t defaultValue, uint32_t currentValue,
         const std::span<const ValuePair> &possibleValues,
@@ -75,7 +75,7 @@ std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::Create
         return std::nullopt;
     }
 
-    return WUPSConfigItemMultipleValues::CreateFromIndex(std::move(identifier),
+    return WUPSConfigItemMultipleValues::CreateFromIndex(identifier,
                                                          displayName,
                                                          defaultIndex, currentValueIndex,
                                                          possibleValues,
@@ -84,12 +84,12 @@ std::optional<WUPSConfigItemMultipleValues> WUPSConfigItemMultipleValues::Create
 }
 
 WUPSConfigItemMultipleValues WUPSConfigItemMultipleValues::CreateFromValue(
-        std::optional<const std::string> identifier, std::string_view displayName,
+        std::optional<std::string_view> identifier, std::string_view displayName,
         int32_t defaultValue, int32_t currentValue,
         const std::span<const ValuePair> &possibleValues,
         MultipleValuesChangedCallback valuesChangedCallback) {
     WUPSConfigAPIStatus err = WUPSCONFIG_API_RESULT_UNKNOWN_ERROR;
-    auto result             = CreateFromValue(std::move(identifier),
+    auto result             = CreateFromValue(identifier,
                                               displayName,
                                               defaultValue, currentValue,
                                               possibleValues,

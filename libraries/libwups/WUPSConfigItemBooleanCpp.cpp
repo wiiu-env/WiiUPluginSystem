@@ -1,6 +1,6 @@
 #include "wups/config/WUPSConfigItemBoolean.h"
 
-std::optional<WUPSConfigItemBoolean> WUPSConfigItemBoolean::CreateEx(std::optional<std::string> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, std::string_view trueValue, std::string_view falseValue, WUPSConfigAPIStatus &err) noexcept {
+std::optional<WUPSConfigItemBoolean> WUPSConfigItemBoolean::CreateEx(std::optional<std::string_view> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, std::string_view trueValue, std::string_view falseValue, WUPSConfigAPIStatus &err) noexcept {
     WUPSConfigItemHandle itemHandle;
     if ((err = WUPSConfigItemBoolean_CreateEx(identifier ? identifier->data() : nullptr,
                                               displayName.data(),
@@ -13,22 +13,22 @@ std::optional<WUPSConfigItemBoolean> WUPSConfigItemBoolean::CreateEx(std::option
     }
     return WUPSConfigItemBoolean(itemHandle);
 }
-WUPSConfigItemBoolean WUPSConfigItemBoolean::CreateEx(std::optional<std::string> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, std::string_view trueValue, std::string_view falseValue) {
+WUPSConfigItemBoolean WUPSConfigItemBoolean::CreateEx(std::optional<std::string_view> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, std::string_view trueValue, std::string_view falseValue) {
     WUPSConfigAPIStatus err;
-    auto result = CreateEx(std::move(identifier), displayName, defaultValue, currentValue, callback, trueValue, falseValue, err);
+    auto result = CreateEx(identifier, displayName, defaultValue, currentValue, callback, trueValue, falseValue, err);
     if (!result) {
         throw std::runtime_error(std::string("Failed to create WUPSConfigItemBoolean: ").append(WUPSConfigAPI_GetStatusStr(err)));
     }
     return std::move(*result);
 }
 
-std::optional<WUPSConfigItemBoolean> WUPSConfigItemBoolean::Create(std::optional<std::string> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, WUPSConfigAPIStatus &err) noexcept {
-    return CreateEx(std::move(identifier), displayName, defaultValue, currentValue, callback, "true", "false", err);
+std::optional<WUPSConfigItemBoolean> WUPSConfigItemBoolean::Create(std::optional<std::string_view> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback, WUPSConfigAPIStatus &err) noexcept {
+    return CreateEx(identifier, displayName, defaultValue, currentValue, callback, "true", "false", err);
 }
 
-WUPSConfigItemBoolean WUPSConfigItemBoolean::Create(std::optional<std::string> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback) {
+WUPSConfigItemBoolean WUPSConfigItemBoolean::Create(std::optional<std::string_view> identifier, std::string_view displayName, bool defaultValue, bool currentValue, BooleanValueChangedCallback callback) {
     WUPSConfigAPIStatus err = WUPSCONFIG_API_RESULT_UNKNOWN_ERROR;
-    auto res                = Create(std::move(identifier), displayName, defaultValue, currentValue, callback, err);
+    auto res                = Create(identifier, displayName, defaultValue, currentValue, callback, err);
     if (!res) {
         throw std::runtime_error(std::string("Failed to create WUPSConfigItemBoolean: ").append(WUPSConfigAPI_GetStatusStr(err)));
     }
