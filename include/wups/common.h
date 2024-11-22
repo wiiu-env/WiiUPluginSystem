@@ -38,11 +38,16 @@
 extern "C" {
 #endif
 
-#define WUPS_SECTION(x) __attribute__((__section__(".wups." x)))
+#ifdef __cplusplus
+#define WUPS_EXTERN_C extern "C"
+#else
+#define WUPS_EXTERN_C
+#endif
+
+#define WUPS_SECTION(x) WUPS_EXTERN_C __attribute__((__section__(".wups." x), used))
 
 #define WUPS_META(id, value)                                 \
-    extern const char wups_meta_##id[] WUPS_SECTION("meta"); \
-    const char wups_meta_##id[] = #id "=" value
+    WUPS_SECTION("meta") const char wups_meta_##id[] = #id "=" value
 
 #ifdef __cplusplus
 }
