@@ -23,7 +23,7 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	:=	-g -O2 -Wall -Werror -save-temps \
+CFLAGS	:=	-g -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
