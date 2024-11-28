@@ -13,7 +13,7 @@ static WUPSConfigAPIStatus (*sAPICategoryAddCategory)(WUPSConfigCategoryHandle p
 static WUPSConfigAPIStatus (*sAPICategoryAddItem)(WUPSConfigCategoryHandle parentHandle, WUPSConfigItemHandle itemHandle)                                                                           = nullptr;
 static WUPSConfigAPIStatus (*sAPIItemCreateEx)(WUPSConfigAPICreateItemOptions options, WUPSConfigItemHandle *out)                                                                                   = nullptr;
 static WUPSConfigAPIStatus (*sAPIItemDestroy)(WUPSConfigItemHandle handle)                                                                                                                          = nullptr;
-static WUPSConfigAPIStatus (*sAPIGetMenuOpen)(BOOL *out)                                                                                                                                            = nullptr;
+static WUPSConfigAPIStatus (*sAPIMenuGetStatus)(WUPSConfigAPIMenuStatus *status)                                                                                                                    = nullptr;
 
 static WUPSConfigAPIVersion sConfigAPIVersion = WUPS_CONFIG_API_VERSION_ERROR;
 
@@ -103,7 +103,7 @@ extern "C" WUPSConfigAPIStatus WUPSConfigAPI_InitLibrary_Internal(wups_loader_in
         return WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT;
     }
     // This one is allowed to fail.
-    OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "WUPSConfigAPI_GetMenuOpen", (void **) &sAPIGetMenuOpen);
+    OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "WUPSConfigAPI_Menu_GetStatus", (void **) &sAPIMenuGetStatus);
 
     sConfigLibInitDone      = true;
     sConfigPluginIdentifier = args.plugin_identifier;
@@ -247,12 +247,12 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_Destroy(WUPSConfigItemHandle handle) {
     return sAPIItemDestroy(handle);
 }
 
-WUPSConfigAPIStatus WUPSConfigAPI_GetMenuOpen(BOOL *out) {
+WUPSConfigAPIStatus WUPSConfigAPI_Menu_GetStatus(WUPSConfigAPIMenuStatus *out) {
     if (sConfigAPIVersion == WUPS_CONFIG_API_VERSION_ERROR) {
         return WUPSCONFIG_API_RESULT_LIB_UNINITIALIZED;
     }
-    if (sAPIGetMenuOpen == nullptr) {
+    if (sAPIMenuGetStatus == nullptr) {
         return WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT;
     }
-    return sAPIGetMenuOpen(out);
+    return sAPIMenuGetStatus(out);
 }
