@@ -294,3 +294,8 @@ typedef struct wups_loader_init_config_args_t {
     uint32_t arg_version;
     uint32_t plugin_identifier;
 } wups_loader_init_config_args_t;
+
+typedef enum WUPSConfigAPIMenuStatus {
+    WUPSCONFIG_API_MENU_STATUS_CLOSED = 0,
+    WUPSCONFIG_API_MENU_STATUS_OPENED = 1,
+} WUPSConfigAPIMenuStatus;

@@ -208,6 +208,23 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_Destroy(WUPSConfigItemHandle handle);
  */
 const char *WUPSConfigAPI_GetStatusStr(WUPSConfigAPIStatus status);
 
+/**
+ * @brief Checks if the WUPS config menu is open.
+ *
+ * Use this function if you want to change the behavior of a function replacement while
+ * the user is interacting with the WUPS config menu.
+ *
+ * @param[out] status Pointer to a variable to write the menu status:
+ *         - `WUPSCONFIG_API_MENU_STATUS_CLOSED`
+ *         - `WUPSCONFIG_API_MENU_STATUS_OPENED`
+ * @return WUPSConfigAPIStatus The status code indicating the result of the operation:
+ *         - WUPSCONFIG_API_RESULT_SUCCESS: The result was written successfully to the `status` argument.
+ *         - WUPSCONFIG_API_RESULT_INVALID_ARGUMENT: The `status` argument is a null pointer.
+ *         - WUPSCONFIG_API_RESULT_LIB_UNINITIALIZED: The WUPSConfig API is not initialized.
+ *         - WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT: The function WUPSConfigAPI_GetMenuOpen was not found in the module.
+ */
+WUPSConfigAPIStatus WUPSConfigAPI_Menu_GetStatus(WUPSConfigAPIMenuStatus *status);
+
 #ifdef __cplusplus
 }
 #endif
