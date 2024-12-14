@@ -148,7 +148,8 @@ typedef struct wups_loader_entry_t {
 #define WUPS_MUST_REPLACE_FOR_PROCESS(x, lib, function_name, targetProcess)                         WUPS_MUST_REPLACE_EX(NULL, NULL, real_##x, lib, my_##x, function_name, targetProcess)
 
 #define WUPS_MUST_REPLACE_EX(pAddress, vAddress, original_func, rpl_type, replace_func, replace_function_name, process) \
-    WUPS_SECTION("load") const wups_loader_entry_t wups_load_##replace_func = {                                         \
+    WUPS_SECTION("load")                                                                                                \
+    const wups_loader_entry_t wups_load_##replace_func = {                                                              \
             .type      = WUPS_LOADER_ENTRY_FUNCTION_MANDATORY,                                                          \
             ._function = {                                                                                              \
                     .physical_address = (const void *) pAddress,                                                        \
