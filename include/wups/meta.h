@@ -50,14 +50,11 @@ extern "C" {
     WUPS___FINI_WRAPPER();                                                                                          \
     WUPS_INIT_CONFIG_FUNCTIONS();                                                                                   \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                                                               \
-    extern const char wups_meta_plugin_name[] WUPS_SECTION("meta");                                                 \
-    const char wups_meta_plugin_name[] = __plugin_name;                                                             \
-    extern const char wups_meta_info_dump[] WUPS_SECTION("meta");                                                   \
-    const char wups_meta_info_dump[] = "(plugin: " __plugin_name ";"                                                \
+    WUPS_SECTION("meta") const char wups_meta_plugin_name[] = __plugin_name;                                        \
+    WUPS_SECTION("meta") const char wups_meta_info_dump[] = "(plugin: " __plugin_name ";"                           \
                                        "wups " WUPS_VERSION_STR ";"                                                 \
                                        "buildtime: " __DATE__ " " __TIME__ ")";                                     \
-    extern const char wups_meta_info_linking_order[] WUPS_SECTION("meta");                                          \
-    const char wups_meta_info_linking_order[] = "Loading \"" __plugin_name "\" failed.\n"                           \
+    WUPS_SECTION("meta") const char wups_meta_info_linking_order[] = "Loading \"" __plugin_name "\" failed.\n"      \
                                                 "Function \"wut_get_thread_specific\" returned unexpected value.\n" \
                                                 "Please check linking order (expected \"-lwups -lwut\")";
 

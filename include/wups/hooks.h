@@ -23,8 +23,7 @@ extern "C" {
 #endif
 
 #define WUPS_HOOK_EX(type_def, original_func)                                         \
-    extern const wups_loader_hook_t wups_hooks_##original_func WUPS_SECTION("hooks"); \
-    const wups_loader_hook_t wups_hooks_##original_func = {                           \
+    WUPS_SECTION("hooks") const wups_loader_hook_t wups_hooks_##original_func = {     \
             .type   = type_def,                                                       \
             .target = (const void *) &(original_func)}
 
