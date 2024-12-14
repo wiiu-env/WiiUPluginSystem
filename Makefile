@@ -23,8 +23,9 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	:=	-g -O2 -Wall -Werror -save-temps \
+CFLAGS	:=	-g -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
+			-flto -ffat-lto-objects \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
 
