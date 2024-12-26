@@ -25,7 +25,6 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 CFLAGS	:=	-g -Wall -Werror -save-temps \
 			-ffunction-sections -fdata-sections \
-			-flto -ffat-lto-objects \
 			$(MACHDEP) \
 			$(BUILD_CFLAGS)
 
