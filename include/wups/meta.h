@@ -49,6 +49,7 @@ extern "C" {
     WUPS___INIT_WRAPPER();                                                                                          \
     WUPS___FINI_WRAPPER();                                                                                          \
     WUPS_INIT_CONFIG_FUNCTIONS();                                                                                   \
+    WUPS_INIT_BUTTON_COMBO_FUNCTIONS();                                                                             \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                                                               \
     WUPS_SECTION("meta")                                                                                            \
     const char wups_meta_plugin_name[] = __plugin_name;                                                             \
@@ -61,11 +62,10 @@ extern "C" {
                                                 "Function \"wut_get_thread_specific\" returned unexpected value.\n" \
                                                 "Please check linking order (expected \"-lwups -lwut\")";
 
-#define WUPS_PLUGIN_AUTHOR(x)          WUPS_META(author, x)
-#define WUPS_PLUGIN_VERSION(x)         WUPS_META(version, x)
-#define WUPS_PLUGIN_LICENSE(x)         WUPS_META(license, x)
-#define WUPS_PLUGIN_DESCRIPTION(x)     WUPS_META(description, x)
-#define WUPS_PLUGIN_CONFIG_REVISION(x) WUPS_META(config_revision, #x)
+#define WUPS_PLUGIN_AUTHOR(x)      WUPS_META(author, x)
+#define WUPS_PLUGIN_VERSION(x)     WUPS_META(version, x)
+#define WUPS_PLUGIN_LICENSE(x)     WUPS_META(license, x)
+#define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
 
 #ifdef __cplusplus
 }

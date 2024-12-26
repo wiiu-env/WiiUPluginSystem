@@ -1,9 +1,6 @@
 #pragma once
 
 #include "config.h"
-#include "config/WUPSConfigCategory.h"
-#include "config/WUPSConfigItem.h"
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -79,7 +76,7 @@ WUPSConfigAPIStatus WUPSConfigAPI_Category_CreateEx(WUPSConfigAPICreateCategoryO
  * a different category
  */
 static inline WUPSConfigAPIStatus WUPSConfigAPI_Category_Create(WUPSConfigAPICreateCategoryOptionsV1 options, WUPSConfigCategoryHandle *out) {
-    WUPSConfigAPICreateCategoryOptions optionsWrapper = {
+    const WUPSConfigAPICreateCategoryOptions optionsWrapper = {
             .version = WUPS_API_CATEGORY_OPTION_VERSION_V1,
             .data    = {.v1 = options},
     };
@@ -173,7 +170,7 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_CreateEx(WUPSConfigAPICreateItemOptions o
  * a category
  */
 static inline WUPSConfigAPIStatus WUPSConfigAPI_Item_Create(WUPSConfigAPIItemOptionsV2 options, WUPSConfigItemHandle *out) {
-    WUPSConfigAPICreateItemOptions itemOptions = {
+    const WUPSConfigAPICreateItemOptions itemOptions = {
             .version = WUPS_API_ITEM_OPTION_VERSION_V2,
             .data    = {.v2 = options},
     };
