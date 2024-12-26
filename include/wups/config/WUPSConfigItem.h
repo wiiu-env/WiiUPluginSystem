@@ -3,11 +3,10 @@
 #ifdef __cplusplus
 
 #include "wups/config.h"
-#include <coreinit/debug.h>
 
 class WUPSConfigItem {
 protected:
-    explicit WUPSConfigItem(WUPSConfigItemHandle itemHandle) : mHandle(itemHandle) {
+    explicit WUPSConfigItem(const WUPSConfigItemHandle itemHandle) : mHandle(itemHandle) {
     }
 
 public:

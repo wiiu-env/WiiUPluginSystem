@@ -29,7 +29,6 @@ WUPSConfigCategory WUPSConfigCategory::Create(std::string_view name) {
 
 bool WUPSConfigCategory::add(WUPSConfigCategory &&cat, WUPSConfigAPIStatus &error) noexcept {
     if (mHandle.handle == nullptr || cat.getHandle().handle == nullptr) {
-        OSReport("mHandle %08X item %08X\n", mHandle.handle, cat.getHandle().handle);
         return false;
     }
     if ((error = WUPSConfigAPI_Category_AddCategory(mHandle, cat.getHandle())) != WUPSCONFIG_API_RESULT_SUCCESS) {
@@ -48,7 +47,6 @@ void WUPSConfigCategory::add(WUPSConfigCategory &&cat) {
 
 bool WUPSConfigCategory::add(WUPSConfigItem &&item, WUPSConfigAPIStatus &error) noexcept {
     if (mHandle.handle == nullptr || item.getHandle().handle == nullptr) {
-        OSReport("mHandle %08X item %08X\n", mHandle.handle, item.getHandle().handle);
         error = WUPSCONFIG_API_RESULT_INVALID_ARGUMENT;
         return false;
     }
