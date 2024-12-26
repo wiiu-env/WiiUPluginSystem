@@ -2,6 +2,7 @@
 #include <coreinit/filesystem.h>
 #include <malloc.h>
 #include <wups.h>
+#include <wups/config/WUPSConfigCategory.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 #include <wups/config/WUPSConfigItemIntegerRange.h>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
