@@ -64,7 +64,7 @@ typedef WUPSButtonCombo_Error (*WUPSButtonCombo_UpdateButtonComboFunction)(void 
  */
 typedef WUPSButtonCombo_Error (*WUPSButtonCombo_UpdateHoldDurationFunction)(void *identifier,
                                                                             WUPSButtonCombo_ComboHandle handle,
-                                                                            uint32_t holdDurationInFrames);
+                                                                            uint32_t holdDurationInMs);
 
 /**
  * @typedef WUPSButtonCombo_GetButtonComboMetaFunction
