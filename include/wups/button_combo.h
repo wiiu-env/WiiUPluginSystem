@@ -138,7 +138,7 @@ typedef struct WUPSButtonCombo_ButtonComboOptions {
 typedef struct WUPSButtonCombo_ButtonComboInfoEx {
     WUPSButtonCombo_ComboType type;
     WUPSButtonCombo_ButtonComboOptions basicCombo;
-    uint32_t optionalHoldForXFrames;
+    uint32_t optionalHoldForXMs;
 } WUPSButtonCombo_ButtonComboInfoEx;
 
 typedef struct WUPSButtonCombo_ComboOptions {
@@ -205,11 +205,11 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const c
                                                                          WUPSButtonCombo_ComboHandle *outHandle,
                                                                          WUPSButtonCombo_ComboStatus *outStatus);
 /**
- * @brief Adds a button combo which triggers a callback if a certain button combination was hold for X frames on any controller.
+ * @brief Adds a button combo which triggers a callback if a certain button combination was hold for X ms on any controller.
  *
- * Registers a unique button combination which will trigger a callback if the combo is held for a certain amount of frames **on any connected controller** and the button combo is valid.
+ * Registers a unique button combination which will trigger a callback if the combo is held for a certain amount of ms **on any connected controller** and the button combo is valid.
  *
- * The callback is triggered if the given button combination has been held down for the given number of frames (frame rate might vary from game to game).
+ * The callback is triggered if the given button combination has been held down for at least X ms
  *
  * Conflict management:
  * The button combination is only active if this function returns WUPS_BUTTON_COMBO_ERROR_SUCCESS and outStatus is WUPS_BUTTON_COMBO_COMBO_STATUS_VALID.
@@ -225,15 +225,16 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const c
  *
  * @param label Label of this button combo
  * @param combo Combination which should be checked
- * @param holdDurationInFrames
- * @param callbackOptions Information about the callbacks that will be called if the combo is triggered
+ * @param holdDurationInMs
+ * @param callback
+ * @param context
  * @param outHandle The handle of the combo will be stored here. Must not be nullptr.
  * @param outStatus The status of the combo will be stored here. Only if the status is WUPS_BUTTON_COMBO_COMBO_STATUS_VALID the combo is valid. Must not be nullptr.
  * @return
  **/
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHold(const char *label,
                                                             WUPSButtonCombo_Buttons combo,
-                                                            uint32_t holdDurationInFrames,
+                                                            uint32_t holdDurationInMs,
                                                             WUPSButtonCombo_ComboCallback callback,
                                                             void *context,
                                                             WUPSButtonCombo_ComboHandle *outHandle,
@@ -241,7 +242,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHold(const char *label,
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldObserver(const char *label,
                                                                     WUPSButtonCombo_Buttons combo,
-                                                                    uint32_t holdDurationInFrames,
+                                                                    uint32_t holdDurationInMs,
                                                                     WUPSButtonCombo_ComboCallback callback,
                                                                     void *context,
                                                                     WUPSButtonCombo_ComboHandle *outHandle,
@@ -277,7 +278,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonCombo(WUPSButtonCombo_Combo
                                                            WUPSButtonCombo_ComboStatus *outStatus);
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateHoldDuration(WUPSButtonCombo_ComboHandle handle,
-                                                            uint32_t holdDurationInFrames);
+                                                            uint32_t holdDurationInMs);
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboMeta(WUPSButtonCombo_ComboHandle handle,
                                                             WUPSButtonCombo_MetaOptionsOut *outOptions);

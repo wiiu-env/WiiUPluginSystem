@@ -103,7 +103,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const c
 
 static WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldEx(const char *label,
                                                                      const WUPSButtonCombo_Buttons combo,
-                                                                     const uint32_t holdDurationInFrames,
+                                                                     const uint32_t holdDurationInMs,
                                                                      const WUPSButtonCombo_ComboCallback callback,
                                                                      void *context,
                                                                      const bool observer,
@@ -115,29 +115,29 @@ static WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldEx(const char 
     options.buttonComboOptions.type                      = observer ? WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD_OBSERVER : WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD;
     options.buttonComboOptions.basicCombo.combo          = combo;
     options.buttonComboOptions.basicCombo.controllerMask = WUPS_BUTTON_COMBO_CONTROLLER_ALL;
-    options.buttonComboOptions.optionalHoldForXFrames    = holdDurationInFrames;
+    options.buttonComboOptions.optionalHoldForXMs        = holdDurationInMs;
 
     return WUPSButtonComboAPI_AddButtonCombo(&options, outHandle, outStatus);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHold(const char *label,
                                                             const WUPSButtonCombo_Buttons combo,
-                                                            const uint32_t holdDurationInFrames,
+                                                            const uint32_t holdDurationInMs,
                                                             const WUPSButtonCombo_ComboCallback callback,
                                                             void *context,
                                                             WUPSButtonCombo_ComboHandle *outHandle,
                                                             WUPSButtonCombo_ComboStatus *outStatus) {
-    return WUPSButtonComboAPI_AddButtonComboHoldEx(label, combo, holdDurationInFrames, callback, context, false, outHandle, outStatus);
+    return WUPSButtonComboAPI_AddButtonComboHoldEx(label, combo, holdDurationInMs, callback, context, false, outHandle, outStatus);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldObserver(const char *label,
                                                                     const WUPSButtonCombo_Buttons combo,
-                                                                    const uint32_t holdDurationInFrames,
+                                                                    const uint32_t holdDurationInMs,
                                                                     const WUPSButtonCombo_ComboCallback callback,
                                                                     void *context,
                                                                     WUPSButtonCombo_ComboHandle *outHandle,
                                                                     WUPSButtonCombo_ComboStatus *outStatus) {
-    return WUPSButtonComboAPI_AddButtonComboHoldEx(label, combo, holdDurationInFrames, callback, context, true, outHandle, outStatus);
+    return WUPSButtonComboAPI_AddButtonComboHoldEx(label, combo, holdDurationInMs, callback, context, true, outHandle, outStatus);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonCombo(const WUPSButtonCombo_ComboOptions *options,
@@ -233,14 +233,14 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonCombo(const WUPSButtonCombo
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateHoldDuration(const WUPSButtonCombo_ComboHandle handle,
-                                                            const uint32_t holdDurationInFrames) {
+                                                            const uint32_t holdDurationInMs) {
     if (__internal_functions.update_hold_duration_function_ptr == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    return __internal_functions.update_hold_duration_function_ptr(__internal_functions.identifier, handle, holdDurationInFrames);
+    return __internal_functions.update_hold_duration_function_ptr(__internal_functions.identifier, handle, holdDurationInMs);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboMeta(const WUPSButtonCombo_ComboHandle handle,
