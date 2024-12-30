@@ -4,7 +4,6 @@
 
 #include "WUPSConfigItem.h"
 #include <optional>
-#include <stdexcept>
 #include <string>
 
 class WUPSConfigCategory {
@@ -14,17 +13,11 @@ public:
 
     WUPSConfigCategory(const WUPSConfigCategory &) = delete;
 
-    WUPSConfigCategory(WUPSConfigCategory &&src) noexcept : mHandle(src.mHandle) {
-        src.mHandle = {};
-    }
+    WUPSConfigCategory(WUPSConfigCategory &&src) noexcept;
 
-    WUPSConfigCategory &operator=(WUPSConfigCategory &&src) noexcept {
-        if (this != &src) {
-            this->mHandle = src.mHandle;
-            src.mHandle   = {};
-        }
-        return *this;
-    }
+    WUPSConfigCategory &operator=(WUPSConfigCategory &&src) noexcept;
+
+    void releaseHandle() noexcept;
 
     static std::optional<WUPSConfigCategory> Create(std::string_view name, WUPSConfigAPIStatus &error) noexcept;
 
@@ -38,13 +31,9 @@ public:
 
     void add(WUPSConfigItem &&item);
 
-    [[nodiscard]] const WUPSConfigCategoryHandle &getHandle() const {
-        return mHandle;
-    }
+    [[nodiscard]] const WUPSConfigCategoryHandle &getHandle() const;
 
-    void release() {
-        mHandle = {};
-    }
+    void release();
 
 private:
     WUPSConfigCategoryHandle mHandle = {};

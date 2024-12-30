@@ -14,25 +14,15 @@ public:
 
     WUPSConfigItem(const WUPSConfigItem &) = delete;
 
-    WUPSConfigItem(WUPSConfigItem &&src) noexcept : mHandle(src.mHandle) {
-        src.mHandle = {};
-    }
+    WUPSConfigItem(WUPSConfigItem &&src) noexcept;
 
-    WUPSConfigItem &operator=(WUPSConfigItem &&src) noexcept {
-        if (this != &src) {
-            this->mHandle = src.mHandle;
-            src.mHandle   = {};
-        }
-        return *this;
-    }
+    WUPSConfigItem &operator=(WUPSConfigItem &&src) noexcept;
 
-    [[nodiscard]] const WUPSConfigItemHandle &getHandle() const {
-        return mHandle;
-    }
+    void releaseHandle() noexcept;
 
-    void release() {
-        mHandle = {};
-    }
+    [[nodiscard]] const WUPSConfigItemHandle &getHandle() const;
+
+    void release();
 
 private:
     WUPSConfigItemHandle mHandle = {};
