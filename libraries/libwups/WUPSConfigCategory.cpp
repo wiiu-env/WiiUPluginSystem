@@ -1,12 +1,34 @@
 #include <wups/config/WUPSConfigCategory.h>
 #include <wups/config_api.h>
 
-WUPSConfigCategory::WUPSConfigCategory(WUPSConfigCategoryHandle handle) noexcept : mHandle(handle) {
+#include <stdexcept>
+
+WUPSConfigCategory::WUPSConfigCategory(const WUPSConfigCategoryHandle handle) noexcept : mHandle(handle) {
 }
 
 WUPSConfigCategory::~WUPSConfigCategory() {
+    releaseHandle();
+}
+
+WUPSConfigCategory::WUPSConfigCategory(WUPSConfigCategory &&src) noexcept {
+    releaseHandle();
+    mHandle     = src.mHandle;
+    src.mHandle = {};
+}
+
+WUPSConfigCategory &WUPSConfigCategory::operator=(WUPSConfigCategory &&src) noexcept {
+    if (this != &src) {
+        releaseHandle();
+        this->mHandle = src.mHandle;
+        src.mHandle   = {};
+    }
+    return *this;
+}
+
+void WUPSConfigCategory::releaseHandle() noexcept {
     if (mHandle.handle != nullptr) {
         WUPSConfigAPI_Category_Destroy(mHandle);
+        mHandle.handle = nullptr;
     }
 }
 
@@ -18,7 +40,7 @@ std::optional<WUPSConfigCategory> WUPSConfigCategory::Create(std::string_view na
     return WUPSConfigCategory(catHandle);
 }
 
-WUPSConfigCategory WUPSConfigCategory::Create(std::string_view name) {
+WUPSConfigCategory WUPSConfigCategory::Create(const std::string_view name) {
     WUPSConfigAPIStatus error;
     auto res = Create(name, error);
     if (!res) {
@@ -62,4 +84,12 @@ void WUPSConfigCategory::add(WUPSConfigItem &&item) {
     if (!add(std::move(item), err)) {
         throw std::runtime_error{"Failed to add item to category"};
     }
+}
+
+const WUPSConfigCategoryHandle &WUPSConfigCategory::getHandle() const {
+    return mHandle;
+}
+
+void WUPSConfigCategory::release() {
+    mHandle = {};
 }
