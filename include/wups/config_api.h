@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config.h"
+#include "config/WUPSConfigCategory.h"
+#include "config/WUPSConfigItem.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
