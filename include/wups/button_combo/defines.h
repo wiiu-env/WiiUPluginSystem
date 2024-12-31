@@ -114,7 +114,7 @@ typedef struct WUPSButtonCombo_ComboHandle {
 #endif
 } WUPSButtonCombo_ComboHandle;
 
-typedef void (*WUPSButtonCombo_ComboCallback)(WUPSButtonCombo_ComboHandle handle, void *context);
+typedef void (*WUPSButtonCombo_ComboCallback)(WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle handle, void *context);
 
 typedef struct WUPSButtonCombo_MetaOptions {
     const char *label;
