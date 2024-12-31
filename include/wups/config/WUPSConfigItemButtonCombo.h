@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <wups/button_combo.h>
+#include <wups/button_combo/defines.h>
 #include <wups/config.h>
 
 #ifdef __cplusplus
