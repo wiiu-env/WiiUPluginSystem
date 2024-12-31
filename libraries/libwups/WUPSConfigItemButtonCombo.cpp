@@ -5,7 +5,7 @@
 #include <cstring>
 #include <string>
 #include <wups.h>
-#include <wups/button_combo.h>
+#include <wups/button_combo/api.h>
 #include <wups/config/WUPSConfigItemButtonCombo.h>
 
 namespace {

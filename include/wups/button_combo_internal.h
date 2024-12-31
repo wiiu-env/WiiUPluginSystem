@@ -1,5 +1,5 @@
 #pragma once
-#include <wups/button_combo.h>
+#include <wups/button_combo/defines.h>
 
 /**
  * @typedef WUPSButtonCombo_AddButtonComboFunction

@@ -1,5 +1,5 @@
 #include <cstdint>
-#include <wups/button_combo.h>
+#include <wups/button_combo/api.h>
 #include <wups/button_combo_internal.h>
 
 struct wups_internal_button_combo_functions_t {
