@@ -1,9 +1,8 @@
 #pragma once
-#include "WUPSButtonCombo.h"
 
-#include <optional>
+#include "defines.h"
+
 #include <stdint.h>
-#include <string_view>
 
 #ifdef __cplusplus
 extern "C" {
@@ -156,103 +155,106 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_DetectButtonCombo_Blocking(const WUPSBu
 #endif
 
 #ifdef __cplusplus
+
+#include "WUPSButtonCombo.h"
+#include <optional>
+#include <string_view>
+
 namespace WUPSButtonComboAPI {
-
-
     std::string_view GetStatusStr(WUPSButtonCombo_Error status);
 
-    std::optional<WUPSButtonCombo> CreateComboPressDownEx(std::string_view label,
-                                                          WUPSButtonCombo_ControllerTypes controllerMask,
-                                                          WUPSButtonCombo_Buttons combo,
-                                                          WUPSButtonCombo_ComboCallback callback,
-                                                          void *context,
-                                                          bool observer,
-                                                          WUPSButtonCombo_ComboStatus &outStatus,
-                                                          WUPSButtonCombo_Error &outError) noexcept;
+    std::optional<ButtonCombo> CreateComboPressDownEx(std::string_view label,
+                                                      WUPSButtonCombo_ControllerTypes controllerMask,
+                                                      WUPSButtonCombo_Buttons combo,
+                                                      WUPSButtonCombo_ComboCallback callback,
+                                                      void *context,
+                                                      bool observer,
+                                                      WUPSButtonCombo_ComboStatus &outStatus,
+                                                      WUPSButtonCombo_Error &outError) noexcept;
 
-    std::optional<WUPSButtonCombo> CreateComboPressDown(std::string_view label,
-                                                        WUPSButtonCombo_Buttons combo,
-                                                        WUPSButtonCombo_ComboCallback callback,
-                                                        void *context,
-                                                        WUPSButtonCombo_ComboStatus &outStatus,
-                                                        WUPSButtonCombo_Error &outError) noexcept;
+    std::optional<ButtonCombo> CreateComboPressDown(std::string_view label,
+                                                    WUPSButtonCombo_Buttons combo,
+                                                    WUPSButtonCombo_ComboCallback callback,
+                                                    void *context,
+                                                    WUPSButtonCombo_ComboStatus &outStatus,
+                                                    WUPSButtonCombo_Error &outError) noexcept;
 
-    std::optional<WUPSButtonCombo> CreateComboPressDownObserver(std::string_view label,
-                                                                WUPSButtonCombo_Buttons combo,
-                                                                WUPSButtonCombo_ComboCallback callback,
-                                                                void *context,
-                                                                WUPSButtonCombo_ComboStatus &outStatus,
-                                                                WUPSButtonCombo_Error &outError) noexcept;
+    std::optional<ButtonCombo> CreateComboPressDownObserver(std::string_view label,
+                                                            WUPSButtonCombo_Buttons combo,
+                                                            WUPSButtonCombo_ComboCallback callback,
+                                                            void *context,
+                                                            WUPSButtonCombo_ComboStatus &outStatus,
+                                                            WUPSButtonCombo_Error &outError) noexcept;
 
-    std::optional<WUPSButtonCombo> CreateComboHoldEx(std::string_view label,
-                                                     WUPSButtonCombo_ControllerTypes controllerMask,
-                                                     WUPSButtonCombo_Buttons combo,
-                                                     uint32_t holdDurationInMs,
-                                                     WUPSButtonCombo_ComboCallback callback,
-                                                     void *context,
-                                                     bool observer,
-                                                     WUPSButtonCombo_ComboStatus &outStatus,
-                                                     WUPSButtonCombo_Error &outError) noexcept;
-
-    std::optional<WUPSButtonCombo> CreateComboHold(std::string_view label,
-                                                   WUPSButtonCombo_Buttons combo,
-                                                   uint32_t holdDurationInMs,
-                                                   WUPSButtonCombo_ComboCallback callback,
-                                                   void *context,
-                                                   WUPSButtonCombo_ComboStatus &outStatus,
-                                                   WUPSButtonCombo_Error &outError) noexcept;
-
-    std::optional<WUPSButtonCombo> CreateComboHoldObserver(std::string_view label,
-                                                           WUPSButtonCombo_Buttons combo,
-                                                           uint32_t holdDurationInMs,
-                                                           WUPSButtonCombo_ComboCallback callback,
-                                                           void *context,
-                                                           WUPSButtonCombo_ComboStatus &outStatus,
-                                                           WUPSButtonCombo_Error &outError) noexcept;
-
-
-    WUPSButtonCombo CreateComboPressDownEx(std::string_view label,
-                                           WUPSButtonCombo_ControllerTypes controllerMask,
-                                           WUPSButtonCombo_Buttons combo,
-                                           WUPSButtonCombo_ComboCallback callback,
-                                           void *context,
-                                           bool observer,
-                                           WUPSButtonCombo_ComboStatus &outStatus);
-
-    WUPSButtonCombo CreateComboPressDown(std::string_view label,
-                                         WUPSButtonCombo_Buttons combo,
-                                         WUPSButtonCombo_ComboCallback callback,
-                                         void *context,
-                                         WUPSButtonCombo_ComboStatus &outStatus);
-
-    WUPSButtonCombo CreateComboPressDownObserver(std::string_view label,
+    std::optional<ButtonCombo> CreateComboHoldEx(std::string_view label,
+                                                 WUPSButtonCombo_ControllerTypes controllerMask,
                                                  WUPSButtonCombo_Buttons combo,
+                                                 uint32_t holdDurationInMs,
                                                  WUPSButtonCombo_ComboCallback callback,
                                                  void *context,
-                                                 WUPSButtonCombo_ComboStatus &outStatus);
+                                                 bool observer,
+                                                 WUPSButtonCombo_ComboStatus &outStatus,
+                                                 WUPSButtonCombo_Error &outError) noexcept;
 
-    WUPSButtonCombo CreateComboHoldEx(std::string_view label,
-                                      WUPSButtonCombo_ControllerTypes controllerMask,
-                                      WUPSButtonCombo_Buttons combo,
-                                      uint32_t holdDurationInMs,
-                                      WUPSButtonCombo_ComboCallback callback,
-                                      void *context,
-                                      bool observer,
-                                      WUPSButtonCombo_ComboStatus &outStatus);
+    std::optional<ButtonCombo> CreateComboHold(std::string_view label,
+                                               WUPSButtonCombo_Buttons combo,
+                                               uint32_t holdDurationInMs,
+                                               WUPSButtonCombo_ComboCallback callback,
+                                               void *context,
+                                               WUPSButtonCombo_ComboStatus &outStatus,
+                                               WUPSButtonCombo_Error &outError) noexcept;
 
-    WUPSButtonCombo CreateComboHold(std::string_view label,
-                                    WUPSButtonCombo_Buttons combo,
-                                    uint32_t holdDurationInMs,
-                                    WUPSButtonCombo_ComboCallback callback,
-                                    void *context,
-                                    WUPSButtonCombo_ComboStatus &outStatus);
+    std::optional<ButtonCombo> CreateComboHoldObserver(std::string_view label,
+                                                       WUPSButtonCombo_Buttons combo,
+                                                       uint32_t holdDurationInMs,
+                                                       WUPSButtonCombo_ComboCallback callback,
+                                                       void *context,
+                                                       WUPSButtonCombo_ComboStatus &outStatus,
+                                                       WUPSButtonCombo_Error &outError) noexcept;
 
-    WUPSButtonCombo CreateComboHoldObserver(std::string_view label,
-                                            WUPSButtonCombo_Buttons combo,
-                                            uint32_t holdDurationInMs,
-                                            WUPSButtonCombo_ComboCallback callback,
-                                            void *context,
-                                            WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboPressDownEx(std::string_view label,
+                                       WUPSButtonCombo_ControllerTypes controllerMask,
+                                       WUPSButtonCombo_Buttons combo,
+                                       WUPSButtonCombo_ComboCallback callback,
+                                       void *context,
+                                       bool observer,
+                                       WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboPressDown(std::string_view label,
+                                     WUPSButtonCombo_Buttons combo,
+                                     WUPSButtonCombo_ComboCallback callback,
+                                     void *context,
+                                     WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboPressDownObserver(std::string_view label,
+                                             WUPSButtonCombo_Buttons combo,
+                                             WUPSButtonCombo_ComboCallback callback,
+                                             void *context,
+                                             WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboHoldEx(std::string_view label,
+                                  WUPSButtonCombo_ControllerTypes controllerMask,
+                                  WUPSButtonCombo_Buttons combo,
+                                  uint32_t holdDurationInMs,
+                                  WUPSButtonCombo_ComboCallback callback,
+                                  void *context,
+                                  bool observer,
+                                  WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboHold(std::string_view label,
+                                WUPSButtonCombo_Buttons combo,
+                                uint32_t holdDurationInMs,
+                                WUPSButtonCombo_ComboCallback callback,
+                                void *context,
+                                WUPSButtonCombo_ComboStatus &outStatus);
+
+    ButtonCombo CreateComboHoldObserver(std::string_view label,
+                                        WUPSButtonCombo_Buttons combo,
+                                        uint32_t holdDurationInMs,
+                                        WUPSButtonCombo_ComboCallback callback,
+                                        void *context,
+                                        WUPSButtonCombo_ComboStatus &outStatus);
     WUPSButtonCombo_Error CheckComboAvailable(const WUPSButtonCombo_ButtonComboOptions &options,
                                               WUPSButtonCombo_ComboStatus &outStatus);
 
