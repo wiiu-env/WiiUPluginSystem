@@ -88,7 +88,7 @@ namespace {
         return res;
     }
 
-    bool checkForHold(ConfigItemButtonCombo *item) {
+    WUPSButtonCombo_Error checkForHold(ConfigItemButtonCombo *item) {
         const auto oldCombo = item->currentButtonCombo;
 
         auto buttonCombo = static_cast<WUPSButtonCombo_Buttons>(0);
@@ -99,15 +99,15 @@ namespace {
         options.abortButtonCombo = item->detectAbortButton;
         options.holdAbortForInMs = item->detectAbortHoldButtonInMs;
         options.holdComboForInMs = item->detectComboHoldDurationInMs;
-        if (const auto res = WUPSButtonComboAPI_DetectButtonCombo_Blocking(&options, &buttonCombo); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
+        if (const auto res = WUPSButtonComboAPI_DetectButtonCombo_Blocking(&options, &buttonCombo); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS && res != WUPS_BUTTON_COMBO_ERROR_ABORTED) {
             OSReport("WUPSButtonComboAPI_DetectButtonCombo_Blocking returned %s\n", WUPSButtonComboAPI_GetStatusStr(res));
-            return false;
+            return res;
         }
 
         WUPSButtonCombo_ComboStatus status = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
         if (const auto res = WUPSButtonComboAPI_UpdateButtonCombo(item->comboHandle, buttonCombo, &status); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
             OSReport("Failed to update combo info\n");
-            return false;
+            return WUPS_BUTTON_COMBO_ERROR_SUCCESS;
         }
         if (status != WUPS_BUTTON_COMBO_COMBO_STATUS_VALID) {
             // (Try) to restore "old" button combo
@@ -115,11 +115,11 @@ namespace {
             if (WUPSButtonComboAPI_UpdateButtonCombo(item->comboHandle, oldCombo, &status) == WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
                 OSReport("Failed to update combo info\n");
             }
-            return false;
+            return WUPS_BUTTON_COMBO_ERROR_UNKNOWN_ERROR;
         }
 
         item->currentButtonCombo = buttonCombo;
-        return true;
+        return WUPS_BUTTON_COMBO_ERROR_SUCCESS;
     }
 
     int32_t getCurrentValueDisplayGeneric(void *context, bool isSelected, char *out_buf, int32_t out_size) {
@@ -127,7 +127,7 @@ namespace {
 
         WUPSButtonCombo_ComboStatus comboStatus = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
         if (const auto res = WUPSButtonComboAPI_GetButtonComboStatus(item->comboHandle, &comboStatus); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
-            OSReport("WUPSConfigItemButtonCombo_getCurrentValueDisplayGeneric: GetButtonComboStatus returned %d\n", WUPSButtonComboAPI_GetStatusStr(res));
+            OSReport("WUPSConfigItemButtonCombo_getCurrentValueDisplayGeneric: GetButtonComboStatus returned %s\n", WUPSButtonComboAPI_GetStatusStr(res));
         }
 
         switch (item->itemState) {
@@ -142,7 +142,7 @@ namespace {
                     snprintf(out_buf, out_size, "<Hold new combo for %dms; hold %s to abort>", item->detectAbortHoldButtonInMs, getButtonChar(item->detectAbortButton));
                     return 0;
                 }
-                if (checkForHold(item)) {
+                if (const auto res = checkForHold(item); res == WUPS_BUTTON_COMBO_ERROR_SUCCESS || res == WUPS_BUTTON_COMBO_ERROR_ABORTED) {
                     item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_NONE;
                 } else {
                     item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD;
