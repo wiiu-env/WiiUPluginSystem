@@ -103,19 +103,19 @@ namespace WUPSButtonComboAPI {
         return std::move(*res);
     }
 
-    ButtonCombo CreatePressDown(const std::string_view label,
-                                const WUPSButtonCombo_Buttons combo,
-                                const WUPSButtonCombo_ComboCallback callback,
-                                void *context,
-                                WUPSButtonCombo_ComboStatus &outStatus) {
+    ButtonCombo CreateComboPressDown(const std::string_view label,
+                                     const WUPSButtonCombo_Buttons combo,
+                                     const WUPSButtonCombo_ComboCallback callback,
+                                     void *context,
+                                     WUPSButtonCombo_ComboStatus &outStatus) {
         return CreateComboPressDownEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, false, outStatus);
     }
 
-    ButtonCombo CreatePressDownObserver(const std::string_view label,
-                                        const WUPSButtonCombo_Buttons combo,
-                                        const WUPSButtonCombo_ComboCallback callback,
-                                        void *context,
-                                        WUPSButtonCombo_ComboStatus &outStatus) {
+    ButtonCombo CreateComboPressDownObserver(const std::string_view label,
+                                             const WUPSButtonCombo_Buttons combo,
+                                             const WUPSButtonCombo_ComboCallback callback,
+                                             void *context,
+                                             WUPSButtonCombo_ComboStatus &outStatus) {
         return CreateComboPressDownEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, true, outStatus);
     }
 
