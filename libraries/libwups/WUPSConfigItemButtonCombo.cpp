@@ -114,6 +114,8 @@ namespace {
         if (const auto res = WUPSButtonComboAPI_DetectButtonCombo_Blocking(&options, &buttonCombo); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS && res != WUPS_BUTTON_COMBO_ERROR_ABORTED) {
             OSReport("WUPSButtonComboAPI_DetectButtonCombo_Blocking returned %s\n", WUPSButtonComboAPI_GetStatusStr(res));
             return res;
+        } else if (res == WUPS_BUTTON_COMBO_ERROR_ABORTED) {
+            return res;
         }
 
         WUPSButtonCombo_ComboStatus status = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
