@@ -124,7 +124,7 @@ namespace {
         if (status != WUPS_BUTTON_COMBO_COMBO_STATUS_VALID) {
             // (Try) to restore "old" button combo
 
-            if (WUPSButtonComboAPI_UpdateButtonCombo(item->comboHandle, oldCombo, &status) == WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
+            if (WUPSButtonComboAPI_UpdateButtonCombo(item->comboHandle, oldCombo, &status) != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
                 OSReport("Failed to update combo info\n");
             }
             return WUPS_BUTTON_COMBO_ERROR_UNKNOWN_ERROR;
