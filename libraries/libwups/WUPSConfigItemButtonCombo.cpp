@@ -159,13 +159,17 @@ namespace {
                 if (const auto res = checkForHold(item); res == WUPS_BUTTON_COMBO_ERROR_SUCCESS || res == WUPS_BUTTON_COMBO_ERROR_ABORTED) {
                     item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_NONE;
                 } else {
-                    item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD;
+                    item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_CONFLICT_WAIT;
                     snprintf(out_buf, out_size, "ERROR: Conflict detected. Try again");
-                    OSSleepTicks(OSMillisecondsToTicks(2000));
                     return 0;
                 }
                 break;
             }
+            case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_CONFLICT_WAIT:
+                OSSleepTicks(OSMillisecondsToTicks(2000));
+                snprintf(out_buf, out_size, "ERROR: Conflict detected. Try again");
+                item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD;
+                return 0;
             case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_NONE:
                 break;
         }
