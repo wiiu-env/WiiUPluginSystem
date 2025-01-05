@@ -19,6 +19,16 @@ extern "C" {
 const char *WUPSButtonComboAPI_GetStatusStr(WUPSButtonCombo_Error status);
 
 /**
+ * @brief Get a string representation of the specified controller type.
+ *
+ * This function returns a string representation of the provided controller type.
+ *
+ * @param controller The controller to get the string representation for.
+ * @return A pointer to a string describing the provided controller.
+ **/
+const char *WUPSButtonComboAPI_GetControllerTypeStr(WUPSButtonCombo_ControllerTypes controller);
+
+/**
  * @brief Adds a button combo which triggers a callback if a certain button combination is pressed on any controller.
  *
  * Registers a unique button combination which will trigger a callback if the combo is pressed down **on any connected controller** and the button combo is valid
@@ -162,6 +172,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_DetectButtonCombo_Blocking(const WUPSBu
 
 namespace WUPSButtonComboAPI {
     std::string_view GetStatusStr(WUPSButtonCombo_Error status);
+    std::string_view GetControllerTypeStr(WUPSButtonCombo_ControllerTypes controller);
 
     std::optional<ButtonCombo> CreateComboPressDownEx(std::string_view label,
                                                       WUPSButtonCombo_ControllerTypes controllerMask,

@@ -66,6 +66,31 @@ const char *WUPSButtonComboAPI_GetStatusStr(const WUPSButtonCombo_Error status) 
     return "WUPS_BUTTON_COMBO_ERROR_UNKNOWN_ERROR";
 }
 
+const char *WUPSButtonComboAPI_GetControllerTypeStr(const WUPSButtonCombo_ControllerTypes controller) {
+    switch (controller) {
+        case WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0";
+        case WUPS_BUTTON_COMBO_CONTROLLER_VPAD_1:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_VPAD_1";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_1:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_1";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_2:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_2";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_3:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_3";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_4:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_4";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_5:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_5";
+        case WUPS_BUTTON_COMBO_CONTROLLER_WPAD_6:
+            return "WUPS_BUTTON_COMBO_CONTROLLER_WPAD_6";
+        default:;
+    }
+    return "<UNKNOWN OR MORE THAN ONE CONTROLLER>";
+}
+
 static WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressEx(const char *label,
                                                                       const WUPSButtonCombo_Buttons combo,
                                                                       const WUPSButtonCombo_ComboCallback callback,
