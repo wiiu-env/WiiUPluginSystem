@@ -151,7 +151,7 @@ namespace {
             case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_WAIT_FOR_HOLD: {
                 if (item->itemState == WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD) {
                     item->itemState = WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_WAIT_FOR_HOLD;
-                    snprintf(out_buf, out_size, "<Hold new combo for %dms; hold %s to abort>", item->detectAbortHoldButtonInMs, getButtonChar(item->detectAbortButton));
+                    snprintf(out_buf, out_size, "<Hold new combo for %dms; hold %s to abort>", item->detectComboHoldDurationInMs, getButtonChar(item->detectAbortButton));
                     return 0;
                 }
                 if (const auto res = checkForHold(item); res == WUPS_BUTTON_COMBO_ERROR_SUCCESS || res == WUPS_BUTTON_COMBO_ERROR_ABORTED) {
