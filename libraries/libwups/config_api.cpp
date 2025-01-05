@@ -103,7 +103,9 @@ extern "C" WUPSConfigAPIStatus WUPSConfigAPI_InitLibrary_Internal(wups_loader_in
         return WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT;
     }
     // This one is allowed to fail.
-    OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "WUPSConfigAPI_Menu_GetStatus", (void **) &sAPIMenuGetStatus);
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "WUPSConfigAPI_Menu_GetStatus", (void **) &sAPIMenuGetStatus) != OS_DYNLOAD_OK) {
+        WUPS_DEBUG_REPORT("libwups: FindExport WUPSConfigAPI_Menu_GetStatus failed.\n");
+    }
 
     sConfigLibInitDone      = true;
     sConfigPluginIdentifier = args.plugin_identifier;
@@ -247,12 +249,12 @@ WUPSConfigAPIStatus WUPSConfigAPI_Item_Destroy(WUPSConfigItemHandle handle) {
     return sAPIItemDestroy(handle);
 }
 
-WUPSConfigAPIStatus WUPSConfigAPI_Menu_GetStatus(WUPSConfigAPIMenuStatus *out) {
+WUPSConfigAPIStatus WUPSConfigAPI_Menu_GetStatus(WUPSConfigAPIMenuStatus *status) {
     if (sConfigAPIVersion == WUPS_CONFIG_API_VERSION_ERROR) {
         return WUPSCONFIG_API_RESULT_LIB_UNINITIALIZED;
     }
-    if (sAPIMenuGetStatus == nullptr) {
-        return WUPSCONFIG_API_RESULT_MODULE_MISSING_EXPORT;
+    if (sAPIMenuGetStatus == nullptr || sConfigAPIVersion < 2) {
+        return WUPSCONFIG_API_RESULT_UNSUPPORTED_COMMAND;
     }
-    return sAPIMenuGetStatus(out);
+    return sAPIMenuGetStatus(status);
 }
