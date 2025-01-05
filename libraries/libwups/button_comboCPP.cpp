@@ -7,6 +7,10 @@ namespace WUPSButtonComboAPI {
         return WUPSButtonComboAPI_GetStatusStr(status);
     }
 
+    std::string_view GetControllerTypeStr(const WUPSButtonCombo_ControllerTypes controller) {
+        return WUPSButtonComboAPI_GetControllerTypeStr(controller);
+    }
+
     std::optional<ButtonCombo> CreateComboPressDownEx(const std::string_view label,
                                                       const WUPSButtonCombo_ControllerTypes controllerMask,
                                                       const WUPSButtonCombo_Buttons combo,
