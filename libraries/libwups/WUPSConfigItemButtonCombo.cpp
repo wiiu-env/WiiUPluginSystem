@@ -65,6 +65,18 @@ namespace {
         if (value & WUPS_BUTTON_COMBO_BUTTON_RESERVED_BIT) {
             return "\ue01E";
         }
+        if (value & WUPS_BUTTON_COMBO_BUTTON_1) {
+            return "\uE047";
+        }
+        if (value & WUPS_BUTTON_COMBO_BUTTON_2) {
+            return "\uE048";
+        }
+        if (value & WUPS_BUTTON_COMBO_BUTTON_C) {
+            return "\uE04A";
+        }
+        if (value & WUPS_BUTTON_COMBO_BUTTON_Z) {
+            return "\uE04B";
+        }
         return "";
     }
 
