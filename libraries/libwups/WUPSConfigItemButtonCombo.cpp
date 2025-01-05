@@ -139,11 +139,6 @@ namespace {
     int32_t getCurrentValueDisplayGeneric(void *context, bool isSelected, char *out_buf, int32_t out_size) {
         auto *item = static_cast<ConfigItemButtonCombo *>(context);
 
-        WUPSButtonCombo_ComboStatus comboStatus = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
-        if (const auto res = WUPSButtonComboAPI_GetButtonComboStatus(item->comboHandle, &comboStatus); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
-            OSReport("WUPSConfigItemButtonCombo_getCurrentValueDisplayGeneric: GetButtonComboStatus returned %s\n", WUPSButtonComboAPI_GetStatusStr(res));
-        }
-
         switch (item->itemState) {
             case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_INVALID_HANDLE: {
                 snprintf(out_buf, out_size, "ERROR: Invalid combo handle");
@@ -172,6 +167,11 @@ namespace {
                 return 0;
             case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_NONE:
                 break;
+        }
+
+        WUPSButtonCombo_ComboStatus comboStatus = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
+        if (const auto res = WUPSButtonComboAPI_GetButtonComboStatus(item->comboHandle, &comboStatus); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
+            OSReport("WUPSConfigItemButtonCombo_getCurrentValueDisplayGeneric: GetButtonComboStatus returned %s\n", WUPSButtonComboAPI_GetStatusStr(res));
         }
 
         if (isSelected) {
