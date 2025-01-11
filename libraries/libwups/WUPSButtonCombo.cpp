@@ -1,8 +1,11 @@
 #include "wups/button_combo/WUPSButtonCombo.h"
 
-#include <coreinit/debug.h>
-#include <stdexcept>
 #include <wups/button_combo/api.h>
+
+#include <coreinit/debug.h>
+
+#include <stdexcept>
+#include <string>
 
 namespace WUPSButtonComboAPI {
     std::optional<ButtonCombo> ButtonCombo::Create(const WUPSButtonCombo_ComboOptions &options,
@@ -65,8 +68,9 @@ namespace WUPSButtonComboAPI {
         return WUPSButtonComboAPI_GetButtonComboStatus(mHandle, &outStatus);
     }
 
-    [[nodiscard]] WUPSButtonCombo_Error ButtonCombo::UpdateButtonComboMeta(const WUPSButtonCombo_MetaOptions &metaOptions) const {
-        return WUPSButtonComboAPI_UpdateButtonComboMeta(mHandle, &metaOptions);
+    [[nodiscard]] WUPSButtonCombo_Error ButtonCombo::UpdateButtonComboMeta(const MetaOptions &metaOptions) const {
+        const WUPSButtonCombo_MetaOptions options = {.label = metaOptions.label.c_str()};
+        return WUPSButtonComboAPI_UpdateButtonComboMeta(mHandle, &options);
     }
 
     [[nodiscard]] WUPSButtonCombo_Error ButtonCombo::UpdateButtonComboCallback(const WUPSButtonCombo_CallbackOptions &callbackOptions) const {
@@ -87,8 +91,15 @@ namespace WUPSButtonComboAPI {
         return WUPSButtonComboAPI_UpdateHoldDuration(mHandle, holdDurationInFrames);
     }
 
-    [[nodiscard]] WUPSButtonCombo_Error ButtonCombo::GetButtonComboMeta(WUPSButtonCombo_MetaOptionsOut &outOptions) const {
-        return WUPSButtonComboAPI_GetButtonComboMeta(mHandle, &outOptions);
+    [[nodiscard]] WUPSButtonCombo_Error ButtonCombo::GetButtonComboMeta(MetaOptions &outOptions) const {
+        outOptions.label.resize(512);
+        memset(outOptions.label.data(), 0, outOptions.label.size());
+        WUPSButtonCombo_MetaOptionsOut options;
+        options.labelBuffer       = outOptions.label.data();
+        options.labelBufferLength = outOptions.label.size();
+        const auto res            = WUPSButtonComboAPI_GetButtonComboMeta(mHandle, &options);
+        outOptions.label.resize(outOptions.label.find_first_of('\0'));
+        return res;
     }
 
     WUPSButtonCombo_Error ButtonCombo::GetButtonComboCallback(WUPSButtonCombo_CallbackOptions &outOptions) const {
