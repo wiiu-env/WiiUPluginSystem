@@ -5,10 +5,14 @@
 #include "defines.h"
 
 #include <optional>
+#include <string>
 
 namespace WUPSButtonComboAPI {
     class ButtonCombo {
     public:
+        struct MetaOptions {
+            std::string label;
+        };
         static std::optional<ButtonCombo> Create(const WUPSButtonCombo_ComboOptions &options,
                                                  WUPSButtonCombo_ComboStatus &outStatus,
                                                  WUPSButtonCombo_Error &outError) noexcept;
@@ -29,7 +33,7 @@ namespace WUPSButtonComboAPI {
 
         WUPSButtonCombo_Error GetButtonComboStatus(WUPSButtonCombo_ComboStatus &outStatus) const;
 
-        [[nodiscard]] WUPSButtonCombo_Error UpdateButtonComboMeta(const WUPSButtonCombo_MetaOptions &metaOptions) const;
+        [[nodiscard]] WUPSButtonCombo_Error UpdateButtonComboMeta(const MetaOptions &metaOptions) const;
 
         [[nodiscard]] WUPSButtonCombo_Error UpdateButtonComboCallback(const WUPSButtonCombo_CallbackOptions &callbackOptions) const;
 
@@ -41,7 +45,7 @@ namespace WUPSButtonComboAPI {
 
         [[nodiscard]] WUPSButtonCombo_Error UpdateHoldDuration(uint32_t holdDurationInFrames) const;
 
-        [[nodiscard]] WUPSButtonCombo_Error GetButtonComboMeta(WUPSButtonCombo_MetaOptionsOut &outOptions) const;
+        [[nodiscard]] WUPSButtonCombo_Error GetButtonComboMeta(MetaOptions &outOptions) const;
 
         WUPSButtonCombo_Error GetButtonComboCallback(WUPSButtonCombo_CallbackOptions &outOptions) const;
 
