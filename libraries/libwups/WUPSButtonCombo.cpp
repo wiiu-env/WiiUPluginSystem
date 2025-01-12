@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <cstring>
+
 namespace WUPSButtonComboAPI {
     std::optional<ButtonCombo> ButtonCombo::Create(const WUPSButtonCombo_ComboOptions &options,
                                                    WUPSButtonCombo_ComboStatus &outStatus,
