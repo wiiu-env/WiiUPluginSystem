@@ -1,8 +1,12 @@
-#include "catch2/catch_test_macros.hpp"
 #include "utils/logger.h"
 #include "utils/utils.h"
-#include <vector>
+
 #include <wups/storage.h>
+
+#include <catch2/catch_amalgamated.hpp>
+
+#include <vector>
+
 template<typename T>
 bool isEqual(const T &v1, const T &v2) {
     return v1 == v2;
@@ -636,7 +640,8 @@ TEST_CASE("USE_EXISTING_BUFFER: Get binary fails if buffer is too small") {
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(binaryData.size() - 1); // Make the buffer just a bit to small
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData,
+                                                    WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_BUFFER_TOO_SMALL);
 }
 
@@ -653,7 +658,8 @@ TEST_CASE("USE_EXISTING_BUFFER: Get binary works with exact buffer size") {
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(binaryData.size());
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData,
+                                                    WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(isEqual(binaryData, readBinaryData));
 }
@@ -671,7 +677,8 @@ TEST_CASE("USE_EXISTING_BUFFER: Get binary works if buffer is too big") {
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(binaryData.size() * 2);
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData,
+                                                    WUPSStorageAPI::GetOptions::USE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(isEqual(binaryData, readBinaryData));
 }
@@ -688,7 +695,8 @@ void test_binary_get_RESIZE_EXISTING_BUFFER_generic(std::vector<uint8_t> &binary
     std::vector<uint8_t> readBinaryData;
     REQUIRE(!binaryData.empty());
     readBinaryData.resize(buffer_size);
-    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData, WUPSStorageAPI::GetOptions::RESIZE_EXISTING_BUFFER);
+    res = WUPSStorageAPI::Get<std::vector<uint8_t>>(itemName, readBinaryData,
+                                                    WUPSStorageAPI::GetOptions::RESIZE_EXISTING_BUFFER);
     REQUIRE(res == WUPS_STORAGE_ERROR_SUCCESS);
     REQUIRE(isEqual(binaryData, readBinaryData));
 }
@@ -791,6 +799,7 @@ TEST_CASE("RESIZE_EXISTING_BUFFER: Get string works if buffer is perfect") {
     std::string strData = "Random string I just need for this test.";
     test_string_get_RESIZE_EXISTING_BUFFER_generic(strData, strData.length() + 1); //add null terminator
 }
+
 TEST_CASE("RESIZE_EXISTING_BUFFER: Get string works if buffer is too big") {
     std::string strData = "Random string I just need for this test.";
     test_string_get_RESIZE_EXISTING_BUFFER_generic(strData, strData.length() * 2);
