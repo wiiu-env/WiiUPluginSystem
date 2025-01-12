@@ -1,7 +1,8 @@
-#include "catch2/catch_config.hpp"
-#include "catch2/catch_session.hpp"
 #include "utils/logger.h"
+
 #include <wups.h>
+
+#include <catch2/catch_amalgamated.hpp>
 
 WUPS_PLUGIN_NAME("Storage_Test_Plugin");
 WUPS_PLUGIN_DESCRIPTION("This plugin tests the storage api");
