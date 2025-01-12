@@ -28,4 +28,4 @@ It's highly recommended to pin the version to the **latest date** instead of usi
 
 ## Format the code via docker
 
-`docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./include ./libraries ./plugins/example_plugin/src ./plugins/example_plugin_cpp/src  ./plugins/storage_test_plugin/src --exclude ./plugins/storage_test_plugin/src/catch2 -i`
+`docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./include ./libraries ./plugins/example_plugin/src ./plugins/example_plugin_cpp/src  ./plugins/storage_test_plugin/src --exclude ./plugins/storage_test_plugin/src/catch2 --exclude ./plugins/button_combo_test_plugin/src/catch2 -i`

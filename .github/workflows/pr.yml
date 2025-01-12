@@ -32,6 +32,7 @@ jobs:
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin/src
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/example_plugin_cpp/src
         docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/storage_test_plugin/src --exclude ./plugins/storage_test_plugin/src/catch2
+        docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./plugins/button_combo_test_plugin/src --exclude ./plugins/button_combo_test_plugin/src/catch2
   build-examples:
     runs-on: ubuntu-22.04
     needs: clang-format-examples
@@ -45,6 +46,8 @@ jobs:
         cd ../example_plugin_cpp
         docker run --rm -v ${PWD}:/project builder make
         cd ../storage_test_plugin
+        docker run --rm -v ${PWD}:/project builder make
+        cd ../button_combo_test_plugin
         docker run --rm -v ${PWD}:/project builder make
     - uses: actions/upload-artifact@master
       with:
