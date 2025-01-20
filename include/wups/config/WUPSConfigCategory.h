@@ -13,6 +13,8 @@ public:
 
     WUPSConfigCategory(const WUPSConfigCategory &) = delete;
 
+    WUPSConfigCategory &operator=(const WUPSConfigCategory &) = delete;
+
     WUPSConfigCategory(WUPSConfigCategory &&src) noexcept;
 
     WUPSConfigCategory &operator=(WUPSConfigCategory &&src) noexcept;
