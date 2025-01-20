@@ -1,13 +1,18 @@
 #include "utils/logger.h"
 #include <coreinit/filesystem.h>
-#include <malloc.h>
 #include <wups.h>
+#include <wups/button_combo/api.h>
 #include <wups/config/WUPSConfigCategory.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
+#include <wups/config/WUPSConfigItemButtonCombo.h>
 #include <wups/config/WUPSConfigItemIntegerRange.h>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
 #include <wups/config/WUPSConfigItemStub.h>
 #include <wups/config_api.h>
+
+#include <forward_list>
+
+#include <malloc.h>
 
 /**
     Mandatory plugin information.
@@ -20,6 +25,8 @@ WUPS_PLUGIN_AUTHOR("Maschell");
 WUPS_PLUGIN_LICENSE("BSD");
 
 #define LOG_FS_OPEN_CONFIG_ID             "logFSOpen"
+#define BUTTON_COMBO_PRESS_DOWN_CONFIG_ID "pressDownItem"
+#define BUTTON_COMBO_HOLD_CONFIG_ID       "holdItem"
 #define OTHER_EXAMPLE_BOOL_CONFIG_ID      "otherBoolItem"
 #define OTHER_EXAMPLE2_BOOL_CONFIG_ID     "other2BoolItem"
 #define INTEGER_RANGE_EXAMPLE_CONFIG_ID   "intRangeExample"
@@ -47,6 +54,14 @@ enum ExampleOptions {
 bool sLogFSOpen                    = LOF_FS_OPEN_DEFAULT_VALUE;
 int sIntegerRangeValue             = INTEGER_RANGE_DEFAULT_VALUE;
 ExampleOptions sExampleOptionValue = MULTIPLE_VALUES_DEFAULT_VALUE;
+
+static std::forward_list<WUPSButtonComboAPI::ButtonCombo> sButtonComboInstances;
+
+static WUPSButtonCombo_ComboHandle sPressDownExampleHandle(nullptr);
+static WUPSButtonCombo_ComboHandle sHoldExampleHandle(nullptr);
+
+WUPSButtonCombo_Buttons DEFAULT_PRESS_DOWN_BUTTON_COMBO = WUPS_BUTTON_COMBO_BUTTON_L | WUPS_BUTTON_COMBO_BUTTON_R;
+WUPSButtonCombo_Buttons DEFAULT_PRESS_HOLD_COMBO        = WUPS_BUTTON_COMBO_BUTTON_L | WUPS_BUTTON_COMBO_BUTTON_R | WUPS_BUTTON_COMBO_BUTTON_DOWN;
 
 /**
  * Callback that will be called if the config has been changed
@@ -84,6 +99,10 @@ void multipleValueItemChanged(ConfigItemIntegerRange *item, uint32_t newValue) {
     }
 }
 
+void buttonComboItemChanged(ConfigItemButtonCombo *item, uint32_t newValue) {
+    DEBUG_FUNCTION_LINE_INFO("New value in buttonComboItemChanged: %d for %s", newValue, item->identifier);
+}
+
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle) {
     // To use the C++ API, we create new WUPSConfigCategory from the root handle!
     WUPSConfigCategory root = WUPSConfigCategory(rootHandle);
@@ -116,6 +135,14 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
                                                     INTEGER_RANGE_DEFAULT_VALUE, sIntegerRangeValue,
                                                     0, 50,
                                                     &integerRangeItemChanged));
+
+        // To change a button combo, we can use the ButtonCombo ConfigItem
+        root.add(WUPSConfigItemButtonCombo::Create(BUTTON_COMBO_PRESS_DOWN_CONFIG_ID, "Press Down button combo",
+                                                   DEFAULT_PRESS_DOWN_BUTTON_COMBO, sPressDownExampleHandle,
+                                                   buttonComboItemChanged));
+        root.add(WUPSConfigItemButtonCombo::Create(BUTTON_COMBO_HOLD_CONFIG_ID, "Hold button combo",
+                                                   DEFAULT_PRESS_HOLD_COMBO, sHoldExampleHandle,
+                                                   buttonComboItemChanged));
 
 
         // To select value from an enum WUPSConfigItemMultipleValues fits the best.
@@ -152,7 +179,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
 
     // In case we don't like exception, we can use the API as well.
     // If we add a "WUPSConfigAPIStatus" reference to the API calls, the function won't throw an exception.
-    // Instead it will return std::optionals and write the result into the WUPSConfigAPIStatus.
+    // Instead, it will return std::optionals and write the result into the WUPSConfigAPIStatus.
     WUPSConfigAPIStatus err;
     auto categoryOpt = WUPSConfigCategory::Create("Just another Category", err);
     if (!categoryOpt) {
@@ -209,6 +236,157 @@ INITIALIZE_PLUGIN() {
         DEBUG_FUNCTION_LINE_ERR("GetOrStoreDefault failed: %s (%d)", WUPSStorageAPI_GetStatusStr(storageRes), storageRes);
     }
 
+    // To register a button combo, we can use the C++ wrapper class "WUPSButtonComboAPI::ButtonCombo".
+    // The combo will be added on construction of that wrapper, and removed again in the destructor. Use `std::move` to move it around.
+    // Like the C++ config api there are two versions of all function, one that throws an exception on error and one that returns a std::optional but set an additional error parameter.
+
+    // Example of the exception throwing API
+    try {
+        WUPSButtonCombo_ComboStatus comboStatus;
+        // Create a button combo which detects if a combo has been pressed down on any controller.
+        // This version will check for conflicts. It's useful to check for conflicts if you want to use that button combo for a global unique thing
+        // that's always possible, like taking screenshots.
+        WUPSButtonComboAPI::ButtonCombo buttonComboPressDown = WUPSButtonComboAPI::CreateComboPressDown(
+                "Example Plugin: Press Down test",
+                DEFAULT_PRESS_DOWN_BUTTON_COMBO, // L + R
+                [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
+                    DEBUG_FUNCTION_LINE_INFO("Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                },
+                nullptr,
+                comboStatus);
+        // On success, we can check if the combo is actually active by checking the combo status.
+        // If there is already another combo that conflicts with us, the status will be set to WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT
+        switch (comboStatus) {
+            case WUPS_BUTTON_COMBO_COMBO_STATUS_VALID:
+                DEBUG_FUNCTION_LINE_INFO("Button combo is valid and active");
+                break;
+            case WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT:
+                DEBUG_FUNCTION_LINE_INFO("Conflict detected for button combo");
+                break;
+            default:
+                DEBUG_FUNCTION_LINE_ERR("Invalid combo status");
+                break;
+        }
+        // We want to save the handle, so we can use it for the config menu
+        sPressDownExampleHandle = buttonComboPressDown.getHandle();
+        // BUT. We need to make sure to keep that button combo instance. Otherwise, the combo will be removed.
+        // We save it in this list, which gets cleared in DEINITIALIZE_PLUGIN
+        sButtonComboInstances.emplace_front(std::move(buttonComboPressDown));
+
+        // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // But we can also create button combos without caring about conflicts.
+        // E.g. when a new Aroma update is detected, the updater can be launched by holding the PLUS button. This should always be possible.
+
+        // If we don't want to check for conflicts, we need to create a "PressDownObserver"
+        WUPSButtonComboAPI::ButtonCombo buttonComboPressDownObserver = WUPSButtonComboAPI::CreateComboPressDownObserver(
+                "Example Plugin: Press Down observer test",
+                DEFAULT_PRESS_DOWN_BUTTON_COMBO, // L + R Even though this is same combo as in buttonComboPressDown an observer will ignore conflicts.
+                [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
+                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                },
+                nullptr,
+                comboStatus); // comboStatus will always be WUPS_BUTTON_COMBO_COMBO_STATUS_VALID for observers.
+
+        // Let's move this instance into the list as well. But in this case we don't need the handle
+        sButtonComboInstances.emplace_front(std::move(buttonComboPressDownObserver));
+
+        // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // In case of a conflict, the button combo instance will be returned, but the combo status will be WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT
+
+        // Let's create a button combo which will lead to a conflict. This time we want to check if a combo has been hold for 500ms. Conflicts are checked across
+        // non-observer combo types.
+        WUPSButtonComboAPI::ButtonCombo buttonComboHold = WUPSButtonComboAPI::CreateComboHold(
+                "Example Plugin: Hold test",
+                DEFAULT_PRESS_HOLD_COMBO, // L+R+DPAD+DOWN. This combo includes the combo "L+R" of the buttonComboPressDown, so this will lead to a conflict.
+                500,                      // We need to hold that combo for 500ms
+                [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
+                    DEBUG_FUNCTION_LINE_INFO("Button combo has been hold for 500ms by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                },
+                nullptr,
+                comboStatus); // comboStatus will always be WUPS_BUTTON_COMBO_COMBO_STATUS_VALID for observers.
+
+        switch (comboStatus) {
+            case WUPS_BUTTON_COMBO_COMBO_STATUS_VALID:
+                DEBUG_FUNCTION_LINE_INFO("Button combo is valid and active");
+                break;
+            case WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT:
+                DEBUG_FUNCTION_LINE_INFO("Conflict detected for button combo"); // <-- this is expected to happen
+                break;
+            default:
+                DEBUG_FUNCTION_LINE_ERR("Invalid combo status");
+                break;
+        }
+
+        // Once combo is in the "WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT" state it can only be valid again, if the combo or the controllerMask changes. Other combo won't ever affect this state of this combo
+        // We can easily update the button combo
+        if (const auto res = buttonComboHold.UpdateButtonCombo(WUPS_BUTTON_COMBO_BUTTON_ZR | WUPS_BUTTON_COMBO_BUTTON_R | WUPS_BUTTON_COMBO_BUTTON_DOWN, comboStatus); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
+            DEBUG_FUNCTION_LINE_INFO("Failed to update button combo");
+        } else {
+            DEBUG_FUNCTION_LINE_INFO("Updated button combo");
+            // Check the comboStatus after updating the combo
+            switch (comboStatus) {
+                case WUPS_BUTTON_COMBO_COMBO_STATUS_VALID:
+                    DEBUG_FUNCTION_LINE_INFO("Button combo is valid and active"); // <-- this is expected to happen
+                    break;
+                case WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT:
+                    DEBUG_FUNCTION_LINE_INFO("Conflict detected for button combo");
+                    break;
+                default:
+                    DEBUG_FUNCTION_LINE_ERR("Invalid combo status");
+                    break;
+            }
+        }
+
+        // We want to save the handle, so we can use it for the config menu
+        sHoldExampleHandle = buttonComboHold.getHandle();
+        // Let's move this instance into the list as well. But in this case we don't need the handle
+        sButtonComboInstances.emplace_front(std::move(buttonComboHold));
+
+        // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // If we want to create combo for only a specific controller (or specific controllers), we have to use the "Ex" functions.
+
+        // If we don't want to check for conflicts, we need to create a "PressDownObserver", but this time we have to provide a controllerMask and if it's a observer.
+        WUPSButtonComboAPI::ButtonCombo buttonComboPressDownExObserver = WUPSButtonComboAPI::CreateComboPressDownEx(
+                "Example Plugin: Press Down observer test",
+                WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0, // Define which controllers should be checked. Could be something (WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0 | WUPS_BUTTON_COMBO_CONTROLLER_VPAD).
+                DEFAULT_PRESS_DOWN_BUTTON_COMBO,     // L + R Even though this is same combo as in buttonComboPressDown an observer will ignore conflicts.
+                [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
+                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER WPAD_0] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                },
+                nullptr,
+                true,         // we want an observer
+                comboStatus); // comboStatus will always be WUPS_BUTTON_COMBO_COMBO_STATUS_VALID for observers.
+
+        // Let's move this instance into the list as well. But in this case we don't need the handle
+        sButtonComboInstances.emplace_front(std::move(buttonComboPressDownExObserver));
+    } catch (std::exception &e) {
+        DEBUG_FUNCTION_LINE_ERR("Caught exception: %s", e.what());
+    }
+
+
+    // But we can also use the version which doesn't throw any exceptions
+    WUPSButtonCombo_ComboStatus comboStatus;
+    WUPSButtonCombo_Error comboError;
+
+    // We add a "WUPSButtonCombo_Error" parameter at the end, the function will not throw any exception, but return a std::optional instead.
+    // Create an observer, because we don't care for conflicts.
+    std::optional<WUPSButtonComboAPI::ButtonCombo> buttonComboPressDownObserverOpt = WUPSButtonComboAPI::CreateComboPressDownObserver(
+            "Example Plugin: Press Down test 2",
+            WUPS_BUTTON_COMBO_BUTTON_X | WUPS_BUTTON_COMBO_BUTTON_Y,
+            [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
+                DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Other button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+            },
+            nullptr,
+            comboStatus,
+            comboError);
+    if (buttonComboPressDownObserverOpt && comboError == WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
+        // Creating was successful! Let's move it to the list as well.
+        sButtonComboInstances.emplace_front(std::move(*buttonComboPressDownObserverOpt));
+    }
+
     deinitLogging();
 }
 
@@ -216,6 +394,8 @@ INITIALIZE_PLUGIN() {
     Gets called when the plugin will be unloaded.
 **/
 DEINITIALIZE_PLUGIN() {
+    // Remove all button combos from this plugin.
+    sButtonComboInstances.clear();
     DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!");
 }
 
