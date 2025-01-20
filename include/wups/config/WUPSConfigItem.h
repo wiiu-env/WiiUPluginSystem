@@ -14,6 +14,8 @@ public:
 
     WUPSConfigItem(const WUPSConfigItem &) = delete;
 
+    WUPSConfigItem &operator=(const WUPSConfigItem &) = delete;
+
     WUPSConfigItem(WUPSConfigItem &&src) noexcept;
 
     WUPSConfigItem &operator=(WUPSConfigItem &&src) noexcept;
