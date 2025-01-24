@@ -3,12 +3,22 @@
 #include <wups/button_combo/defines.h>
 
 namespace WUPSButtonComboAPI {
-    std::string_view GetStatusStr(const WUPSButtonCombo_Error status) {
+    const char *GetStatusStr(const WUPSButtonCombo_Error status) {
         return WUPSButtonComboAPI_GetStatusStr(status);
     }
 
-    std::string_view GetControllerTypeStr(const WUPSButtonCombo_ControllerTypes controller) {
+    const char *GetControllerTypeStr(const WUPSButtonCombo_ControllerTypes controller) {
         return WUPSButtonComboAPI_GetControllerTypeStr(controller);
+    }
+
+    const char *GetComboStatusStr(WUPSButtonCombo_ComboStatus status) {
+        return WUPSButtonComboAPI_GetComboStatusStr(status);
+    }
+
+    std::optional<ButtonCombo> CreateComboEx(const WUPSButtonCombo_ComboOptions &options,
+                                             WUPSButtonCombo_ComboStatus &outStatus,
+                                             WUPSButtonCombo_Error &outError) noexcept {
+        return ButtonCombo::Create(options, outStatus, outError);
     }
 
     std::optional<ButtonCombo> CreateComboPressDownEx(const std::string_view label,
@@ -86,6 +96,11 @@ namespace WUPSButtonComboAPI {
                                                        WUPSButtonCombo_ComboStatus &outStatus,
                                                        WUPSButtonCombo_Error &outError) noexcept {
         return CreateComboHoldEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, holdDurationInMs, callback, context, true, outStatus, outError);
+    }
+
+    ButtonCombo CreateComboEx(const WUPSButtonCombo_ComboOptions &options,
+                              WUPSButtonCombo_ComboStatus &outStatus) {
+        return ButtonCombo::Create(options, outStatus);
     }
 
     ButtonCombo CreateComboPressDownEx(const std::string_view label,
