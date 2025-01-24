@@ -43,13 +43,13 @@ typedef enum WUPSButtonCombo_Buttons {
     WUPS_BUTTON_COMBO_BUTTON_TV = 0x00010000,
     //! The reserved bit
     WUPS_BUTTON_COMBO_BUTTON_RESERVED_BIT = 0x80000,
-    //! The 1 button
+    //! The 1 button on the wiimote (exclusive to Wiimotes)
     WUPS_BUTTON_COMBO_BUTTON_1 = 0x0001,
-    //! The 2 button
+    //! The 2 button on the wiimote (exclusive to Wiimotes)
     WUPS_BUTTON_COMBO_BUTTON_2 = 0x0002,
-    //! The C button
+    //! The C button on the nunchuck (exclusive to Wiimotes)
     WUPS_BUTTON_COMBO_BUTTON_C = 0x100000,
-    //! The Z button
+    //! The Z button on the nunchuck (exclusive to Wiimotes)
     WUPS_BUTTON_COMBO_BUTTON_Z = 0x200000,
 } WUPSButtonCombo_Buttons;
 WUT_ENUM_BITMASK_TYPE(WUPSButtonCombo_Buttons);
@@ -77,25 +77,33 @@ typedef enum WUPSButtonCombo_ControllerTypes {
 } WUPSButtonCombo_ControllerTypes;
 WUT_ENUM_BITMASK_TYPE(WUPSButtonCombo_ControllerTypes);
 
+/**
+ * @enum WUPSButtonCombo_ComboType
+ * @brief Represents status the status of a combo
+ */
 typedef enum WUPSButtonCombo_ComboType {
     WUPS_BUTTON_COMBO_COMBO_TYPE_INVALID             = 0,
-    WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD                = 1, // Does check for conflicts
-    WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN          = 2, // Does check for conflicts
-    WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD_OBSERVER       = 3, // Does not check for conflicts
-    WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN_OBSERVER = 4, // Does not check for conflicts
+    WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD                = 1, // Checks if a combo has been hold for X ms. Does check for conflicts
+    WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD_OBSERVER       = 2, // Checks if a combo has been hold for X ms. Does not check for conflicts
+    WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN          = 3, // Checks if a combo has been pressed down on a controller. Does check for conflicts
+    WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN_OBSERVER = 4, // Checks if a combo has been pressed down on a controller. Does not check for conflicts
 } WUPSButtonCombo_ComboType;
 
+/**
+ * @enum WUPSButtonCombo_ComboStatus
+ * @brief Represents status of a combo
+ */
 typedef enum WUPSButtonCombo_ComboStatus {
-    WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS = 0,
-    WUPS_BUTTON_COMBO_COMBO_STATUS_VALID          = 1,
-    WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT       = 2,
+    WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS = 0, // Invalid status, this only happens on errors.
+    WUPS_BUTTON_COMBO_COMBO_STATUS_VALID          = 1, // The Combo is valid and active
+    WUPS_BUTTON_COMBO_COMBO_STATUS_CONFLICT       = 2, // The Combo is already used by a different combo. Update to combo by updating the combo or controller mask.
 } WUPSButtonCombo_ComboStatus;
 
 /**
  * @enum WUPSButtonComboError
  * @brief Represents error codes returned by storage API functions.
  */
-typedef enum {
+typedef enum WUPSButtonCombo_Error {
     WUPS_BUTTON_COMBO_ERROR_SUCCESS                  = 0,     /**< Success. */
     WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS             = -0x01, /**< Invalid arguments passed to the function. */
     WUPS_BUTTON_COMBO_ERROR_MALLOC_FAILED            = -0x02, /**< Memory allocation failed. */
@@ -106,6 +114,10 @@ typedef enum {
     WUPS_BUTTON_COMBO_ERROR_UNKNOWN_ERROR            = -0x100 /**< Unknown error. */
 } WUPSButtonCombo_Error;
 
+/**
+ * @enum WUPSButtonCombo_ComboHandle
+ * @brief Represents the handle for a button combo
+ */
 typedef struct WUPSButtonCombo_ComboHandle {
     void *handle;
 #ifdef __cplusplus
@@ -122,10 +134,28 @@ typedef struct WUPSButtonCombo_ComboHandle {
 #endif
 } WUPSButtonCombo_ComboHandle;
 
+/**
+ * @typedef WUPSButtonCombo_ComboCallback
+ * @brief Callback function type for handling button combo events.
+ *
+ * This callback is invoked when a button combo is triggered.
+ *
+ * @param triggeredBy
+ *        The type of controller that triggered the button combination.
+ *        See @ref WUPSButtonCombo_ControllerTypes for possible values.
+ *
+ * @param handle
+ *        A handle representing the button combo that was triggered.
+ *        This can be used to identify the specific combo that invoked the callback.
+ *
+ * @param context
+ *        A user-defined context pointer passed during the setup of the callback.
+ *        This can be used to provide additional information or state relevant to the callback.
+ */
 typedef void (*WUPSButtonCombo_ComboCallback)(WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle handle, void *context);
 
 typedef struct WUPSButtonCombo_MetaOptions {
-    const char *label;
+    const char *label; // Label that identifies a button combo, currently only used for debugging
 } WUPSButtonCombo_MetaOptions;
 
 typedef struct WUPSButtonCombo_MetaOptionsOut {
@@ -134,25 +164,25 @@ typedef struct WUPSButtonCombo_MetaOptionsOut {
 } WUPSButtonCombo_MetaOptionsOut;
 
 typedef struct WUPSButtonCombo_CallbackOptions {
-    WUPSButtonCombo_ComboCallback callback;
-    void *context;
+    WUPSButtonCombo_ComboCallback callback; // Must not be NULL. Defines which callback should be called once a combo is detected
+    void *context;                          // Passed into the callback when it's triggered. Can be NULL
 } WUPSButtonCombo_CallbackOptions;
 
 typedef struct WUPSButtonCombo_ButtonComboOptions {
-    WUPSButtonCombo_ControllerTypes controllerMask;
-    WUPSButtonCombo_Buttons combo;
+    WUPSButtonCombo_ControllerTypes controllerMask; // Defines a mask for which controller should be checked. Must not be empty.
+    WUPSButtonCombo_Buttons combo;                  // Defines which combo should be detected. Note: Not all button are available on all controllers. Must not be empty.
 } WUPSButtonCombo_ButtonComboOptions;
 
 typedef struct WUPSButtonCombo_ButtonComboInfoEx {
-    WUPSButtonCombo_ComboType type;
-    WUPSButtonCombo_ButtonComboOptions basicCombo;
-    uint32_t optionalHoldForXMs;
+    WUPSButtonCombo_ComboType type;                // Defines the type of the combo AND if it will check for conflicts.
+    WUPSButtonCombo_ButtonComboOptions basicCombo; // Defines which combo should be checked on which controller
+    uint32_t optionalHoldForXMs;                   // Only mandatory if the type is set to COMBO_TYPE_HOLD or COMBO_TYPE_HOLD_OBSERVER
 } WUPSButtonCombo_ButtonComboInfoEx;
 
 typedef struct WUPSButtonCombo_ComboOptions {
-    WUPSButtonCombo_MetaOptions metaOptions;
-    WUPSButtonCombo_CallbackOptions callbackOptions;
-    WUPSButtonCombo_ButtonComboInfoEx buttonComboOptions;
+    WUPSButtonCombo_MetaOptions metaOptions;              // Defines the meta information about the combo e.g. the label
+    WUPSButtonCombo_CallbackOptions callbackOptions;      // Defines the callback that should be called once the combo is detected
+    WUPSButtonCombo_ButtonComboInfoEx buttonComboOptions; // Defines how and when which combo should be detected
 } WUPSButtonCombo_ComboOptions;
 
 typedef struct WUPSButtonCombo_DetectButtonComboOptions {
