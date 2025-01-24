@@ -13,6 +13,7 @@ namespace WUPSButtonComboAPI {
         struct MetaOptions {
             std::string label;
         };
+
         static std::optional<ButtonCombo> Create(const WUPSButtonCombo_ComboOptions &options,
                                                  WUPSButtonCombo_ComboStatus &outStatus,
                                                  WUPSButtonCombo_Error &outError) noexcept;

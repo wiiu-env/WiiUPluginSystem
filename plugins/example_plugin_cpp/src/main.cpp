@@ -250,7 +250,7 @@ INITIALIZE_PLUGIN() {
                 "Example Plugin: Press Down test",
                 DEFAULT_PRESS_DOWN_BUTTON_COMBO, // L + R
                 [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
-                    DEBUG_FUNCTION_LINE_INFO("Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                    DEBUG_FUNCTION_LINE_INFO("Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy));
                 },
                 nullptr,
                 comboStatus);
@@ -283,7 +283,7 @@ INITIALIZE_PLUGIN() {
                 "Example Plugin: Press Down observer test",
                 DEFAULT_PRESS_DOWN_BUTTON_COMBO, // L + R Even though this is same combo as in buttonComboPressDown an observer will ignore conflicts.
                 [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
-                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy));
                 },
                 nullptr,
                 comboStatus); // comboStatus will always be WUPS_BUTTON_COMBO_COMBO_STATUS_VALID for observers.
@@ -302,7 +302,7 @@ INITIALIZE_PLUGIN() {
                 DEFAULT_PRESS_HOLD_COMBO, // L+R+DPAD+DOWN. This combo includes the combo "L+R" of the buttonComboPressDown, so this will lead to a conflict.
                 500,                      // We need to hold that combo for 500ms
                 [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
-                    DEBUG_FUNCTION_LINE_INFO("Button combo has been hold for 500ms by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                    DEBUG_FUNCTION_LINE_INFO("Button combo has been hold for 500ms by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy));
                 },
                 nullptr,
                 comboStatus); // comboStatus will always be WUPS_BUTTON_COMBO_COMBO_STATUS_VALID for observers.
@@ -354,7 +354,7 @@ INITIALIZE_PLUGIN() {
                 WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0, // Define which controllers should be checked. Could be something (WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0 | WUPS_BUTTON_COMBO_CONTROLLER_VPAD).
                 DEFAULT_PRESS_DOWN_BUTTON_COMBO,     // L + R Even though this is same combo as in buttonComboPressDown an observer will ignore conflicts.
                 [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
-                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER WPAD_0] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                    DEBUG_FUNCTION_LINE_INFO("[OBSERVER WPAD_0] Button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy));
                 },
                 nullptr,
                 true,         // we want an observer
@@ -377,7 +377,7 @@ INITIALIZE_PLUGIN() {
             "Example Plugin: Press Down test 2",
             WUPS_BUTTON_COMBO_BUTTON_X | WUPS_BUTTON_COMBO_BUTTON_Y,
             [](const WUPSButtonCombo_ControllerTypes triggeredBy, WUPSButtonCombo_ComboHandle, void *) {
-                DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Other button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy).data());
+                DEBUG_FUNCTION_LINE_INFO("[OBSERVER] Other button combo has been pressed down by controller %s", WUPSButtonComboAPI::GetControllerTypeStr(triggeredBy));
             },
             nullptr,
             comboStatus,
