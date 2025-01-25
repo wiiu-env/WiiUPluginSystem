@@ -85,21 +85,21 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonCombo(const WUPSButtonCombo_Co
  * @param outStatus (optional) The status of the combo will be stored here. Only if the status is WUPS_BUTTON_COMBO_COMBO_STATUS_VALID the combo is valid. Can be NULL.
  * @return Returns WUPS_BUTTON_COMBO_ERROR_SUCCESS on success. Please check the outStatus as well.
 */
-WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressEx(const char *label,
-                                                               WUPSButtonCombo_ControllerTypes controllerMask,
-                                                               WUPSButtonCombo_Buttons combo,
-                                                               WUPSButtonCombo_ComboCallback callback,
-                                                               void *context,
-                                                               bool observer,
-                                                               WUPSButtonCombo_ComboHandle *outHandle,
-                                                               WUPSButtonCombo_ComboStatus *outStatus);
+WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownEx(const char *label,
+                                                                   WUPSButtonCombo_ControllerTypes controllerMask,
+                                                                   WUPSButtonCombo_Buttons combo,
+                                                                   WUPSButtonCombo_ComboCallback callback,
+                                                                   void *context,
+                                                                   bool observer,
+                                                                   WUPSButtonCombo_ComboHandle *outHandle,
+                                                                   WUPSButtonCombo_ComboStatus *outStatus);
 
 /**
- * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDown` with
+ * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDownEx` with
  * - `observer` set to "true"
  * - `controllerMask` set to "WUPS_BUTTON_COMBO_CONTROLLER_ALL"
  *
- * See: @WUPSButtonComboAPI_AddButtonComboPressEx for more information.
+ * See: @WUPSButtonComboAPI_AddButtonComboPressDownEx for more information.
 */
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDown(const char *label,
                                                                  WUPSButtonCombo_Buttons combo,
@@ -109,11 +109,11 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDown(const char *lab
                                                                  WUPSButtonCombo_ComboStatus *outStatus);
 
 /**
- * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDownObserver` with
+ * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDownEx` with
  * - `observer` set to "true"
  * - `controllerMask` set to "WUPS_BUTTON_COMBO_CONTROLLER_ALL"
  *
- * See: @WUPSButtonComboAPI_AddButtonComboPressEx for more information.
+ * See: @WUPSButtonComboAPI_AddButtonComboPressDownEx for more information.
 */
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const char *label,
                                                                          WUPSButtonCombo_Buttons combo,
@@ -150,11 +150,11 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldEx(const char *label,
                                                               WUPSButtonCombo_ComboStatus *outStatus);
 
 /**
- * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDownObserver` with
+ * Wrapper for `WUPSButtonComboAPI_AddButtonComboHoldEx` with
  * - `observer` set to "false"
  * - `controllerMask` set to "WUPS_BUTTON_COMBO_CONTROLLER_ALL"
  *
- * See: @WUPSButtonComboAPI_AddButtonComboPressEx for more information.
+ * See: @WUPSButtonComboAPI_AddButtonComboHoldEx for more information.
 */
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHold(const char *label,
                                                             WUPSButtonCombo_Buttons combo,
@@ -165,12 +165,11 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHold(const char *label,
                                                             WUPSButtonCombo_ComboStatus *outStatus);
 
 /**
- * Wrapper for `WUPSButtonComboAPI_AddButtonComboPressDownObserver` with
+ * Wrapper for `WUPSButtonComboAPI_AddButtonComboHoldEx` with
  * - `observer` set to "true"
  * - `controllerMask` set to "WUPS_BUTTON_COMBO_CONTROLLER_ALL"
  *
- * See: @WUPSButtonComboAPI_AddButtonComboPressEx for more information.
- *
+ * See: @WUPSButtonComboAPI_AddButtonComboHoldEx for more information.
 */
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldObserver(const char *label,
                                                                     WUPSButtonCombo_Buttons combo,

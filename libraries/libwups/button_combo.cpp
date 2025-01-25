@@ -123,14 +123,14 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonCombo(const WUPSButtonCombo_Co
 }
 
 
-WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressEx(const char *label,
-                                                               const WUPSButtonCombo_ControllerTypes controllerMask,
-                                                               const WUPSButtonCombo_Buttons combo,
-                                                               const WUPSButtonCombo_ComboCallback callback,
-                                                               void *context,
-                                                               const bool observer,
-                                                               WUPSButtonCombo_ComboHandle *outHandle,
-                                                               WUPSButtonCombo_ComboStatus *outStatus) {
+WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownEx(const char *label,
+                                                                   const WUPSButtonCombo_ControllerTypes controllerMask,
+                                                                   const WUPSButtonCombo_Buttons combo,
+                                                                   const WUPSButtonCombo_ComboCallback callback,
+                                                                   void *context,
+                                                                   const bool observer,
+                                                                   WUPSButtonCombo_ComboHandle *outHandle,
+                                                                   WUPSButtonCombo_ComboStatus *outStatus) {
     WUPSButtonCombo_ComboOptions options                 = {};
     options.metaOptions.label                            = label;
     options.callbackOptions                              = {.callback = callback, .context = context};
@@ -148,7 +148,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDown(const char *lab
                                                                  void *context,
                                                                  WUPSButtonCombo_ComboHandle *outHandle,
                                                                  WUPSButtonCombo_ComboStatus *outStatus) {
-    return WUPSButtonComboAPI_AddButtonComboPressEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, false, outHandle, outStatus);
+    return WUPSButtonComboAPI_AddButtonComboPressDownEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, false, outHandle, outStatus);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const char *label,
@@ -157,7 +157,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboPressDownObserver(const c
                                                                          void *context,
                                                                          WUPSButtonCombo_ComboHandle *outHandle,
                                                                          WUPSButtonCombo_ComboStatus *outStatus) {
-    return WUPSButtonComboAPI_AddButtonComboPressEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, true, outHandle, outStatus);
+    return WUPSButtonComboAPI_AddButtonComboPressDownEx(label, WUPS_BUTTON_COMBO_CONTROLLER_ALL, combo, callback, context, true, outHandle, outStatus);
 }
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_AddButtonComboHoldEx(const char *label,
