@@ -341,20 +341,12 @@ namespace WUPSButtonComboAPI {
     const char *GetStatusStr(WUPSButtonCombo_Error status);
 
     /**
-     *
-     * This function returns a string representation of the provided WUPSButtonCombo_ControllerTypes.
-     *
-     * @param controller The controller to get the string representation for.
-     * @return A pointer to a string describing the provided controller.
-    **/
+    * Wrapper for @WUPSButtonComboAPI_GetControllerTypeStr
+   **/
     const char *GetControllerTypeStr(WUPSButtonCombo_ControllerTypes controller);
 
     /**
-     *
-     * This function returns a string representation of the provided WUPSButtonCombo_ControllerTypes.
-     *
-     * @param status The controller to get the string representation for.
-     * @return A pointer to a string describing the provided controller.
+     * Wrapper for @WUPSButtonComboAPI_GetComboStatusStr
     **/
     const char *GetComboStatusStr(WUPSButtonCombo_ComboStatus status);
 
