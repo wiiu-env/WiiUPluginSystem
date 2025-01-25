@@ -207,6 +207,9 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_RemoveButtonCombo(const WUPSButtonCombo
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
+    if (handle == nullptr) {
+        return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
+    }
     return __internal_functions.remove_button_combo_function_ptr(__internal_functions.identifier, handle);
 }
 
@@ -218,11 +221,12 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboStatus(const WUPSButtonCo
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (outStatus == nullptr) {
+    if (handle == nullptr || outStatus == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.get_button_combo_status_function_ptr(__internal_functions.identifier, handle, outStatus);
 }
+
 WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonComboMeta(const WUPSButtonCombo_ComboHandle handle,
                                                                const WUPSButtonCombo_MetaOptions *metaOptions) {
     if (__internal_functions.update_button_combo_meta_function_ptr == nullptr) {
@@ -231,7 +235,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonComboMeta(const WUPSButtonC
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (metaOptions == nullptr) {
+    if (handle == nullptr || metaOptions == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.update_button_combo_meta_function_ptr(__internal_functions.identifier, handle, metaOptions);
@@ -245,12 +249,11 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonComboCallback(const WUPSBut
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (callbackOptions == nullptr) {
+    if (handle == nullptr || callbackOptions == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.update_button_combo_callback_function_ptr(__internal_functions.identifier, handle, callbackOptions);
 }
-
 
 WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateControllerMask(const WUPSButtonCombo_ComboHandle handle,
                                                               const WUPSButtonCombo_ControllerTypes controllerMask,
@@ -260,6 +263,9 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateControllerMask(const WUPSButtonCo
     }
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
+    }
+    if (handle == nullptr) {
+        return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.update_controller_mask_function_ptr(__internal_functions.identifier, handle, controllerMask, outStatus);
 }
@@ -273,6 +279,9 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateButtonCombo(const WUPSButtonCombo
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
+    if (handle == nullptr) {
+        return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
+    }
     return __internal_functions.update_button_combo_function_ptr(__internal_functions.identifier, handle, combo, outStatus);
 }
 
@@ -283,6 +292,9 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_UpdateHoldDuration(const WUPSButtonComb
     }
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
+    }
+    if (handle == nullptr) {
+        return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.update_hold_duration_function_ptr(__internal_functions.identifier, handle, holdDurationInMs);
 }
@@ -295,7 +307,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboMeta(const WUPSButtonComb
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (outOptions == nullptr) {
+    if (handle == nullptr || outOptions == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.get_button_combo_meta_function_ptr(__internal_functions.identifier, handle, outOptions);
@@ -309,7 +321,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboCallback(const WUPSButton
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (outOptions == nullptr) {
+    if (handle == nullptr || outOptions == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.get_button_combo_callback_function_ptr(__internal_functions.identifier, handle, outOptions);
@@ -323,7 +335,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_GetButtonComboInfoEx(const WUPSButtonCo
     if (__internal_functions.identifier == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INTERNAL_NOT_INITIALIZED;
     }
-    if (outOptions == nullptr) {
+    if (handle == nullptr || outOptions == nullptr) {
         return WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS;
     }
     return __internal_functions.get_button_combo_info_ex_function_ptr(__internal_functions.identifier, handle, outOptions);
