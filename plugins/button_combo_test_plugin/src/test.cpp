@@ -10,7 +10,7 @@ static void *DEFAULT_CALLBACK_CONTEXT = reinterpret_cast<void *>(0x13371337);
 constexpr auto BASE_COMBO             = WUPS_BUTTON_COMBO_BUTTON_RESERVED_BIT | WUPS_BUTTON_COMBO_BUTTON_ZL | WUPS_BUTTON_COMBO_BUTTON_ZR;
 static std::string BASE_LABEL         = "label";
 
-TEST_CASE("Creating a hold combination works") {
+TEST_CASE("C++: Creating a hold combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
     const auto resOpt = WUPSButtonComboAPI::CreateComboHold(
@@ -36,7 +36,36 @@ TEST_CASE("Creating a hold combination works") {
     }
 }
 
-TEST_CASE("Creating a press down combination works") {
+TEST_CASE("C: Creating a hold combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboHold(
+            BASE_LABEL.c_str(),
+            BASE_COMBO,
+            1,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD);
+        REQUIRE(info.optionalHoldForXMs == 1);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_ALL);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    }
+}
+
+TEST_CASE("C++: Creating a press down combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
 
@@ -63,7 +92,35 @@ TEST_CASE("Creating a press down combination works") {
     }
 }
 
-TEST_CASE("Creating a hold observer combination works") {
+TEST_CASE("C: Creating a press down combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboPressDown(
+            BASE_LABEL.c_str(),
+            BASE_COMBO,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN);
+        REQUIRE(info.optionalHoldForXMs == 0);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_ALL);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    }
+}
+
+TEST_CASE("C++: Creating a hold observer combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
     const auto resOpt = WUPSButtonComboAPI::CreateComboHoldObserver(
@@ -89,7 +146,36 @@ TEST_CASE("Creating a hold observer combination works") {
     }
 }
 
-TEST_CASE("Creating a press down observer combination works") {
+TEST_CASE("C: Creating a hold observer combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboHoldObserver(
+            BASE_LABEL.c_str(),
+            BASE_COMBO,
+            1,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD_OBSERVER);
+        REQUIRE(info.optionalHoldForXMs == 1);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_ALL);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    }
+}
+
+TEST_CASE("C++ Creating a press down observer combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
 
@@ -117,7 +203,35 @@ TEST_CASE("Creating a press down observer combination works") {
     }
 }
 
-TEST_CASE("Creating a hold ex combination works") {
+TEST_CASE("C: Creating a press down observer combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboPressDownObserver(
+            BASE_LABEL.c_str(),
+            BASE_COMBO,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN_OBSERVER);
+        REQUIRE(info.optionalHoldForXMs == 0);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_ALL);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    }
+}
+
+TEST_CASE("C++: Creating a hold ex combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
 
@@ -147,7 +261,38 @@ TEST_CASE("Creating a hold ex combination works") {
     }
 }
 
-TEST_CASE("Creating a press down ex combination works") {
+TEST_CASE("C: Creating a hold ex combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboHoldEx(
+            BASE_LABEL.c_str(),
+            WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0,
+            BASE_COMBO,
+            2,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            false,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_HOLD);
+        REQUIRE(info.optionalHoldForXMs == 2);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_WPAD_0);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    }
+}
+
+TEST_CASE("C++: Creating a press down ex combination works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
 
@@ -173,6 +318,36 @@ TEST_CASE("Creating a press down ex combination works") {
         REQUIRE(info.optionalHoldForXMs == 0);
         REQUIRE(info.basicCombo.combo == BASE_COMBO);
         REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_WPAD_1);
+    }
+}
+
+TEST_CASE("C: Creating a press down ex combination works") {
+    WUPSButtonCombo_ComboStatus status;
+    WUPSButtonCombo_ComboHandle handle;
+    auto error = WUPSButtonComboAPI_AddButtonComboPressDownEx(
+            BASE_LABEL.c_str(),
+            WUPS_BUTTON_COMBO_CONTROLLER_WPAD_1,
+            BASE_COMBO,
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            true,
+            &handle,
+            &status);
+
+    REQUIRE(status == WUPS_BUTTON_COMBO_COMBO_STATUS_VALID);
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    {
+        WUPSButtonCombo_ButtonComboInfoEx info;
+        error = WUPSButtonComboAPI_GetButtonComboInfoEx(handle, &info);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+        REQUIRE(info.type == WUPS_BUTTON_COMBO_COMBO_TYPE_PRESS_DOWN_OBSERVER);
+        REQUIRE(info.optionalHoldForXMs == 0);
+        REQUIRE(info.basicCombo.combo == BASE_COMBO);
+        REQUIRE(info.basicCombo.controllerMask == WUPS_BUTTON_COMBO_CONTROLLER_WPAD_1);
+    }
+    {
+        error = WUPSButtonComboAPI_RemoveButtonCombo(handle);
+        REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
     }
 }
 
@@ -289,11 +464,10 @@ TEST_CASE("Different combos are no conflict") {
 TEST_CASE("Detecting a conflict is working") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto noConflictOpt = WUPSButtonComboAPI::CreateComboHold(
             BASE_LABEL,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             DEFAULT_CALLBACK_CONTEXT,
@@ -308,7 +482,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 1a; button that's already used in another combo
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboHold(
                 BASE_LABEL,
-                baseCombo & ~WUPS_BUTTON_COMBO_BUTTON_ZL,
+                BASE_COMBO & ~WUPS_BUTTON_COMBO_BUTTON_ZL,
                 1,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
@@ -323,7 +497,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 1b; button that's already used in another combo by other combo type
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboPressDown(
                 BASE_LABEL,
-                baseCombo & ~WUPS_BUTTON_COMBO_BUTTON_ZL,
+                BASE_COMBO & ~WUPS_BUTTON_COMBO_BUTTON_ZL,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
                 status,
@@ -337,7 +511,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 2a; Same button as existing combo
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboHold(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
@@ -352,7 +526,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 2b; Same button as existing combo; but other combo type
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboPressDown(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
                 status,
@@ -366,7 +540,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 3a: includes existing combo
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboHold(
                 BASE_LABEL,
-                baseCombo | WUPS_BUTTON_COMBO_BUTTON_L,
+                BASE_COMBO | WUPS_BUTTON_COMBO_BUTTON_L,
                 1,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
@@ -381,7 +555,7 @@ TEST_CASE("Detecting a conflict is working") {
         // Conflict 3b: includes existing combo; but other combo type
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboPressDown(
                 BASE_LABEL,
-                baseCombo | WUPS_BUTTON_COMBO_BUTTON_L,
+                BASE_COMBO | WUPS_BUTTON_COMBO_BUTTON_L,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
                 status,
@@ -396,7 +570,7 @@ TEST_CASE("Detecting a conflict is working") {
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboHoldEx(
                 BASE_LABEL,
                 WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
@@ -413,7 +587,7 @@ TEST_CASE("Detecting a conflict is working") {
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboPressDownEx(
                 BASE_LABEL,
                 WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-                baseCombo,
+                BASE_COMBO,
                 stubCallback,
                 DEFAULT_CALLBACK_CONTEXT,
                 false,
@@ -429,12 +603,11 @@ TEST_CASE("Detecting a conflict is working") {
 TEST_CASE("No conflict when using the same combo on multiple controllers") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHoldEx(
             BASE_LABEL,
             WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             nullptr,
@@ -451,7 +624,7 @@ TEST_CASE("No conflict when using the same combo on multiple controllers") {
         const auto noConflictOpt = WUPSButtonComboAPI::CreateComboHoldEx(
                 BASE_LABEL,
                 WUPS_BUTTON_COMBO_CONTROLLER_VPAD_1,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -468,7 +641,7 @@ TEST_CASE("No conflict when using the same combo on multiple controllers") {
         const auto noConflictOpt = WUPSButtonComboAPI::CreateComboHoldEx(
                 BASE_LABEL,
                 WUPS_BUTTON_COMBO_CONTROLLER_ALL & ~WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -485,11 +658,10 @@ TEST_CASE("No conflict when using the same combo on multiple controllers") {
 TEST_CASE("Observer won't trigger a conflict") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHold(
             BASE_LABEL,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             nullptr,
@@ -504,7 +676,7 @@ TEST_CASE("Observer won't trigger a conflict") {
         // No conflict because it's just a hold observer
         const auto noConflictOpt = WUPSButtonComboAPI::CreateComboHoldObserver(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -519,7 +691,7 @@ TEST_CASE("Observer won't trigger a conflict") {
         // No conflict because it's just a press down observer
         const auto noConflictOpt = WUPSButtonComboAPI::CreateComboPressDownObserver(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 stubCallback,
                 nullptr,
                 status,
@@ -534,11 +706,10 @@ TEST_CASE("Observer won't trigger a conflict") {
 TEST_CASE("Conflict but we resolve it by updating the combo") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHold(
             BASE_LABEL,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             nullptr,
@@ -552,7 +723,7 @@ TEST_CASE("Conflict but we resolve it by updating the combo") {
     {
         const auto conflictAtFirstOpt = WUPSButtonComboAPI::CreateComboHold(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -581,12 +752,11 @@ TEST_CASE("Conflict but we resolve it by updating the combo") {
 TEST_CASE("Conflict but we resolve it by updating the controller mask") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHoldEx(
             BASE_LABEL,
             WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             nullptr,
@@ -602,7 +772,7 @@ TEST_CASE("Conflict but we resolve it by updating the controller mask") {
         const auto conflictAtFirstOpt = WUPSButtonComboAPI::CreateComboHoldEx(
                 BASE_LABEL,
                 WUPS_BUTTON_COMBO_CONTROLLER_VPAD_0,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -928,11 +1098,10 @@ TEST_CASE("UpdateButtonComboCallback and GetButtonComboCallback works") {
 TEST_CASE("GetButtonComboStatus works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHold(
             BASE_LABEL,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             reinterpret_cast<void *>(0x13371337),
@@ -954,7 +1123,7 @@ TEST_CASE("GetButtonComboStatus works") {
         // CONFLICT!
         const auto conflictOpt = WUPSButtonComboAPI::CreateComboHold(
                 BASE_LABEL,
-                baseCombo,
+                BASE_COMBO,
                 1,
                 stubCallback,
                 nullptr,
@@ -976,11 +1145,10 @@ TEST_CASE("GetButtonComboStatus works") {
 TEST_CASE("UpdateButtonComboMeta and GetButtonComboMeta works") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
-    const WUPSButtonCombo_Buttons baseCombo = BASE_COMBO;
     // Register Combo on all controllers
     const auto baseComboOpt = WUPSButtonComboAPI::CreateComboHold(
             BASE_LABEL,
-            baseCombo,
+            BASE_COMBO,
             1,
             stubCallback,
             reinterpret_cast<void *>(0x13371337),
@@ -1020,7 +1188,7 @@ TEST_CASE("UpdateButtonComboMeta and GetButtonComboMeta works") {
         WUPSButtonComboAPI::ButtonCombo::MetaOptions metaOptionsOut;
         auto updateRes = baseComboOpt->GetButtonComboMeta(metaOptionsOut);
         REQUIRE(updateRes == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
-        REQUIRE(metaOptionsOut.label == "");
+        REQUIRE(metaOptionsOut.label.empty());
     }
 }
 
