@@ -37,7 +37,7 @@ namespace WUPSButtonComboAPI {
     void ButtonCombo::ReleaseButtonComboHandle() {
         if (mHandle != nullptr) {
             if (const auto res = WUPSButtonComboAPI_RemoveButtonCombo(mHandle); res != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
-                OSReport("ButtonCombo::ReleaseButtonComboHandle(): WUPSButtonComboAPI_RemoveButtonCombo for %08X returned: %s\n", mHandle, WUPSButtonComboAPI_GetStatusStr(res));
+                OSReport("ButtonCombo::ReleaseButtonComboHandle(): WUPSButtonComboAPI_RemoveButtonCombo for %p returned: %s\n", mHandle.handle, WUPSButtonComboAPI_GetStatusStr(res));
             }
             mHandle = WUPSButtonCombo_ComboHandle(nullptr);
         }
