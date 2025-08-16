@@ -1,5 +1,3 @@
-[Issue Tracker](https://github.com/wiiu-env/WiiUPluginSystem/issues) | [Discord](https://discord.gg/bZ2rep2)
- 
 # What is the Wii U Plugin System?
 
 The Wii U Plugin System is a library to create plugins for the [WiiUPluginLoaderBackend](https://github.com/wiiu-env/WiiUPluginLoaderBackend).
