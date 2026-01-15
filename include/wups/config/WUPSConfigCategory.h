@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && __cplusplus >= 201703L
 
 #include "WUPSConfigItem.h"
 #include <optional>
