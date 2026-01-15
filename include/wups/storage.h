@@ -647,7 +647,7 @@ WUPSStorageError WUPSStorageAPI_GetItemSize(wups_storage_item parent, const char
 }
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && __cplusplus >= 201703L
 
 #include <cstring>
 #include <memory>
