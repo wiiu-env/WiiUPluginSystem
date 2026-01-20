@@ -62,6 +62,7 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_INIT_STORAGE,      /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_CONFIG,       /* Only for internal usage */
     WUPS_LOADER_HOOK_INIT_BUTTON_COMBO, /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_WUT_THREAD,   /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -180,14 +181,19 @@ typedef struct wups_loader_hook_t {
 #define WUPS_USE_WUT_STDCPP()                                           \
     __EXTERN_C_MACRO void __init_wut_stdcpp();                          \
     void on_init_wut_stdcpp() {                                         \
-        __init_wut_stdcpp();                                            \
     }                                                                   \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_STDCPP, on_init_wut_stdcpp); \
     __EXTERN_C_MACRO void __fini_wut_stdcpp();                          \
     void on_fini_wut_stdcpp() {                                         \
-        __fini_wut_stdcpp();                                            \
     }                                                                   \
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_FINI_WUT_STDCPP, on_fini_wut_stdcpp)
+
+#define WUPS_USE_WUT_THREAD()                  \
+    __EXTERN_C_MACRO void __init_wut_thread(); \
+    void on_init_wut_thread() {                \
+        __init_wut_thread();                   \
+    }                                          \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_WUT_THREAD, on_init_wut_thread);
 
 #ifdef __cplusplus
 extern "C" uint32_t __attribute__((weak)) wut_get_thread_specific(int id);

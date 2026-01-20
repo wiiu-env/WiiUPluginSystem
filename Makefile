@@ -2,8 +2,8 @@ TOPDIR ?= $(CURDIR)
 include $(TOPDIR)/share/wups_rules
 
 export WUPS_MAJOR	:=	0
-export WUPS_MINOR	:=	8
-export WUPS_PATCH	:=	2
+export WUPS_MINOR	:=	9
+export WUPS_PATCH	:=	0
 
 VERSION	:=	$(WUPS_MAJOR).$(WUPS_MINOR).$(WUPS_PATCH)
 
