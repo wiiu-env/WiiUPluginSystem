@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define WUPS_VERSION_STR "0.8.2"
+#define WUPS_VERSION_STR "0.9.0"
 #define WUPS_PLUGIN_NAME(__plugin_name)                                                                             \
     WUPS_META(name, __plugin_name);                                                                                 \
     WUPS_META(wups, WUPS_VERSION_STR);                                                                              \
@@ -46,6 +46,7 @@ extern "C" {
     WUPS_USE_WUT_SOCKETS();                                                                                         \
     WUPS_USE_WUT_NEWLIB();                                                                                          \
     WUPS_USE_WUT_STDCPP();                                                                                          \
+    WUPS_USE_WUT_THREAD();                                                                                          \
     WUPS___INIT_WRAPPER();                                                                                          \
     WUPS___FINI_WRAPPER();                                                                                          \
     WUPS_INIT_CONFIG_FUNCTIONS();                                                                                   \
