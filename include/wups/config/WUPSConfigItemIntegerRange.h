@@ -59,7 +59,7 @@ WUPSConfigItemIntegerRange_AddToCategory(WUPSConfigCategoryHandle cat,
 #endif
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && __cplusplus >= 201703L
 #include "WUPSConfigItem.h"
 #include <optional>
 #include <span>

@@ -26,7 +26,8 @@ WUPSConfigItemStub_AddToCategory(WUPSConfigCategoryHandle cat, const char *displ
 #ifdef __cplusplus
 }
 #endif
-#ifdef __cplusplus
+
+#if defined(__cplusplus) && __cplusplus >= 201703L
 
 #include "WUPSConfigItem.h"
 #include <optional>
