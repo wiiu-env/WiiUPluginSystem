@@ -328,7 +328,7 @@ WUPSButtonCombo_Error WUPSButtonComboAPI_DetectButtonCombo_Blocking(const WUPSBu
 }
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && __cplusplus >= 201703L
 
 #include "WUPSButtonCombo.h"
 #include <optional>
