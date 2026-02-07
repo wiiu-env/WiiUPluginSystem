@@ -5,6 +5,7 @@
 #include <wups/config/WUPSConfigCategory.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 #include <wups/config/WUPSConfigItemButtonCombo.h>
+#include <wups/config/WUPSConfigItemIPAddress.h>
 #include <wups/config/WUPSConfigItemIntegerRange.h>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
 #include <wups/config/WUPSConfigItemStub.h>
@@ -31,6 +32,7 @@ WUPS_PLUGIN_LICENSE("BSD");
 #define OTHER_EXAMPLE2_BOOL_CONFIG_ID     "other2BoolItem"
 #define INTEGER_RANGE_EXAMPLE_CONFIG_ID   "intRangeExample"
 #define MULTIPLE_VALUES_EXAMPLE_CONFIG_ID "multValueExample"
+#define IP_ADDRESS_CONFIG_ID              "ipAddressExample"
 
 /**
     All of this defines can be used in ANY file.
@@ -50,10 +52,12 @@ enum ExampleOptions {
 #define LOF_FS_OPEN_DEFAULT_VALUE     true
 #define INTEGER_RANGE_DEFAULT_VALUE   10
 #define MULTIPLE_VALUES_DEFAULT_VALUE EXAMPLE_OPTION_2
+#define IP_ADDRESS_DEFAULT_VALUE      0x2a2a2a2a
 
 bool sLogFSOpen                    = LOF_FS_OPEN_DEFAULT_VALUE;
 int sIntegerRangeValue             = INTEGER_RANGE_DEFAULT_VALUE;
 ExampleOptions sExampleOptionValue = MULTIPLE_VALUES_DEFAULT_VALUE;
+uint32_t sIPAddress                = IP_ADDRESS_DEFAULT_VALUE;
 
 static std::forward_list<WUPSButtonComboAPI::ButtonCombo> sButtonComboInstances;
 
@@ -101,6 +105,13 @@ void multipleValueItemChanged(ConfigItemIntegerRange *item, uint32_t newValue) {
 
 void buttonComboItemChanged(ConfigItemButtonCombo *item, uint32_t newValue) {
     DEBUG_FUNCTION_LINE_INFO("New value in buttonComboItemChanged: %d for %s", newValue, item->identifier);
+}
+
+void ipAddressItemChangedConfig(ConfigItemIPAddress *item, uint32_t newValue) {
+    if (std::string_view(IP_ADDRESS_CONFIG_ID) == item->identifier) {
+        sIPAddress = newValue;
+    }
+    DEBUG_FUNCTION_LINE_INFO("New value in ipAddressItemChangedConfig: %d for %s", newValue, item->identifier);
 }
 
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle) {
@@ -159,6 +170,13 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
                                                                MULTIPLE_VALUES_DEFAULT_VALUE, sExampleOptionValue,
                                                                possibleValues,
                                                                nullptr));
+
+
+        root.add(WUPSConfigItemIPAddress::Create(IP_ADDRESS_CONFIG_ID,
+                                                 "IP address example",
+                                                 IP_ADDRESS_DEFAULT_VALUE,
+                                                 sIPAddress,
+                                                 &ipAddressItemChangedConfig));
 
         // It's also possible to have nested categories
         auto nc1 = WUPSConfigCategory::Create("Category inside root");
