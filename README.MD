@@ -6,7 +6,7 @@ The Wii U Plugin System is a library to create plugins for the [WiiUPluginLoader
 See the repository of the Backend for more information.
 
 ## How create plugins
-See the [example plugin](https://github.com/wiiu-env/WiiUPluginSystem/tree/master/plugins/example_plugin) for more information about creating a plugin.
+See the [example plugin](https://github.com/wiiu-env/WiiUPluginSystem/tree/master/plugins/example_plugin_cpp) for more information about creating a plugin.
 
 ## Compile and install the WUPS lib
 For building you need:
