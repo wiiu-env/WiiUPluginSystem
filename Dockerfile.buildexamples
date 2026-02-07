@@ -1,4 +1,4 @@
-FROM ghcr.io/wiiu-env/devkitppc:20260126
+FROM ghcr.io/wiiu-env/devkitppc:20260204
 
 WORKDIR tmp_build
 COPY . .
@@ -8,7 +8,7 @@ WORKDIR /artifacts
 FROM scratch as libwups
 COPY --from=0 /artifacts /artifacts
 
-FROM ghcr.io/wiiu-env/devkitppc:20260126
+FROM ghcr.io/wiiu-env/devkitppc:20260204
 
 COPY --from=libwups /artifacts $DEVKITPRO
 
