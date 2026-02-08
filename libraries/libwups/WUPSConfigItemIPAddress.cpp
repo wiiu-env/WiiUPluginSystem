@@ -187,7 +187,8 @@ static void WUPSConfigItemIPAddress_onDelete(void *context) {
 WUPSConfigAPIStatus
 WUPSConfigItemIPAddress_Create(const char *identifier,
                                const char *displayName,
-                               const uint32_t defaultIPAddress,
+                               const uint32_t defaultValue,
+                               const uint32_t currentValue,
                                IPAddressValueChangedCallback callback,
                                WUPSConfigItemHandle *outItemHandle) {
     if (outItemHandle == nullptr) {
@@ -205,9 +206,9 @@ WUPSConfigItemIPAddress_Create(const char *identifier,
         item->identifier = nullptr;
     }
 
-    item->currentValue         = defaultIPAddress;
-    item->defaultValue         = defaultIPAddress;
-    item->valueAtCreation      = defaultIPAddress;
+    item->currentValue         = currentValue;
+    item->defaultValue         = defaultValue;
+    item->valueAtCreation      = currentValue;
     item->valueChangedCallback = reinterpret_cast<void *>(callback);
 
     item->itemState = WUPS_CONFIG_ITEM_IP_ADDRESS_STATE_NONE;
@@ -244,13 +245,15 @@ WUPSConfigItemIPAddress_Create(const char *identifier,
 WUPSConfigAPIStatus
 WUPSConfigItemIPAddress_AddToCategory(const WUPSConfigCategoryHandle cat,
                                       const char *identifier, const char *displayName,
-                                      const uint32_t defaultIPAddress,
+                                      const uint32_t defaultValue,
+                                      const uint32_t currentValue,
                                       const IPAddressValueChangedCallback callback) {
     WUPSConfigItemHandle itemHandle;
     WUPSConfigAPIStatus res;
     if ((res = WUPSConfigItemIPAddress_Create(identifier,
                                               displayName,
-                                              defaultIPAddress,
+                                              defaultValue,
+                                              currentValue,
                                               callback, &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
         return res;
     }
