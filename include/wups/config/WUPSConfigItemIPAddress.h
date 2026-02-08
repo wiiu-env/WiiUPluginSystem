@@ -33,7 +33,8 @@ typedef void (*IPAddressValueChangedCallback)(ConfigItemIPAddress *item, uint32_
 WUPSConfigAPIStatus
 WUPSConfigItemIPAddress_Create(const char *identifier,
                                const char *displayName,
-                               uint32_t defaultIPAddress,
+                               uint32_t defaultValue,
+                               uint32_t currentValue,
                                IPAddressValueChangedCallback callback,
                                WUPSConfigItemHandle *outItemHandle);
 
@@ -41,7 +42,8 @@ WUPSConfigItemIPAddress_Create(const char *identifier,
 WUPSConfigAPIStatus
 WUPSConfigItemIPAddress_AddToCategory(WUPSConfigCategoryHandle cat,
                                       const char *identifier, const char *displayName,
-                                      uint32_t defaultIPAddress,
+                                      uint32_t defaultValue,
+                                      uint32_t currentValue,
                                       IPAddressValueChangedCallback callback);
 #ifdef __cplusplus
 }
@@ -56,13 +58,16 @@ WUPSConfigItemIPAddress_AddToCategory(WUPSConfigCategoryHandle cat,
 class WUPSConfigItemIPAddress : public WUPSConfigItem {
 public:
     static std::optional<WUPSConfigItemIPAddress> Create(const std::optional<std::string> &identifier,
-                                                         std::string_view displayName, uint32_t defaultIPAddress,
+                                                         std::string_view displayName,
+                                                         uint32_t defaultValue,
+                                                         uint32_t currentValue,
                                                          IPAddressValueChangedCallback callback,
                                                          WUPSConfigAPIStatus &err) noexcept;
 
     static WUPSConfigItemIPAddress Create(const std::optional<std::string> &identifier,
                                           std::string_view displayName,
-                                          uint32_t defaultIPAddress,
+                                          uint32_t defaultValue,
+                                          uint32_t currentValue,
                                           IPAddressValueChangedCallback callback);
 
 private:
