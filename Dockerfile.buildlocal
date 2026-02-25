@@ -1,3 +1,3 @@
-FROM ghcr.io/wiiu-env/devkitppc:20260204
+FROM ghcr.io/wiiu-env/devkitppc:20260225
 
 WORKDIR project
