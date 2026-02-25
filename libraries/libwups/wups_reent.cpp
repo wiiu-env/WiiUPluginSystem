@@ -55,7 +55,11 @@ __wups_thread_cleanup(OSThread *thread,
 }
 
 struct _reent *
-__wups_getreent(void) {
+__wups_getreent() {
+    if (!wut_get_thread_specific || !wut_set_thread_specific || OSGetCurrentThread() == nullptr) {
+        return _GLOBAL_REENT;
+    }
+
     struct __wups_thread_context *context;
 
     context = (struct __wups_thread_context *) wut_get_thread_specific(__WUPS_CONTEXT_THREAD_SPECIFIC_ID);
