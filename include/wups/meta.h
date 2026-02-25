@@ -63,10 +63,11 @@ extern "C" {
                                                 "Function \"wut_get_thread_specific\" returned unexpected value.\n" \
                                                 "Please check linking order (expected \"-lwups -lwut\")";
 
-#define WUPS_PLUGIN_AUTHOR(x)      WUPS_META(author, x)
-#define WUPS_PLUGIN_VERSION(x)     WUPS_META(version, x)
-#define WUPS_PLUGIN_LICENSE(x)     WUPS_META(license, x)
-#define WUPS_PLUGIN_DESCRIPTION(x) WUPS_META(description, x)
+#define WUPS_PLUGIN_AUTHOR(x)       WUPS_META(author, x)
+#define WUPS_PLUGIN_VERSION(x)      WUPS_META(version, x)
+#define WUPS_PLUGIN_LICENSE(x)      WUPS_META(license, x)
+#define WUPS_PLUGIN_DESCRIPTION(x)  WUPS_META(description, x)
+#define WUPS_PLUGIN_HEAP_TRACKING() WUPS_META(debug, "track_heap_with_stack_trace")
 
 #ifdef __cplusplus
 }
