@@ -4,8 +4,18 @@
 #include <coreinit/debug.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern const char wups_meta_info_dump[];
+#ifdef __cplusplus
+}
+#endif
+
 #ifdef DEBUG
-#define WUPS_DEBUG_REPORT(fmt, ...) OSReport(fmt, ##__VA_ARGS__)
+#define WUPS_DEBUG_REPORT(fmt, ...) OSReport("[%s] " fmt, wups_meta_info_dump, ##__VA_ARGS__)
 #else
 #define WUPS_DEBUG_REPORT(fmt, ...)
 #endif
+
+#define WUPS_DEBUG_WARN(fmt, ...) OSReport("[%s] " fmt, wups_meta_info_dump, ##__VA_ARGS__)
