@@ -237,6 +237,7 @@ void ConfigMenuClosedCallback() {
     Gets called ONCE when the plugin was loaded.
 **/
 INITIALIZE_PLUGIN() {
+    OSReport("Init plugin");
     // Logging only works when compiled with `make DEBUG=1`. See the README for more information.
     initLogging();
     DEBUG_FUNCTION_LINE("INITIALIZE_PLUGIN of example_plugin!");
@@ -414,6 +415,10 @@ INITIALIZE_PLUGIN() {
 DEINITIALIZE_PLUGIN() {
     // Remove all button combos from this plugin.
     sButtonComboInstances.clear();
+    DEBUG_FUNCTION_LINE_INFO("Deinitialize Logging Plugin");
+    if (auto f = malloc(4); f != nullptr) {
+        free(f);
+    }
     DEBUG_FUNCTION_LINE("DEINITIALIZE_PLUGIN of example_plugin!");
 }
 
@@ -466,10 +471,12 @@ ON_APPLICATION_REQUESTS_EXIT() {
 
     Use this macro for each function you want to override
 **/
-DECL_FUNCTION(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error) {
-    int result = real_FSOpenFile(pClient, pCmd, path, mode, handle, error);
-    if (sLogFSOpen) {
-        DEBUG_FUNCTION_LINE_INFO("FSOpenFile called for folder %s! Result %d", path, result);
+DECL_FUNCTION(int, OSIsMainCore) {
+    int result = real_OSIsMainCore();
+    if (auto f = malloc(4); f != nullptr) {
+
+        DEBUG_FUNCTION_LINE_INFO("OSIsMainCore is %p", f);
+        free(f);
     }
     return result;
 }
@@ -482,4 +489,4 @@ WUPS_MUST_REPLACE(FUNCTION_NAME_IN_THIS_FILE,   NAME_OF_LIB_WHICH_CONTAINS_THIS_
 
 Define this for each function you want to override.
 **/
-WUPS_MUST_REPLACE(FSOpenFile, WUPS_LOADER_LIBRARY_COREINIT, FSOpenFile);
+WUPS_MUST_REPLACE(OSIsMainCore, WUPS_LOADER_LIBRARY_COREINIT, OSIsMainCore);
