@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define WUPS_VERSION_STR "0.9.0"
+#define WUPS_VERSION_STR "0.9.1"
 #define WUPS_PLUGIN_NAME(__plugin_name)                                                                             \
     WUPS_META(name, __plugin_name);                                                                                 \
     WUPS_META(wups, WUPS_VERSION_STR);                                                                              \
@@ -51,6 +51,7 @@ extern "C" {
     WUPS___FINI_WRAPPER();                                                                                          \
     WUPS_INIT_CONFIG_FUNCTIONS();                                                                                   \
     WUPS_INIT_BUTTON_COMBO_FUNCTIONS();                                                                             \
+    WUPS_INIT_REENT_FUNCTIONS();                                                                                    \
     WUPS_META(buildtimestamp, __DATE__ " " __TIME__);                                                               \
     WUPS_SECTION("meta")                                                                                            \
     const char wups_meta_plugin_name[] = __plugin_name;                                                             \

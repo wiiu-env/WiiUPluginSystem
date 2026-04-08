@@ -19,6 +19,7 @@
 #include "common.h"
 #include <wups/button_combo_internal.h>
 #include <wups/config.h>
+#include <wups/reent_internal.h>
 #include <wups/storage.h>
 
 #ifdef __cplusplus
@@ -59,10 +60,11 @@ typedef enum wups_loader_hook_type_t {
     WUPS_LOADER_HOOK_APPLICATION_REQUESTS_EXIT, /* Called when an application wants to exit */
     WUPS_LOADER_HOOK_APPLICATION_ENDS,          /* Called when an application ends */
 
-    WUPS_LOADER_HOOK_INIT_STORAGE,      /* Only for internal usage */
-    WUPS_LOADER_HOOK_INIT_CONFIG,       /* Only for internal usage */
-    WUPS_LOADER_HOOK_INIT_BUTTON_COMBO, /* Only for internal usage */
-    WUPS_LOADER_HOOK_INIT_WUT_THREAD,   /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_STORAGE,         /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_CONFIG,          /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_BUTTON_COMBO,    /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_WUT_THREAD,      /* Only for internal usage */
+    WUPS_LOADER_HOOK_INIT_REENT_FUNCTIONS, /* Only for internal usage */
 } wups_loader_hook_type_t;
 
 typedef struct wups_loader_hook_t {
@@ -140,6 +142,14 @@ typedef struct wups_loader_hook_t {
     WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_BUTTON_COMBO, wups_init_button_combo_functions);                                \
     WUPSButtonCombo_Error wups_init_button_combo_functions(wups_loader_init_button_combo_args_t args) {                \
         return WUPSButtonComboAPI_InitInternal(args);                                                                  \
+    }
+
+#define WUPS_INIT_REENT_FUNCTIONS()                                                  \
+    __EXTERN_C_MACRO void WUPSReentAPI_InitInternal(wups_loader_init_reent_args_t_); \
+    void wups_init_reent_functions(wups_loader_init_reent_args_t_ args);             \
+    WUPS_HOOK_EX(WUPS_LOADER_HOOK_INIT_REENT_FUNCTIONS, wups_init_reent_functions);  \
+    void wups_init_reent_functions(wups_loader_init_reent_args_t_ args) {            \
+        return WUPSReentAPI_InitInternal(args);                                      \
     }
 
 #define WUPS_USE_WUT_MALLOC()                                           \

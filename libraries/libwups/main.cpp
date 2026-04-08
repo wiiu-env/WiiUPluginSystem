@@ -1,5 +1,6 @@
 #include "wups_reent.h"
-#include "wups_thread_specific.h"
+#include <coreinit/debug.h>
+
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -44,16 +45,25 @@ extern "C" struct _reent *__getreent(void) {
     return __wups_getreent();
 }
 
-extern "C" void __attribute__((weak)) wut_set_thread_specific(__wut_thread_specific_id id, void *value);
+extern const char wups_meta_info_dump[];
 
-void wut_set_thread_specific(__wut_thread_specific_id id, void *value) {
-    return wups_set_thread_specific(id, value);
-}
+typedef enum __wut_thread_specific_id {
+    WUT_THREAD_SPECIFIC_0 = 0,
+    WUT_THREAD_SPECIFIC_1 = 1,
+} __wut_thread_specific_id;
+
 
 extern "C" void *__attribute__((weak)) wut_get_thread_specific(__wut_thread_specific_id id);
 
 void *wut_get_thread_specific(__wut_thread_specific_id id) {
-    return wups_get_thread_specific(id);
+    if ((uint32_t) id == 0x13371337) { // Mechanism to detect if the function was overridden properly
+        return (void *) 0x42424242;
+    }
+
+    OSReport("[%s] wups_get_thread_specific: NOT SUPPORTED\n", wups_meta_info_dump);
+    OSFatal("wups_get_thread_specific: NOT SUPPORTED\n");
+
+    return nullptr;
 }
 
 
@@ -102,6 +112,8 @@ __assert_func(const char *file,
     }
 
     OSFatal(buffer);
+    while (true)
+        ;
     /* NOTREACHED */
 }
 
