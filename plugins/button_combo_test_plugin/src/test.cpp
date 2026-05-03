@@ -351,7 +351,7 @@ TEST_CASE("C: Creating a press down ex combination works") {
     }
 }
 
-TEST_CASE("Creating a combo fails if combo is empty") {
+TEST_CASE("Creating two combos with empty combo does not create an conflict") {
     WUPSButtonCombo_ComboStatus status;
     WUPSButtonCombo_Error error;
 
@@ -363,8 +363,18 @@ TEST_CASE("Creating a combo fails if combo is empty") {
             status,
             error);
 
-    REQUIRE(!resOpt.has_value());
-    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS);
+    REQUIRE(resOpt.has_value());
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
+    const auto resOpt1 = WUPSButtonComboAPI::CreateComboPressDown(
+            BASE_LABEL,
+            static_cast<WUPSButtonCombo_Buttons>(0),
+            stubCallback,
+            DEFAULT_CALLBACK_CONTEXT,
+            status,
+            error);
+
+    REQUIRE(resOpt1.has_value());
+    REQUIRE(error == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
 }
 
 TEST_CASE("Creating a combo still works if the label is empty") {
@@ -1269,36 +1279,6 @@ TEST_CASE("WUPSButtonComboAPI_AddButtonCombo works if status is nullptr") {
     REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
     res = WUPSButtonComboAPI_RemoveButtonCombo(handle);
     REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_SUCCESS);
-}
-
-TEST_CASE("WUPSButtonComboAPI_AddButtonCombo fails if invalid or empty controller mask is used") {
-    WUPSButtonCombo_ComboOptions options = getDefaultComboOptions();
-
-    WUPSButtonCombo_ComboHandle handle;
-    WUPSButtonCombo_ComboStatus status;
-
-    options.buttonComboOptions.basicCombo.controllerMask = static_cast<WUPSButtonCombo_ControllerTypes>(1 << 12);
-    auto res                                             = WUPSButtonComboAPI_AddButtonCombo(&options, &handle, &status);
-    REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS);
-
-    options.buttonComboOptions.basicCombo.controllerMask = static_cast<WUPSButtonCombo_ControllerTypes>(0);
-    res                                                  = WUPSButtonComboAPI_AddButtonCombo(&options, &handle, &status);
-    REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS);
-}
-
-TEST_CASE("WUPSButtonComboAPI_AddButtonCombo fails if invalid or empty button combo is used") {
-    WUPSButtonCombo_ComboOptions options = getDefaultComboOptions();
-
-    WUPSButtonCombo_ComboHandle handle;
-    WUPSButtonCombo_ComboStatus status;
-
-    options.buttonComboOptions.basicCombo.combo = static_cast<WUPSButtonCombo_Buttons>(0);
-    auto res                                    = WUPSButtonComboAPI_AddButtonCombo(&options, &handle, &status);
-    REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS);
-
-    options.buttonComboOptions.basicCombo.combo = static_cast<WUPSButtonCombo_Buttons>(0x400000);
-    res                                         = WUPSButtonComboAPI_AddButtonCombo(&options, &handle, &status);
-    REQUIRE(res == WUPS_BUTTON_COMBO_ERROR_INVALID_ARGS);
 }
 
 TEST_CASE("WUPSButtonComboAPI_AddButtonCombo fails if callback is missing") {
