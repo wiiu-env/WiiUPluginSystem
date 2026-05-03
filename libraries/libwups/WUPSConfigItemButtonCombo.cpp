@@ -81,6 +81,9 @@ namespace {
     }
 
     std::string getComboAsString(const uint32_t value) {
+        if (value == 0) {
+            return "Not Set";
+        }
         char comboString[60] = {};
 
         for (uint32_t i = 0; i < 32; i++) {
