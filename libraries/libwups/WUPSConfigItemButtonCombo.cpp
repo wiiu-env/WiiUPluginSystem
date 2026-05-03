@@ -223,7 +223,17 @@ static void WUPSConfigItemButtonCombo_restoreDefault(void *context) {
 
 static bool WUPSConfigItemButtonCombo_isMovementAllowed(void *context) {
     const auto *item = static_cast<ConfigItemButtonCombo *>(context);
-    return item->itemState != WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD && item->itemState != WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_WAIT_FOR_HOLD;
+
+    switch (item->itemState) {
+        case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_PREPARE_FOR_HOLD:
+        case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_WAIT_FOR_HOLD:
+        case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_CONFLICT_WAIT:
+            return false;
+        case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_NONE:
+        case WUPS_CONFIG_ITEM_BUTTON_COMBO_STATE_INVALID_HANDLE:
+            break;
+    }
+    return true;
 }
 
 static void WUPSConfigItemButtonCombo_Cleanup(ConfigItemButtonCombo *item) {
